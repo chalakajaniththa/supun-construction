@@ -14,7 +14,7 @@
 
 | Step | Status | Date | Commit |
 |---|---|---|---|
-| 1 — Foundation | ✅ Done | 2026-10-14 | (see git log: feat(step-1): foundation) |
+| 1 — Foundation | ✅ Done | 2026-10-14 | bbd7eaa |
 | 2 — Master data & documents | ⬜ Not started | | |
 | 3 — Daily operations | ⬜ Not started | | |
 | 4 — Money | ⬜ Not started | | |
@@ -124,6 +124,7 @@
 - Not installed yet (add when needed): `@nestjs/schedule` (Step 5), `exceljs`, `handlebars`, `recharts`.
 
 ### Useful commands
+- Verified from a clean clone: `pnpm install --frozen-lockfile && pnpm -r build && pnpm -r typecheck` all succeed.
 - Install: `pnpm install` (root `postinstall` builds `packages/shared`)
 - Dev infra: `pnpm dev:infra` (= `docker compose -f docker-compose.dev.yml up -d --wait`) → postgres `localhost:5433` (user/pass `supun`/`supun`, DBs `supun_dev`, `supun_test`), S3 `localhost:8334`, Gotenberg `localhost:3002`
 - Dev DB: `pnpm --filter @sc/api db:deploy && pnpm --filter @sc/api db:seed`; new migration: `pnpm --filter @sc/api prisma migrate dev --name <name>` (add `--create-only` for raw SQL)
