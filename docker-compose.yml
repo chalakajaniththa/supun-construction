@@ -1,0 +1,104 @@
+# Supun Construction — the full system (what the owner runs).
+#   docker compose up -d --build        (or double-click scripts/start.command on the Mac)
+# Only the web app is published, on http://localhost:3000 (bound to 127.0.0.1).
+# All settings come from .env (copy .env.example; start.command does this for you).
+name: supun
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  postgres:
+    <<: *restart
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-supun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-supun}
+      TZ: Asia/Colombo
+    volumes:
+      # PostgreSQL 18 images keep data under /var/lib/postgresql/<version>/…
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  seaweedfs:
+    <<: *restart
+    image: chrislusf/seaweedfs:4.48
+    entrypoint: ['/bin/sh', '/sc-entrypoint.sh']
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY in .env}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?Set S3_SECRET_KEY in .env}
+    volumes:
+      - seaweed_data:/data
+      - ./docker/seaweedfs/entrypoint.sh:/sc-entrypoint.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:8333/healthz || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  gotenberg:
+    <<: *restart
+    image: gotenberg/gotenberg:8.37.0-chromium
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1:3000/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  api:
+    <<: *restart
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: supun-api:latest
+    environment:
+      NODE_ENV: production
+      TZ: Asia/Colombo
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-supun}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supun}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-supun-docs}
+      GOTENBERG_URL: http://gotenberg:3000
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+
+  web:
+    <<: *restart
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        API_INTERNAL_URL: http://api:4000
+    image: supun-web:latest
+    environment:
+      TZ: Asia/Colombo
+    ports:
+      - '127.0.0.1:${WEB_PORT:-3000}:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # backup: (Step 6) alpine + pg_dump + rclone + restic + supercronic → local repo + Google Drive.
+
+volumes:
+  pgdata:
+  seaweed_data:

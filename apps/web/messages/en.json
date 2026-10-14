@@ -1,0 +1,353 @@
+{
+  "common": {
+    "appName": "Supun Construction",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "confirm": "Yes, continue",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "loading": "Loading…",
+    "search": "Search…",
+    "noResults": "Nothing to show yet.",
+    "comingSoonTitle": "Coming soon",
+    "comingSoonText": "This page is being built. It will be ready in a later update.",
+    "goToDashboard": "Go to the dashboard",
+    "language": "Language",
+    "english": "English",
+    "sinhala": "සිංහල",
+    "notifications": "Notifications",
+    "notificationsSoon": "Reminders will show here soon.",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "userMenu": "Account",
+    "changePassword": "Change password",
+    "logout": "Log out",
+    "loggingOut": "Logging out…",
+    "rupees": "Rs.",
+    "optional": "optional",
+    "required": "required",
+    "areYouSure": "Are you sure?",
+    "pagination": {
+      "summary": "Showing {from}–{to} of {total}",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "daily": "Daily Entry",
+    "projects": "Projects",
+    "schedule": "Schedule",
+    "workers": "Workers",
+    "assets": "Machines & Vehicles",
+    "purchases": "Purchases & Store",
+    "suppliers": "Suppliers",
+    "payroll": "Payroll",
+    "reports": "Reports",
+    "documents": "Documents",
+    "settings": "Settings"
+  },
+  "auth": {
+    "title": "Welcome",
+    "subtitle": "Please log in to continue.",
+    "username": "Username",
+    "password": "Password",
+    "login": "Log in",
+    "loggingIn": "Logging in…",
+    "loggedOut": "You have logged out.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "defaultPasswordBanner": "You are still using the first password that came with the system. Please change it to keep your data safe.",
+    "changeNow": "Change it now"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Company details, rates and your password.",
+    "saved": "Settings saved.",
+    "tabs": {
+      "company": "Company",
+      "payroll": "Salary rates",
+      "reminders": "Reminders",
+      "billing": "Billing",
+      "password": "Password"
+    },
+    "company": {
+      "title": "Company information",
+      "description": "Shown on reports and at the top of the screen.",
+      "name": "Company name",
+      "address": "Address",
+      "phone": "Phone number",
+      "email": "Email",
+      "cidaGrade": "CIDA grade"
+    },
+    "payroll": {
+      "title": "Salary rates",
+      "description": "Used when salaries are calculated. Change only if the law or your rules change.",
+      "epfEmployeePct": "EPF – worker's share (%)",
+      "epfEmployerPct": "EPF – company's share (%)",
+      "etfEmployerPct": "ETF – company's share (%)",
+      "workingDaysPerMonth": "Working days in a month",
+      "otMultiplier": "Overtime rate (times normal pay)",
+      "permanentOtDivisor": "Overtime hourly divisor (permanent staff)",
+      "dailyStandardHours": "Normal working hours in a day"
+    },
+    "reminders": {
+      "title": "Reminders",
+      "description": "How many days before an expiry date (insurance, licences, bonds) you want a reminder.",
+      "daysBefore": "Remind me this many days before",
+      "daysHint": "Separate numbers with commas, for example: 30, 14, 7"
+    },
+    "billing": {
+      "title": "Billing defaults",
+      "description": "Default values for new projects. Each project can still have its own values.",
+      "defaultRetentionPct": "Retention held from each bill (%)",
+      "defaultRetentionCapPct": "Retention limit (% of contract value)"
+    },
+    "password": {
+      "title": "Change password",
+      "description": "Use at least 8 characters. Write it down somewhere safe.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "New password again",
+      "submit": "Change password",
+      "changed": "Your password has been changed."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Good day!",
+    "subtitle": "Here is a quick look at your business.",
+    "kpi": {
+      "activeProjects": "Active projects",
+      "workersToday": "Workers on site today",
+      "spentThisMonth": "Spent this month",
+      "toReceive": "Money to receive"
+    },
+    "notYet": "Will show once data is entered",
+    "needsAttention": "Needs attention",
+    "nothingNeedsAttention": "Nothing needs your attention right now.",
+    "activeProjects": "Active projects",
+    "noActiveProjects": "No active projects yet.",
+    "quickActions": "Quick actions",
+    "addExpense": "Add expense",
+    "uploadDocument": "Upload document"
+  },
+  "errors": {
+    "VALIDATION_FAILED": "Some values are not correct. Please check the form.",
+    "UNAUTHORIZED": "Please log in again.",
+    "INVALID_CREDENTIALS": "Wrong username or password.",
+    "TOO_MANY_ATTEMPTS": "Too many wrong attempts. Please wait a minute and try again.",
+    "WRONG_PASSWORD": "The current password is not correct.",
+    "FORBIDDEN": "You are not allowed to do this.",
+    "NOT_FOUND": "We could not find this.",
+    "DUPLICATE": "This already exists.",
+    "CONFLICT": "This is linked to other records and cannot be changed.",
+    "ALLOCATION_OVERLAP": "This worker or machine is already booked for that time.",
+    "PAYROLL_LOCKED": "Salaries for this month are finalized, so this cannot be changed.",
+    "INSUFFICIENT_STOCK": "There is not enough stock in the store.",
+    "UNKNOWN_SETTING": "This setting does not exist.",
+    "INTERNAL_ERROR": "Something went wrong. Please try again.",
+    "NETWORK": "Cannot reach the system. Check that it is running and try again.",
+    "generic": "Something went wrong. Please try again.",
+    "pageErrorTitle": "Something went wrong",
+    "pageErrorText": "Please try again. If it keeps happening, restart the system.",
+    "tryAgain": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundText": "This page does not exist.",
+    "validation": {
+      "REQUIRED": "Please fill this in.",
+      "INVALID": "Please check this value.",
+      "INVALID_EMAIL": "Please enter a valid email address.",
+      "INVALID_MONEY": "Enter an amount like 1500 or 1500.50.",
+      "INVALID_QUANTITY": "Enter a quantity like 12 or 12.5.",
+      "INVALID_NUMBER": "Please enter a number.",
+      "INVALID_DATE": "Please enter a valid date.",
+      "PERCENT_TOO_HIGH": "This cannot be more than 100.",
+      "MUST_BE_POSITIVE": "This must be more than 0.",
+      "NEGATIVE_NOT_ALLOWED": "This cannot be less than 0.",
+      "PASSWORD_TOO_SHORT": "Use at least 8 characters.",
+      "PASSWORDS_DO_NOT_MATCH": "The two new passwords are not the same.",
+      "PASSWORD_SAME_AS_OLD": "The new password must be different from the current one.",
+      "DAYS_LIST": "Enter whole numbers between 1 and 365, separated by commas."
+    }
+  },
+  "enums": {
+    "notificationSeverity": { "INFO": "Info", "WARNING": "Warning", "DANGER": "Urgent" },
+    "backupStatus": { "RUNNING": "Running", "SUCCESS": "Successful", "FAILED": "Failed" },
+    "backupTrigger": { "SCHEDULED": "Automatic", "MANUAL": "Manual" },
+    "backupDestination": {
+      "LOCAL": "This computer",
+      "GDRIVE": "Google Drive",
+      "BOTH": "This computer and Google Drive"
+    },
+    "auditAction": { "CREATE": "Added", "UPDATE": "Changed", "DELETE": "Removed" },
+    "clientType": { "GOVERNMENT": "Government", "PRIVATE": "Private" },
+    "supplierType": {
+      "MATERIAL": "Materials",
+      "HARDWARE": "Hardware",
+      "FUEL": "Fuel",
+      "SUBCONTRACTOR": "Subcontractor",
+      "EQUIPMENT_HIRE": "Machine hire",
+      "OTHER": "Other"
+    },
+    "projectType": {
+      "ROAD": "Road",
+      "BUILDING": "Building",
+      "SCHOOL_BUILDING": "School building",
+      "BRIDGE_CULVERT": "Bridge / culvert",
+      "IRRIGATION": "Irrigation",
+      "OTHER": "Other"
+    },
+    "projectSource": { "GOVERNMENT_TENDER": "Government tender", "PRIVATE": "Private work" },
+    "projectStatus": {
+      "PLANNING": "Planning",
+      "ONGOING": "Ongoing",
+      "ON_HOLD": "On hold",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "budgetCategory": {
+      "LABOUR": "Labour",
+      "MATERIALS": "Materials",
+      "EQUIPMENT": "Machines",
+      "SUBCONTRACT": "Subcontract",
+      "OVERHEAD": "Overhead",
+      "OTHER": "Other"
+    },
+    "variationStatus": { "PENDING": "Waiting", "APPROVED": "Approved", "REJECTED": "Rejected" },
+    "certificateStatus": {
+      "DRAFT": "Draft",
+      "SUBMITTED": "Submitted",
+      "CERTIFIED": "Certified",
+      "PAID": "Paid"
+    },
+    "paymentMethod": { "CASH": "Cash", "CHEQUE": "Cheque", "BANK_TRANSFER": "Bank transfer" },
+    "clientPaymentKind": {
+      "IPC_PAYMENT": "Bill payment",
+      "ADVANCE": "Advance",
+      "RETENTION_RELEASE": "Retention released",
+      "OTHER": "Other"
+    },
+    "bondType": {
+      "BID_BOND": "Bid bond",
+      "PERFORMANCE_BOND": "Performance bond",
+      "ADVANCE_PAYMENT_GUARANTEE": "Advance payment guarantee",
+      "RETENTION_GUARANTEE": "Retention guarantee"
+    },
+    "bondStatus": { "ACTIVE": "Active", "RELEASED": "Released", "EXPIRED": "Expired" },
+    "documentOwnerType": {
+      "COMPANY": "Company",
+      "PROJECT": "Project",
+      "ASSET": "Machine / vehicle",
+      "WORKER": "Worker",
+      "SUPPLIER": "Supplier",
+      "CLIENT": "Client"
+    },
+    "documentCategory": {
+      "PLAN_DRAWING": "Plan / drawing",
+      "CONTRACT": "Contract",
+      "BOQ": "BOQ",
+      "PHOTO": "Photo",
+      "INVOICE": "Invoice",
+      "RECEIPT": "Receipt",
+      "LETTER": "Letter",
+      "ESTIMATE": "Estimate",
+      "REVENUE_LICENCE": "Revenue licence",
+      "INSURANCE": "Insurance",
+      "EMISSION_TEST": "Emission test",
+      "FITNESS_CERTIFICATE": "Fitness certificate",
+      "REGISTRATION_BOOK": "Registration book",
+      "NIC_COPY": "NIC copy",
+      "CERTIFICATE": "Certificate",
+      "CIDA_REGISTRATION": "CIDA registration",
+      "BOND_COPY": "Bond copy",
+      "OTHER": "Other"
+    },
+    "workerSkill": {
+      "MASON": "Mason",
+      "CARPENTER": "Carpenter",
+      "HELPER": "Helper / labourer",
+      "MACHINE_OPERATOR": "Machine operator",
+      "DRIVER": "Driver",
+      "STEEL_FIXER": "Steel fixer",
+      "ELECTRICIAN": "Electrician",
+      "PLUMBER": "Plumber",
+      "SUPERVISOR": "Supervisor",
+      "OTHER": "Other"
+    },
+    "workerType": { "DAILY": "Daily paid", "PERMANENT": "Permanent" },
+    "allocationStatus": { "PLANNED": "Planned", "CANCELLED": "Cancelled" },
+    "attendanceStatus": {
+      "PRESENT": "Present",
+      "HALF_DAY": "Half day",
+      "ABSENT": "Absent",
+      "LEAVE": "Leave"
+    },
+    "advanceStatus": { "OPEN": "Not yet recovered", "RECOVERED": "Recovered" },
+    "assetCategory": {
+      "JCB_BACKHOE": "JCB / backhoe",
+      "EXCAVATOR": "Excavator",
+      "TIPPER": "Tipper",
+      "CAB": "Cab / double cab",
+      "TRACTOR": "Tractor",
+      "ROLLER": "Roller",
+      "CONCRETE_MIXER": "Concrete mixer",
+      "WATER_BOWSER": "Water bowser",
+      "COMPACTOR": "Compactor",
+      "GENERATOR": "Generator",
+      "TOOL": "Tool",
+      "OTHER": "Other"
+    },
+    "assetOwnership": { "OWNED": "Own", "HIRED_IN": "Hired" },
+    "assetStatus": {
+      "AVAILABLE": "Available",
+      "IN_USE": "In use",
+      "UNDER_REPAIR": "Under repair",
+      "DISPOSED": "Disposed"
+    },
+    "meterType": { "HOURS": "Engine hours", "KM": "Kilometres", "NONE": "No meter" },
+    "maintenanceType": {
+      "SERVICE": "Service",
+      "REPAIR": "Repair",
+      "TYRE": "Tyres",
+      "OTHER": "Other"
+    },
+    "materialCategory": {
+      "CEMENT": "Cement",
+      "SAND": "Sand",
+      "AGGREGATE": "Metal / aggregate",
+      "STEEL": "Steel",
+      "BRICKS_BLOCKS": "Bricks / blocks",
+      "TIMBER": "Timber",
+      "HARDWARE": "Hardware",
+      "FUEL": "Fuel",
+      "OTHER": "Other"
+    },
+    "purchasePaymentType": { "CASH": "Cash", "CREDIT": "Credit" },
+    "expenseCategory": {
+      "FUEL": "Fuel",
+      "TRANSPORT": "Transport",
+      "MEALS": "Meals",
+      "EQUIPMENT_HIRE": "Machine hire",
+      "SUBCONTRACT": "Subcontract",
+      "SMALL_TOOLS": "Small tools",
+      "UTILITIES": "Electricity / water",
+      "PERMITS_FEES": "Permits & fees",
+      "REPAIRS": "Repairs",
+      "OFFICE": "Office",
+      "OTHER": "Other"
+    },
+    "expensePaidBy": { "CASH": "Cash", "BANK": "Bank", "CREDIT": "Credit" },
+    "payrollStatus": { "DRAFT": "Draft", "FINALIZED": "Finalized" }
+  }
+}

@@ -1,0 +1,12 @@
+pnpm-lock.yaml
+**/dist
+**/.next
+**/generated
+**/migrations
+docs
+apps/web/src/components/ui
+apps/web/e2e/screenshots
+apps/web/playwright-report
+apps/web/test-results
+apps/web/next-env.d.ts
+pnpm-workspace.yaml

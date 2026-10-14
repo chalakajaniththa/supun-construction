@@ -1,0 +1,1043 @@
+// Supun Construction — full data model (overview §6). Implemented completely in Step 1;
+// later steps only add features on top of it. Any rename/removal must be logged in docs/DRIFT-LOG.md.
+//
+// Conventions
+// - M = money  → Decimal(14,2) · Q = quantity → Decimal(14,3) · percentages → Decimal(7,4)
+// - Calendar days use @db.Date, allocations use @db.Timestamptz.
+// - Every table has createdAt / updatedAt. Master data has deletedAt (soft delete).
+// - Enums mirror packages/shared/src/enums.ts exactly (checked by a unit test).
+// - DB-only features (btree_gist exclusion constraints) live as raw SQL in migrations.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────────────── Enums ─────────────────────────────────
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  DANGER
+}
+
+enum BackupStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum BackupTrigger {
+  SCHEDULED
+  MANUAL
+}
+
+enum BackupDestination {
+  LOCAL
+  GDRIVE
+  BOTH
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+enum ClientType {
+  GOVERNMENT
+  PRIVATE
+}
+
+enum SupplierType {
+  MATERIAL
+  HARDWARE
+  FUEL
+  SUBCONTRACTOR
+  EQUIPMENT_HIRE
+  OTHER
+}
+
+enum ProjectType {
+  ROAD
+  BUILDING
+  SCHOOL_BUILDING
+  BRIDGE_CULVERT
+  IRRIGATION
+  OTHER
+}
+
+enum ProjectSource {
+  GOVERNMENT_TENDER
+  PRIVATE
+}
+
+enum ProjectStatus {
+  PLANNING
+  ONGOING
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum BudgetCategory {
+  LABOUR
+  MATERIALS
+  EQUIPMENT
+  SUBCONTRACT
+  OVERHEAD
+  OTHER
+}
+
+enum VariationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CertificateStatus {
+  DRAFT
+  SUBMITTED
+  CERTIFIED
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  CHEQUE
+  BANK_TRANSFER
+}
+
+enum ClientPaymentKind {
+  IPC_PAYMENT
+  ADVANCE
+  RETENTION_RELEASE
+  OTHER
+}
+
+enum BondType {
+  BID_BOND
+  PERFORMANCE_BOND
+  ADVANCE_PAYMENT_GUARANTEE
+  RETENTION_GUARANTEE
+}
+
+enum BondStatus {
+  ACTIVE
+  RELEASED
+  EXPIRED
+}
+
+enum DocumentOwnerType {
+  COMPANY
+  PROJECT
+  ASSET
+  WORKER
+  SUPPLIER
+  CLIENT
+}
+
+enum DocumentCategory {
+  PLAN_DRAWING
+  CONTRACT
+  BOQ
+  PHOTO
+  INVOICE
+  RECEIPT
+  LETTER
+  ESTIMATE
+  REVENUE_LICENCE
+  INSURANCE
+  EMISSION_TEST
+  FITNESS_CERTIFICATE
+  REGISTRATION_BOOK
+  NIC_COPY
+  CERTIFICATE
+  CIDA_REGISTRATION
+  BOND_COPY
+  OTHER
+}
+
+enum WorkerSkill {
+  MASON
+  CARPENTER
+  HELPER
+  MACHINE_OPERATOR
+  DRIVER
+  STEEL_FIXER
+  ELECTRICIAN
+  PLUMBER
+  SUPERVISOR
+  OTHER
+}
+
+enum WorkerType {
+  DAILY
+  PERMANENT
+}
+
+enum AllocationStatus {
+  PLANNED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  HALF_DAY
+  ABSENT
+  LEAVE
+}
+
+enum AdvanceStatus {
+  OPEN
+  RECOVERED
+}
+
+enum AssetCategory {
+  JCB_BACKHOE
+  EXCAVATOR
+  TIPPER
+  CAB
+  TRACTOR
+  ROLLER
+  CONCRETE_MIXER
+  WATER_BOWSER
+  COMPACTOR
+  GENERATOR
+  TOOL
+  OTHER
+}
+
+enum AssetOwnership {
+  OWNED
+  HIRED_IN
+}
+
+enum AssetStatus {
+  AVAILABLE
+  IN_USE
+  UNDER_REPAIR
+  DISPOSED
+}
+
+enum MeterType {
+  HOURS
+  KM
+  NONE
+}
+
+enum MaintenanceType {
+  SERVICE
+  REPAIR
+  TYRE
+  OTHER
+}
+
+enum MaterialCategory {
+  CEMENT
+  SAND
+  AGGREGATE
+  STEEL
+  BRICKS_BLOCKS
+  TIMBER
+  HARDWARE
+  FUEL
+  OTHER
+}
+
+enum PurchasePaymentType {
+  CASH
+  CREDIT
+}
+
+enum ExpenseCategory {
+  FUEL
+  TRANSPORT
+  MEALS
+  EQUIPMENT_HIRE
+  SUBCONTRACT
+  SMALL_TOOLS
+  UTILITIES
+  PERMITS_FEES
+  REPAIRS
+  OFFICE
+  OTHER
+}
+
+enum ExpensePaidBy {
+  CASH
+  BANK
+  CREDIT
+}
+
+enum PayrollStatus {
+  DRAFT
+  FINALIZED
+}
+
+// ───────────────────────────────── System ─────────────────────────────────
+
+model User {
+  id                   String    @id @default(uuid()) @db.Uuid
+  username             String    @unique
+  passwordHash         String
+  mustChangePassword   Boolean   @default(false)
+  /// True until the admin changes the password set from .env at install time.
+  usingDefaultPassword Boolean   @default(true)
+  lastLoginAt          DateTime? @db.Timestamptz
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+}
+
+model Setting {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+}
+
+model AuditLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  entity    String
+  entityId  String?
+  action    AuditAction
+  /// { method, path, params, body (secrets redacted), statusCode }
+  summary   Json
+  username  String?
+  createdAt DateTime    @default(now()) @db.Timestamptz
+  updatedAt DateTime    @updatedAt @db.Timestamptz
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id         String               @id @default(uuid()) @db.Uuid
+  /// e.g. DOCUMENT_EXPIRY, BOND_EXPIRY, SERVICE_DUE, PROJECT_DEADLINE, BACKUP (defined in Step 5)
+  type       String
+  severity   NotificationSeverity
+  titleKey   String
+  params     Json                 @default("{}")
+  entityType String?
+  entityId   String?
+  dueDate    DateTime?            @db.Date
+  readAt     DateTime?            @db.Timestamptz
+  resolvedAt DateTime?            @db.Timestamptz
+  dedupeKey  String               @unique
+  createdAt  DateTime             @default(now()) @db.Timestamptz
+  updatedAt  DateTime             @updatedAt @db.Timestamptz
+
+  @@index([resolvedAt, readAt])
+  @@index([entityType, entityId])
+}
+
+/// Written by the backup container (plain SQL), so table and columns use snake_case.
+model BackupRun {
+  id          String            @id @default(uuid()) @db.Uuid
+  startedAt   DateTime          @default(now()) @map("started_at") @db.Timestamptz
+  finishedAt  DateTime?         @map("finished_at") @db.Timestamptz
+  status      BackupStatus
+  trigger     BackupTrigger
+  sizeBytes   BigInt?           @map("size_bytes")
+  destination BackupDestination
+  message     String?
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([startedAt])
+  @@map("backup_runs")
+}
+
+/// "Backup now" requests; the backup container polls this table.
+model BackupRequest {
+  id          String    @id @default(uuid()) @db.Uuid
+  requestedAt DateTime  @default(now()) @map("requested_at") @db.Timestamptz
+  pickedAt    DateTime? @map("picked_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("backup_requests")
+}
+
+// ───────────────────────────────── Parties ─────────────────────────────────
+
+model Client {
+  id            String     @id @default(uuid()) @db.Uuid
+  name          String
+  type          ClientType
+  contactPerson String?
+  phone         String?
+  email         String?
+  address       String?
+  notes         String?
+  createdAt     DateTime   @default(now()) @db.Timestamptz
+  updatedAt     DateTime   @updatedAt @db.Timestamptz
+  deletedAt     DateTime?  @db.Timestamptz
+
+  projects Project[]
+
+  @@index([name])
+}
+
+model Supplier {
+  id        String       @id @default(uuid()) @db.Uuid
+  code      String       @unique
+  name      String
+  type      SupplierType
+  phone     String?
+  address   String?
+  notes     String?
+  createdAt DateTime     @default(now()) @db.Timestamptz
+  updatedAt DateTime     @updatedAt @db.Timestamptz
+  deletedAt DateTime?    @db.Timestamptz
+
+  purchases          Purchase[]
+  payments           SupplierPayment[]
+  expenses           Expense[]
+  maintenanceRecords MaintenanceRecord[]
+
+  @@index([name])
+}
+
+// ───────────────────────────────── Projects ─────────────────────────────────
+
+model Project {
+  id                     String        @id @default(uuid()) @db.Uuid
+  code                   String        @unique
+  name                   String
+  type                   ProjectType
+  source                 ProjectSource
+  clientId               String        @db.Uuid
+  location               String?
+  description            String?
+  contractValue          Decimal       @default(0) @db.Decimal(14, 2)
+  contractNo             String?
+  tenderNo               String?
+  startDate              DateTime      @db.Date
+  plannedEndDate         DateTime      @db.Date
+  revisedEndDate         DateTime?     @db.Date
+  actualEndDate          DateTime?     @db.Date
+  status                 ProjectStatus @default(PLANNING)
+  retentionPct           Decimal       @default(10) @db.Decimal(7, 4)
+  retentionCapPct        Decimal       @default(5) @db.Decimal(7, 4)
+  advanceAmount          Decimal       @default(0) @db.Decimal(14, 2)
+  advanceRecoveryPct     Decimal       @default(0) @db.Decimal(7, 4)
+  dlpMonths              Int           @default(12)
+  /// Manual physical progress %, used when the project has no BOQ.
+  progressPct            Decimal?      @db.Decimal(7, 4)
+  siteSupervisorWorkerId String?       @db.Uuid
+  notes                  String?
+  createdAt              DateTime      @default(now()) @db.Timestamptz
+  updatedAt              DateTime      @updatedAt @db.Timestamptz
+  deletedAt              DateTime?     @db.Timestamptz
+
+  client            Client               @relation(fields: [clientId], references: [id])
+  siteSupervisor    Worker?              @relation("ProjectSupervisor", fields: [siteSupervisorWorkerId], references: [id])
+  budgetLines       ProjectBudgetLine[]
+  extensions        ExtensionOfTime[]
+  boqItems          BoqItem[]
+  variations        Variation[]
+  certificates      PaymentCertificate[]
+  clientPayments    ClientPayment[]
+  bonds             Bond[]
+  workerAllocations WorkerAllocation[]
+  attendance        Attendance[]
+  assetAllocations  AssetAllocation[]
+  assetUsageLogs    AssetUsageLog[]
+  purchaseLines     PurchaseLine[]
+  materialIssues    MaterialIssue[]
+  expenses          Expense[]
+
+  @@index([status])
+  @@index([clientId])
+}
+
+model ProjectBudgetLine {
+  id        String         @id @default(uuid()) @db.Uuid
+  projectId String         @db.Uuid
+  category  BudgetCategory
+  amount    Decimal        @db.Decimal(14, 2)
+  notes     String?
+  createdAt DateTime       @default(now()) @db.Timestamptz
+  updatedAt DateTime       @updatedAt @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, category])
+}
+
+model ExtensionOfTime {
+  id              String   @id @default(uuid()) @db.Uuid
+  projectId       String   @db.Uuid
+  previousEndDate DateTime @db.Date
+  newEndDate      DateTime @db.Date
+  approvedDate    DateTime @db.Date
+  reference       String?
+  reason          String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, approvedDate])
+}
+
+model BoqItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  projectId   String   @db.Uuid
+  itemNo      String
+  description String
+  unit        String
+  quantity    Decimal  @db.Decimal(14, 3)
+  rate        Decimal  @db.Decimal(14, 2)
+  sortOrder   Int      @default(0)
+  variationId String?  @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  variation    Variation?       @relation(fields: [variationId], references: [id])
+  measurements BoqMeasurement[]
+
+  @@index([projectId, sortOrder])
+}
+
+model BoqMeasurement {
+  id            String   @id @default(uuid()) @db.Uuid
+  boqItemId     String   @db.Uuid
+  date          DateTime @db.Date
+  /// Cumulative quantity completed up to this date.
+  cumulativeQty Decimal  @db.Decimal(14, 3)
+  notes         String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  boqItem BoqItem @relation(fields: [boqItemId], references: [id], onDelete: Cascade)
+
+  @@unique([boqItemId, date])
+}
+
+model Variation {
+  id           String          @id @default(uuid()) @db.Uuid
+  projectId    String          @db.Uuid
+  number       Int
+  title        String
+  date         DateTime        @db.Date
+  status       VariationStatus @default(PENDING)
+  amountChange Decimal         @default(0) @db.Decimal(14, 2)
+  notes        String?
+  createdAt    DateTime        @default(now()) @db.Timestamptz
+  updatedAt    DateTime        @updatedAt @db.Timestamptz
+
+  project  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  boqItems BoqItem[]
+
+  @@unique([projectId, number])
+}
+
+model PaymentCertificate {
+  id                  String            @id @default(uuid()) @db.Uuid
+  projectId           String            @db.Uuid
+  number              Int
+  periodFrom          DateTime          @db.Date
+  periodTo            DateTime          @db.Date
+  cumulativeWorkDone  Decimal           @db.Decimal(14, 2)
+  previousCertified   Decimal           @db.Decimal(14, 2)
+  grossThisBill       Decimal           @db.Decimal(14, 2)
+  retentionDeducted   Decimal           @default(0) @db.Decimal(14, 2)
+  advanceRecovered    Decimal           @default(0) @db.Decimal(14, 2)
+  otherDeductions     Decimal           @default(0) @db.Decimal(14, 2)
+  otherDeductionsNote String?
+  netPayable          Decimal           @db.Decimal(14, 2)
+  status              CertificateStatus @default(DRAFT)
+  submittedDate       DateTime?         @db.Date
+  certifiedDate       DateTime?         @db.Date
+  notes               String?
+  createdAt           DateTime          @default(now()) @db.Timestamptz
+  updatedAt           DateTime          @updatedAt @db.Timestamptz
+
+  project  Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  payments ClientPayment[]
+
+  @@unique([projectId, number])
+}
+
+model ClientPayment {
+  id            String            @id @default(uuid()) @db.Uuid
+  projectId     String            @db.Uuid
+  certificateId String?           @db.Uuid
+  date          DateTime          @db.Date
+  amount        Decimal           @db.Decimal(14, 2)
+  method        PaymentMethod
+  reference     String?
+  kind          ClientPaymentKind
+  notes         String?
+  createdAt     DateTime          @default(now()) @db.Timestamptz
+  updatedAt     DateTime          @updatedAt @db.Timestamptz
+
+  project     Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  certificate PaymentCertificate? @relation(fields: [certificateId], references: [id])
+
+  @@index([projectId, date])
+}
+
+model Bond {
+  id          String     @id @default(uuid()) @db.Uuid
+  projectId   String     @db.Uuid
+  type        BondType
+  bank        String
+  referenceNo String
+  amount      Decimal    @db.Decimal(14, 2)
+  issueDate   DateTime   @db.Date
+  expiryDate  DateTime   @db.Date
+  status      BondStatus @default(ACTIVE)
+  notes       String?
+  createdAt   DateTime   @default(now()) @db.Timestamptz
+  updatedAt   DateTime   @updatedAt @db.Timestamptz
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([status, expiryDate])
+}
+
+// ───────────────────────────────── Documents ─────────────────────────────────
+
+model Document {
+  id               String            @id @default(uuid()) @db.Uuid
+  ownerType        DocumentOwnerType
+  /// Polymorphic owner id (project, asset, worker, …); null for COMPANY documents.
+  ownerId          String?           @db.Uuid
+  category         DocumentCategory
+  title            String
+  description      String?
+  currentVersionId String?           @unique @db.Uuid
+  createdAt        DateTime          @default(now()) @db.Timestamptz
+  updatedAt        DateTime          @updatedAt @db.Timestamptz
+  deletedAt        DateTime?         @db.Timestamptz
+
+  versions       DocumentVersion[] @relation("DocumentVersions")
+  currentVersion DocumentVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  workerPhotoOf  Worker[]          @relation("WorkerPhoto")
+  receiptOf      Expense[]         @relation("ExpenseReceipt")
+
+  @@index([ownerType, ownerId])
+  @@index([category])
+}
+
+model DocumentVersion {
+  id         String    @id @default(uuid()) @db.Uuid
+  documentId String    @db.Uuid
+  versionNo  Int
+  /// documents/{documentId}/v{versionNo}-{uuid}-{safeFileName} — never overwritten.
+  storageKey String    @unique
+  fileName   String
+  mimeType   String
+  sizeBytes  Int
+  sha256     String
+  issueDate  DateTime? @db.Date
+  expiryDate DateTime? @db.Date
+  note       String?
+  uploadedAt DateTime  @default(now()) @db.Timestamptz
+  createdAt  DateTime  @default(now()) @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @db.Timestamptz
+
+  document  Document  @relation("DocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  currentOf Document? @relation("CurrentVersion")
+
+  @@unique([documentId, versionNo])
+  @@index([expiryDate])
+}
+
+// ───────────────────────────────── Workers ─────────────────────────────────
+
+model Worker {
+  id               String      @id @default(uuid()) @db.Uuid
+  code             String      @unique
+  fullName         String
+  nameSinhala      String?
+  nic              String?     @unique
+  phone            String?
+  address          String?
+  dateOfBirth      DateTime?   @db.Date
+  skill            WorkerSkill
+  type             WorkerType
+  joinedDate       DateTime    @db.Date
+  leftDate         DateTime?   @db.Date
+  active           Boolean     @default(true)
+  epfNo            String?
+  bankName         String?
+  bankAccountNo    String?
+  emergencyContact String?
+  photoDocId       String?     @db.Uuid
+  notes            String?
+  createdAt        DateTime    @default(now()) @db.Timestamptz
+  updatedAt        DateTime    @updatedAt @db.Timestamptz
+  deletedAt        DateTime?   @db.Timestamptz
+
+  photo               Document?          @relation("WorkerPhoto", fields: [photoDocId], references: [id])
+  rates               WorkerRate[]
+  allocations         WorkerAllocation[]
+  attendance          Attendance[]
+  advances            Advance[]
+  payrollLines        PayrollLine[]
+  supervisedProjects  Project[]          @relation("ProjectSupervisor")
+  operatedAllocations AssetAllocation[]  @relation("AllocationOperator")
+  operatedUsageLogs   AssetUsageLog[]    @relation("UsageOperator")
+
+  @@index([fullName])
+  @@index([type, active])
+}
+
+model WorkerRate {
+  id            String   @id @default(uuid()) @db.Uuid
+  workerId      String   @db.Uuid
+  effectiveFrom DateTime @db.Date
+  dailyRate     Decimal? @db.Decimal(14, 2)
+  monthlySalary Decimal? @db.Decimal(14, 2)
+  otHourlyRate  Decimal? @db.Decimal(14, 2)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@unique([workerId, effectiveFrom])
+}
+
+/// A plan. Overlaps per worker are rejected by the exclusion constraint worker_alloc_no_overlap.
+model WorkerAllocation {
+  id        String           @id @default(uuid()) @db.Uuid
+  workerId  String           @db.Uuid
+  projectId String           @db.Uuid
+  startAt   DateTime         @db.Timestamptz
+  endAt     DateTime         @db.Timestamptz
+  notes     String?
+  status    AllocationStatus @default(PLANNED)
+  createdAt DateTime         @default(now()) @db.Timestamptz
+  updatedAt DateTime         @updatedAt @db.Timestamptz
+
+  worker  Worker  @relation(fields: [workerId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([workerId, startAt])
+  @@index([projectId, startAt])
+}
+
+model Attendance {
+  id           String           @id @default(uuid()) @db.Uuid
+  workerId     String           @db.Uuid
+  date         DateTime         @db.Date
+  projectId    String?          @db.Uuid
+  status       AttendanceStatus
+  otHours      Decimal          @default(0) @db.Decimal(14, 3)
+  notes        String?
+  payrollRunId String?          @db.Uuid
+  createdAt    DateTime         @default(now()) @db.Timestamptz
+  updatedAt    DateTime         @updatedAt @db.Timestamptz
+
+  worker     Worker      @relation(fields: [workerId], references: [id])
+  project    Project?    @relation(fields: [projectId], references: [id])
+  payrollRun PayrollRun? @relation(fields: [payrollRunId], references: [id])
+
+  @@unique([workerId, date])
+  @@index([projectId, date])
+  @@index([date])
+}
+
+model Advance {
+  id               String        @id @default(uuid()) @db.Uuid
+  workerId         String        @db.Uuid
+  date             DateTime      @db.Date
+  amount           Decimal       @db.Decimal(14, 2)
+  reason           String?
+  recoveryPerMonth Decimal?      @db.Decimal(14, 2)
+  status           AdvanceStatus @default(OPEN)
+  createdAt        DateTime      @default(now()) @db.Timestamptz
+  updatedAt        DateTime      @updatedAt @db.Timestamptz
+
+  worker     Worker            @relation(fields: [workerId], references: [id])
+  recoveries AdvanceRecovery[]
+
+  @@index([workerId, status])
+}
+
+model AdvanceRecovery {
+  id            String   @id @default(uuid()) @db.Uuid
+  advanceId     String   @db.Uuid
+  payrollLineId String   @db.Uuid
+  amount        Decimal  @db.Decimal(14, 2)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  advance     Advance     @relation(fields: [advanceId], references: [id])
+  payrollLine PayrollLine @relation(fields: [payrollLineId], references: [id], onDelete: Cascade)
+
+  @@unique([advanceId, payrollLineId])
+}
+
+// ───────────────────────────────── Assets ─────────────────────────────────
+
+model Asset {
+  id                   String         @id @default(uuid()) @db.Uuid
+  code                 String         @unique
+  name                 String
+  category             AssetCategory
+  make                 String?
+  model                String?
+  registrationNo       String?        @unique
+  chassisNo            String?
+  engineNo             String?
+  yearOfManufacture    Int?
+  purchaseDate         DateTime?      @db.Date
+  purchaseCost         Decimal?       @db.Decimal(14, 2)
+  ownership            AssetOwnership @default(OWNED)
+  status               AssetStatus    @default(AVAILABLE)
+  meterType            MeterType      @default(HOURS)
+  currentMeter         Decimal        @default(0) @db.Decimal(14, 3)
+  serviceIntervalMeter Decimal?       @db.Decimal(14, 3)
+  lastServiceMeter     Decimal?       @db.Decimal(14, 3)
+  internalRatePerHour  Decimal?       @db.Decimal(14, 2)
+  internalRatePerDay   Decimal?       @db.Decimal(14, 2)
+  isVehicle            Boolean        @default(false)
+  notes                String?
+  createdAt            DateTime       @default(now()) @db.Timestamptz
+  updatedAt            DateTime       @updatedAt @db.Timestamptz
+  deletedAt            DateTime?      @db.Timestamptz
+
+  allocations        AssetAllocation[]
+  usageLogs          AssetUsageLog[]
+  maintenanceRecords MaintenanceRecord[]
+  expenses           Expense[]
+
+  @@index([category])
+}
+
+/// A plan. Overlaps per asset are rejected by the exclusion constraint asset_alloc_no_overlap.
+model AssetAllocation {
+  id               String           @id @default(uuid()) @db.Uuid
+  assetId          String           @db.Uuid
+  projectId        String           @db.Uuid
+  startAt          DateTime         @db.Timestamptz
+  endAt            DateTime         @db.Timestamptz
+  operatorWorkerId String?          @db.Uuid
+  notes            String?
+  status           AllocationStatus @default(PLANNED)
+  createdAt        DateTime         @default(now()) @db.Timestamptz
+  updatedAt        DateTime         @updatedAt @db.Timestamptz
+
+  asset    Asset   @relation(fields: [assetId], references: [id])
+  project  Project @relation(fields: [projectId], references: [id])
+  operator Worker? @relation("AllocationOperator", fields: [operatorWorkerId], references: [id])
+
+  @@index([assetId, startAt])
+  @@index([projectId, startAt])
+}
+
+model AssetUsageLog {
+  id               String   @id @default(uuid()) @db.Uuid
+  assetId          String   @db.Uuid
+  projectId        String?  @db.Uuid
+  date             DateTime @db.Date
+  startMeter       Decimal? @db.Decimal(14, 3)
+  endMeter         Decimal? @db.Decimal(14, 3)
+  hoursUsed        Decimal  @default(0) @db.Decimal(14, 3)
+  fuelLitres       Decimal? @db.Decimal(14, 3)
+  fuelCost         Decimal? @db.Decimal(14, 2)
+  operatorWorkerId String?  @db.Uuid
+  notes            String?
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  asset    Asset    @relation(fields: [assetId], references: [id])
+  project  Project? @relation(fields: [projectId], references: [id])
+  operator Worker?  @relation("UsageOperator", fields: [operatorWorkerId], references: [id])
+
+  @@index([assetId, date])
+  @@index([projectId, date])
+}
+
+model MaintenanceRecord {
+  id               String          @id @default(uuid()) @db.Uuid
+  assetId          String          @db.Uuid
+  date             DateTime        @db.Date
+  type             MaintenanceType
+  description      String
+  meterReading     Decimal?        @db.Decimal(14, 3)
+  cost             Decimal         @default(0) @db.Decimal(14, 2)
+  supplierId       String?         @db.Uuid
+  nextServiceMeter Decimal?        @db.Decimal(14, 3)
+  createdAt        DateTime        @default(now()) @db.Timestamptz
+  updatedAt        DateTime        @updatedAt @db.Timestamptz
+
+  asset    Asset     @relation(fields: [assetId], references: [id])
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
+  @@index([assetId, date])
+}
+
+// ─────────────────────── Materials, purchasing, expenses ───────────────────────
+
+model Material {
+  id          String           @id @default(uuid()) @db.Uuid
+  name        String
+  nameSinhala String?
+  unit        String
+  category    MaterialCategory
+  createdAt   DateTime         @default(now()) @db.Timestamptz
+  updatedAt   DateTime         @updatedAt @db.Timestamptz
+  deletedAt   DateTime?        @db.Timestamptz
+
+  purchaseLines PurchaseLine[]
+  issues        MaterialIssue[]
+
+  @@index([name])
+}
+
+model Purchase {
+  id          String              @id @default(uuid()) @db.Uuid
+  supplierId  String              @db.Uuid
+  date        DateTime            @db.Date
+  invoiceNo   String?
+  paymentType PurchasePaymentType
+  notes       String?
+  total       Decimal             @db.Decimal(14, 2)
+  createdAt   DateTime            @default(now()) @db.Timestamptz
+  updatedAt   DateTime            @updatedAt @db.Timestamptz
+
+  supplier Supplier       @relation(fields: [supplierId], references: [id])
+  lines    PurchaseLine[]
+
+  @@index([supplierId, date])
+  @@index([date])
+}
+
+model PurchaseLine {
+  id         String   @id @default(uuid()) @db.Uuid
+  purchaseId String   @db.Uuid
+  materialId String   @db.Uuid
+  quantity   Decimal  @db.Decimal(14, 3)
+  unitPrice  Decimal  @db.Decimal(14, 2)
+  amount     Decimal  @db.Decimal(14, 2)
+  /// null = delivered to the main store
+  projectId  String?  @db.Uuid
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id])
+  project  Project? @relation(fields: [projectId], references: [id])
+
+  @@index([materialId])
+  @@index([projectId])
+}
+
+model MaterialIssue {
+  id         String   @id @default(uuid()) @db.Uuid
+  materialId String   @db.Uuid
+  projectId  String   @db.Uuid
+  date       DateTime @db.Date
+  quantity   Decimal  @db.Decimal(14, 3)
+  /// Weighted average store cost at the time of issue.
+  unitCost   Decimal  @db.Decimal(14, 2)
+  notes      String?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  material Material @relation(fields: [materialId], references: [id])
+  project  Project  @relation(fields: [projectId], references: [id])
+
+  @@index([materialId, date])
+  @@index([projectId, date])
+}
+
+model SupplierPayment {
+  id         String        @id @default(uuid()) @db.Uuid
+  supplierId String        @db.Uuid
+  date       DateTime      @db.Date
+  amount     Decimal       @db.Decimal(14, 2)
+  method     PaymentMethod
+  reference  String?
+  notes      String?
+  createdAt  DateTime      @default(now()) @db.Timestamptz
+  updatedAt  DateTime      @updatedAt @db.Timestamptz
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+
+  @@index([supplierId, date])
+}
+
+model Expense {
+  id                String          @id @default(uuid()) @db.Uuid
+  date              DateTime        @db.Date
+  projectId         String?         @db.Uuid
+  assetId           String?         @db.Uuid
+  category          ExpenseCategory
+  description       String
+  amount            Decimal         @db.Decimal(14, 2)
+  paidBy            ExpensePaidBy   @default(CASH)
+  supplierId        String?         @db.Uuid
+  receiptDocumentId String?         @db.Uuid
+  createdAt         DateTime        @default(now()) @db.Timestamptz
+  updatedAt         DateTime        @updatedAt @db.Timestamptz
+
+  project  Project?  @relation(fields: [projectId], references: [id])
+  asset    Asset?    @relation(fields: [assetId], references: [id])
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+  receipt  Document? @relation("ExpenseReceipt", fields: [receiptDocumentId], references: [id])
+
+  @@index([date])
+  @@index([projectId, date])
+  @@index([category])
+}
+
+// ───────────────────────────────── Payroll ─────────────────────────────────
+
+model PayrollRun {
+  id          String        @id @default(uuid()) @db.Uuid
+  year        Int
+  month       Int
+  status      PayrollStatus @default(DRAFT)
+  finalizedAt DateTime?     @db.Timestamptz
+  createdAt   DateTime      @default(now()) @db.Timestamptz
+  updatedAt   DateTime      @updatedAt @db.Timestamptz
+
+  lines      PayrollLine[]
+  attendance Attendance[]
+
+  @@unique([year, month])
+}
+
+model PayrollLine {
+  id               String     @id @default(uuid()) @db.Uuid
+  payrollRunId     String     @db.Uuid
+  workerId         String     @db.Uuid
+  workerType       WorkerType
+  daysWorked       Decimal    @default(0) @db.Decimal(14, 3)
+  halfDays         Int        @default(0)
+  otHours          Decimal    @default(0) @db.Decimal(14, 3)
+  basicPay         Decimal    @default(0) @db.Decimal(14, 2)
+  otPay            Decimal    @default(0) @db.Decimal(14, 2)
+  grossPay         Decimal    @default(0) @db.Decimal(14, 2)
+  epfEmployee      Decimal    @default(0) @db.Decimal(14, 2)
+  epfEmployer      Decimal    @default(0) @db.Decimal(14, 2)
+  etfEmployer      Decimal    @default(0) @db.Decimal(14, 2)
+  advanceDeduction Decimal    @default(0) @db.Decimal(14, 2)
+  otherDeductions  Decimal    @default(0) @db.Decimal(14, 2)
+  netPay           Decimal    @default(0) @db.Decimal(14, 2)
+  /// Per-project days & cost: [{ projectId, days, cost }]
+  breakdown        Json       @default("[]")
+  createdAt        DateTime   @default(now()) @db.Timestamptz
+  updatedAt        DateTime   @updatedAt @db.Timestamptz
+
+  payrollRun PayrollRun        @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  worker     Worker            @relation(fields: [workerId], references: [id])
+  recoveries AdvanceRecovery[]
+
+  @@unique([payrollRunId, workerId])
+}

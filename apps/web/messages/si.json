@@ -1,0 +1,357 @@
+{
+  "common": {
+    "appName": "සුපුන් කන්ස්ට්‍රක්ෂන්",
+    "save": "සුරකින්න",
+    "saving": "සුරකිමින්…",
+    "saved": "සුරැකුණා",
+    "cancel": "අවලංගු කරන්න",
+    "confirm": "ඔව්, කරගෙන යන්න",
+    "close": "වසන්න",
+    "delete": "මකන්න",
+    "edit": "වෙනස් කරන්න",
+    "add": "එකතු කරන්න",
+    "back": "ආපසු",
+    "loading": "මදක් රැඳී සිටින්න…",
+    "search": "සොයන්න…",
+    "noResults": "තවම පෙන්වීමට කිසිවක් නැත.",
+    "comingSoonTitle": "ළඟදීම",
+    "comingSoonText": "මෙම පිටුව සකස් කරමින් පවතී. ඉදිරි යාවත්කාලීන කිරීමකින් එය ලැබෙනු ඇත.",
+    "goToDashboard": "මුල් පිටුවට යන්න",
+    "language": "භාෂාව",
+    "english": "English",
+    "sinhala": "සිංහල",
+    "notifications": "දැනුම්දීම්",
+    "notificationsSoon": "මතක් කිරීම් ළඟදීම මෙහි පෙන්වයි.",
+    "menu": "මෙනුව",
+    "openMenu": "මෙනුව විවෘත කරන්න",
+    "userMenu": "ගිණුම",
+    "changePassword": "මුරපදය වෙනස් කරන්න",
+    "logout": "පිටවන්න",
+    "loggingOut": "පිටවෙමින්…",
+    "rupees": "රු.",
+    "optional": "අත්‍යවශ්‍ය නැත",
+    "required": "අවශ්‍යයි",
+    "areYouSure": "ඔබට විශ්වාසද?",
+    "pagination": {
+      "summary": "{total} න් {from}–{to} පෙන්වයි",
+      "previous": "පෙර",
+      "next": "ඊළඟ",
+      "page": "පිටුව {page} / {pages}"
+    },
+    "status": {
+      "active": "ක්‍රියාත්මකයි",
+      "inactive": "ක්‍රියාත්මක නැත"
+    }
+  },
+  "nav": {
+    "dashboard": "මුල් පිටුව",
+    "daily": "දෛනික සටහන්",
+    "projects": "ව්‍යාපෘති",
+    "schedule": "වැඩ සැලැස්ම",
+    "workers": "සේවකයින්",
+    "assets": "යන්ත්‍ර සහ වාහන",
+    "purchases": "මිලදී ගැනීම් සහ ගබඩාව",
+    "suppliers": "සැපයුම්කරුවන්",
+    "payroll": "වැටුප්",
+    "reports": "වාර්තා",
+    "documents": "ලේඛන",
+    "settings": "සැකසුම්"
+  },
+  "auth": {
+    "title": "ආයුබෝවන්",
+    "subtitle": "ඉදිරියට යාමට කරුණාකර ඇතුළු වන්න.",
+    "username": "පරිශීලක නාමය",
+    "password": "මුරපදය",
+    "login": "ඇතුළු වන්න",
+    "loggingIn": "ඇතුළු වෙමින්…",
+    "loggedOut": "ඔබ පිටවී ඇත.",
+    "showPassword": "මුරපදය පෙන්වන්න",
+    "hidePassword": "මුරපදය සඟවන්න",
+    "defaultPasswordBanner": "ඔබ තවමත් පද්ධතිය සමඟ ලැබුණු මුල් මුරපදය භාවිතා කරයි. ඔබේ දත්ත ආරක්ෂිතව තබා ගැනීමට කරුණාකර එය වෙනස් කරන්න.",
+    "changeNow": "දැන්ම වෙනස් කරන්න"
+  },
+  "settings": {
+    "title": "සැකසුම්",
+    "subtitle": "සමාගමේ විස්තර, අනුපාත සහ ඔබේ මුරපදය.",
+    "saved": "සැකසුම් සුරැකුණා.",
+    "tabs": {
+      "company": "සමාගම",
+      "payroll": "වැටුප් අනුපාත",
+      "reminders": "මතක් කිරීම්",
+      "billing": "බිල්පත්",
+      "password": "මුරපදය"
+    },
+    "company": {
+      "title": "සමාගමේ තොරතුරු",
+      "description": "වාර්තාවල සහ තිරයේ ඉහළින් පෙන්වයි.",
+      "name": "සමාගමේ නම",
+      "address": "ලිපිනය",
+      "phone": "දුරකථන අංකය",
+      "email": "ඊමේල්",
+      "cidaGrade": "CIDA ශ්‍රේණිය"
+    },
+    "payroll": {
+      "title": "වැටුප් අනුපාත",
+      "description": "වැටුප් ගණනය කිරීමේදී භාවිතා වේ. නීතිය හෝ ඔබේ නීති වෙනස් වුවහොත් පමණක් වෙනස් කරන්න.",
+      "epfEmployeePct": "EPF – සේවකයාගේ කොටස (%)",
+      "epfEmployerPct": "EPF – සමාගමේ කොටස (%)",
+      "etfEmployerPct": "ETF – සමාගමේ කොටස (%)",
+      "workingDaysPerMonth": "මසකට වැඩ කරන දින ගණන",
+      "otMultiplier": "අතිකාල අනුපාතය (සාමාන්‍ය පඩිය මෙන් ගුණයක්)",
+      "permanentOtDivisor": "අතිකාල පැය බෙදීම (ස්ථිර සේවකයින්)",
+      "dailyStandardHours": "දිනකට සාමාන්‍ය වැඩ පැය ගණන"
+    },
+    "reminders": {
+      "title": "මතක් කිරීම්",
+      "description": "කල් ඉකුත් වන දිනයකට (රක්ෂණ, බලපත්‍ර, ඇපකර) දින කීයකට පෙර මතක් කළ යුතුද.",
+      "daysBefore": "මෙපමණ දින ගණනකට පෙර මතක් කරන්න",
+      "daysHint": "අංක කොමාවෙන් වෙන් කරන්න, උදාහරණයක් ලෙස: 30, 14, 7"
+    },
+    "billing": {
+      "title": "බිල්පත් සඳහා මූලික අගයන්",
+      "description": "නව ව්‍යාපෘති සඳහා මූලික අගයන්. සෑම ව්‍යාපෘතියකටම තමන්ගේම අගයන් තිබිය හැක.",
+      "defaultRetentionPct": "සෑම බිලකින්ම රඳවා ගන්නා ප්‍රමාණය (%)",
+      "defaultRetentionCapPct": "රඳවා ගැනීමේ සීමාව (ගිවිසුම් වටිනාකමෙන් %)"
+    },
+    "password": {
+      "title": "මුරපදය වෙනස් කරන්න",
+      "description": "අවම වශයෙන් අකුරු 8ක් භාවිතා කරන්න. එය ආරක්ෂිත තැනක ලියා තබා ගන්න.",
+      "currentPassword": "දැනට ඇති මුරපදය",
+      "newPassword": "නව මුරපදය",
+      "confirmPassword": "නව මුරපදය නැවත",
+      "submit": "මුරපදය වෙනස් කරන්න",
+      "changed": "ඔබේ මුරපදය වෙනස් කළා."
+    }
+  },
+  "dashboard": {
+    "title": "මුල් පිටුව",
+    "greeting": "සුබ දවසක්!",
+    "subtitle": "ඔබේ ව්‍යාපාරය ගැන කෙටි දළ විශ්ලේෂණයක්.",
+    "kpi": {
+      "activeProjects": "ක්‍රියාත්මක ව්‍යාපෘති",
+      "workersToday": "අද වැඩබිමේ සේවකයින්",
+      "spentThisMonth": "මේ මාසයේ වියදම",
+      "toReceive": "ලැබිය යුතු මුදල්"
+    },
+    "notYet": "දත්ත ඇතුළත් කළ පසු පෙන්වයි",
+    "needsAttention": "අවධානය යොමු කළ යුතු දේ",
+    "nothingNeedsAttention": "දැනට අවධානය යොමු කළ යුතු කිසිවක් නැත.",
+    "activeProjects": "ක්‍රියාත්මක ව්‍යාපෘති",
+    "noActiveProjects": "තවම ක්‍රියාත්මක ව්‍යාපෘති නැත.",
+    "quickActions": "ඉක්මන් ක්‍රියා",
+    "addExpense": "වියදමක් එකතු කරන්න",
+    "uploadDocument": "ලේඛනයක් උඩුගත කරන්න"
+  },
+  "errors": {
+    "VALIDATION_FAILED": "සමහර අගයන් නිවැරදි නැත. කරුණාකර පෝරමය පරීක්ෂා කරන්න.",
+    "UNAUTHORIZED": "කරුණාකර නැවත ඇතුළු වන්න.",
+    "INVALID_CREDENTIALS": "පරිශීලක නාමය හෝ මුරපදය වැරදියි.",
+    "TOO_MANY_ATTEMPTS": "වැරදි උත්සාහයන් වැඩියි. විනාඩියක් රැඳී සිට නැවත උත්සාහ කරන්න.",
+    "WRONG_PASSWORD": "දැනට ඇති මුරපදය වැරදියි.",
+    "FORBIDDEN": "ඔබට මෙය කිරීමට අවසර නැත.",
+    "NOT_FOUND": "මෙය සොයාගත නොහැකි විය.",
+    "DUPLICATE": "මෙය දැනටමත් තිබේ.",
+    "CONFLICT": "මෙය වෙනත් වාර්තා සමඟ සම්බන්ධ නිසා වෙනස් කළ නොහැක.",
+    "ALLOCATION_OVERLAP": "මෙම සේවකයා හෝ යන්ත්‍රය එම වේලාවට දැනටමත් වෙන් කර ඇත.",
+    "PAYROLL_LOCKED": "මෙම මාසයේ වැටුප් අවසන් කර ඇති නිසා මෙය වෙනස් කළ නොහැක.",
+    "INSUFFICIENT_STOCK": "ගබඩාවේ ප්‍රමාණවත් තොගයක් නැත.",
+    "UNKNOWN_SETTING": "මෙම සැකසුම නොපවතී.",
+    "INTERNAL_ERROR": "යමක් වැරදුණා. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "NETWORK": "පද්ධතියට සම්බන්ධ විය නොහැක. එය ක්‍රියාත්මකදැයි බලා නැවත උත්සාහ කරන්න.",
+    "generic": "යමක් වැරදුණා. කරුණාකර නැවත උත්සාහ කරන්න.",
+    "pageErrorTitle": "යමක් වැරදුණා",
+    "pageErrorText": "කරුණාකර නැවත උත්සාහ කරන්න. දිගටම මෙසේ වුවහොත් පද්ධතිය නැවත ආරම්භ කරන්න.",
+    "tryAgain": "නැවත උත්සාහ කරන්න",
+    "notFoundTitle": "පිටුව හමු නොවීය",
+    "notFoundText": "මෙම පිටුව නොපවතී.",
+    "validation": {
+      "REQUIRED": "කරුණාකර මෙය පුරවන්න.",
+      "INVALID": "කරුණාකර මෙම අගය පරීක්ෂා කරන්න.",
+      "INVALID_EMAIL": "කරුණාකර නිවැරදි ඊමේල් ලිපිනයක් ඇතුළත් කරන්න.",
+      "INVALID_MONEY": "1500 හෝ 1500.50 වැනි මුදලක් ඇතුළත් කරන්න.",
+      "INVALID_QUANTITY": "12 හෝ 12.5 වැනි ප්‍රමාණයක් ඇතුළත් කරන්න.",
+      "INVALID_NUMBER": "කරුණාකර අංකයක් ඇතුළත් කරන්න.",
+      "INVALID_DATE": "කරුණාකර නිවැරදි දිනයක් ඇතුළත් කරන්න.",
+      "PERCENT_TOO_HIGH": "මෙය 100 ට වඩා වැඩි විය නොහැක.",
+      "MUST_BE_POSITIVE": "මෙය 0 ට වඩා වැඩි විය යුතුය.",
+      "NEGATIVE_NOT_ALLOWED": "මෙය 0 ට වඩා අඩු විය නොහැක.",
+      "PASSWORD_TOO_SHORT": "අවම වශයෙන් අකුරු 8ක් භාවිතා කරන්න.",
+      "PASSWORDS_DO_NOT_MATCH": "නව මුරපද දෙක එක සමාන නැත.",
+      "PASSWORD_SAME_AS_OLD": "නව මුරපදය දැනට ඇති මුරපදයට වඩා වෙනස් විය යුතුය.",
+      "DAYS_LIST": "1 සිට 365 දක්වා පූර්ණ සංඛ්‍යා කොමාවෙන් වෙන් කර ඇතුළත් කරන්න."
+    }
+  },
+  "enums": {
+    "notificationSeverity": { "INFO": "තොරතුරක්", "WARNING": "අවවාදයක්", "DANGER": "හදිසි" },
+    "backupStatus": { "RUNNING": "සිදු වෙමින්", "SUCCESS": "සාර්ථකයි", "FAILED": "අසාර්ථකයි" },
+    "backupTrigger": { "SCHEDULED": "ස්වයංක්‍රීය", "MANUAL": "අතින්" },
+    "backupDestination": {
+      "LOCAL": "මෙම පරිගණකය",
+      "GDRIVE": "Google Drive",
+      "BOTH": "මෙම පරිගණකය සහ Google Drive"
+    },
+    "auditAction": { "CREATE": "එකතු කළා", "UPDATE": "වෙනස් කළා", "DELETE": "ඉවත් කළා" },
+    "clientType": { "GOVERNMENT": "රජයේ", "PRIVATE": "පුද්ගලික" },
+    "supplierType": {
+      "MATERIAL": "ද්‍රව්‍ය",
+      "HARDWARE": "හාඩ්වෙයාර්",
+      "FUEL": "ඉන්ධන",
+      "SUBCONTRACTOR": "උප කොන්ත්‍රාත්කරු",
+      "EQUIPMENT_HIRE": "යන්ත්‍ර කුලියට",
+      "OTHER": "වෙනත්"
+    },
+    "projectType": {
+      "ROAD": "මාර්ග",
+      "BUILDING": "ගොඩනැගිලි",
+      "SCHOOL_BUILDING": "පාසල් ගොඩනැගිලි",
+      "BRIDGE_CULVERT": "පාලම් / බෝක්කු",
+      "IRRIGATION": "වාරිමාර්ග",
+      "OTHER": "වෙනත්"
+    },
+    "projectSource": { "GOVERNMENT_TENDER": "රජයේ ටෙන්ඩර්", "PRIVATE": "පුද්ගලික වැඩ" },
+    "projectStatus": {
+      "PLANNING": "සැලසුම් කරමින්",
+      "ONGOING": "සිදු වෙමින්",
+      "ON_HOLD": "නවතා ඇත",
+      "COMPLETED": "අවසන්",
+      "CANCELLED": "අවලංගුයි"
+    },
+    "budgetCategory": {
+      "LABOUR": "කම්කරු",
+      "MATERIALS": "ද්‍රව්‍ය",
+      "EQUIPMENT": "යන්ත්‍ර",
+      "SUBCONTRACT": "උප කොන්ත්‍රාත්",
+      "OVERHEAD": "පොදු වියදම්",
+      "OTHER": "වෙනත්"
+    },
+    "variationStatus": {
+      "PENDING": "බලාපොරොත්තුවෙන්",
+      "APPROVED": "අනුමතයි",
+      "REJECTED": "ප්‍රතික්ෂේපිතයි"
+    },
+    "certificateStatus": {
+      "DRAFT": "කෙටුම්පත",
+      "SUBMITTED": "යවා ඇත",
+      "CERTIFIED": "සහතික කළා",
+      "PAID": "ගෙවා ඇත"
+    },
+    "paymentMethod": { "CASH": "මුදල්", "CHEQUE": "චෙක්පත", "BANK_TRANSFER": "බැංකු මාරුව" },
+    "clientPaymentKind": {
+      "IPC_PAYMENT": "බිල් ගෙවීම",
+      "ADVANCE": "අත්තිකාරම",
+      "RETENTION_RELEASE": "රඳවා ගැනීම නිදහස් කිරීම",
+      "OTHER": "වෙනත්"
+    },
+    "bondType": {
+      "BID_BOND": "ලංසු ඇපකරය",
+      "PERFORMANCE_BOND": "කාර්ය සාධන ඇපකරය",
+      "ADVANCE_PAYMENT_GUARANTEE": "අත්තිකාරම් ඇපකරය",
+      "RETENTION_GUARANTEE": "රඳවා ගැනීමේ ඇපකරය"
+    },
+    "bondStatus": { "ACTIVE": "වලංගුයි", "RELEASED": "නිදහස් කළා", "EXPIRED": "කල් ඉකුත්" },
+    "documentOwnerType": {
+      "COMPANY": "සමාගම",
+      "PROJECT": "ව්‍යාපෘතිය",
+      "ASSET": "යන්ත්‍රය / වාහනය",
+      "WORKER": "සේවකයා",
+      "SUPPLIER": "සැපයුම්කරු",
+      "CLIENT": "සේවාදායකයා"
+    },
+    "documentCategory": {
+      "PLAN_DRAWING": "සැලැස්ම / ඇඳීම",
+      "CONTRACT": "ගිවිසුම",
+      "BOQ": "BOQ",
+      "PHOTO": "ඡායාරූපය",
+      "INVOICE": "ඉන්වොයිසිය",
+      "RECEIPT": "රිසිට්පත",
+      "LETTER": "ලිපිය",
+      "ESTIMATE": "ඇස්තමේන්තුව",
+      "REVENUE_LICENCE": "ආදායම් බලපත්‍රය",
+      "INSURANCE": "රක්ෂණය",
+      "EMISSION_TEST": "දුම් පරීක්ෂණය",
+      "FITNESS_CERTIFICATE": "යෝග්‍යතා සහතිකය",
+      "REGISTRATION_BOOK": "ලියාපදිංචි පොත",
+      "NIC_COPY": "හැඳුනුම්පත් පිටපත",
+      "CERTIFICATE": "සහතිකය",
+      "CIDA_REGISTRATION": "CIDA ලියාපදිංචිය",
+      "BOND_COPY": "ඇපකර පිටපත",
+      "OTHER": "වෙනත්"
+    },
+    "workerSkill": {
+      "MASON": "මේසන්",
+      "CARPENTER": "වඩුවා",
+      "HELPER": "සහායක / කම්කරු",
+      "MACHINE_OPERATOR": "යන්ත්‍ර ක්‍රියාකරු",
+      "DRIVER": "රියදුරු",
+      "STEEL_FIXER": "යකඩ බැඳීම",
+      "ELECTRICIAN": "විදුලි කාර්මික",
+      "PLUMBER": "ජල නල කාර්මික",
+      "SUPERVISOR": "අධීක්ෂක",
+      "OTHER": "වෙනත්"
+    },
+    "workerType": { "DAILY": "දෛනික වැටුප්", "PERMANENT": "ස්ථිර" },
+    "allocationStatus": { "PLANNED": "සැලසුම් කළා", "CANCELLED": "අවලංගුයි" },
+    "attendanceStatus": {
+      "PRESENT": "පැමිණ ඇත",
+      "HALF_DAY": "භාග දිනය",
+      "ABSENT": "නොපැමිණි",
+      "LEAVE": "නිවාඩු"
+    },
+    "advanceStatus": { "OPEN": "තවම අය කර නැත", "RECOVERED": "අය කර ඇත" },
+    "assetCategory": {
+      "JCB_BACKHOE": "JCB / බැක්හෝ",
+      "EXCAVATOR": "එක්ස්කැවේටරය",
+      "TIPPER": "ටිපර්",
+      "CAB": "කැබ් / ඩබල් කැබ්",
+      "TRACTOR": "ට්‍රැක්ටරය",
+      "ROLLER": "රෝලරය",
+      "CONCRETE_MIXER": "කොන්ක්‍රීට් මික්සරය",
+      "WATER_BOWSER": "ජල බවුසරය",
+      "COMPACTOR": "කොම්පැක්ටරය",
+      "GENERATOR": "ජනක යන්ත්‍රය",
+      "TOOL": "උපකරණ",
+      "OTHER": "වෙනත්"
+    },
+    "assetOwnership": { "OWNED": "තමන්ගේ", "HIRED_IN": "කුලියට ගත්" },
+    "assetStatus": {
+      "AVAILABLE": "භාවිතයට සූදානම්",
+      "IN_USE": "භාවිතයේ",
+      "UNDER_REPAIR": "අලුත්වැඩියාවේ",
+      "DISPOSED": "ඉවත් කළා"
+    },
+    "meterType": { "HOURS": "එන්ජින් පැය", "KM": "කිලෝමීටර්", "NONE": "මීටරයක් නැත" },
+    "maintenanceType": {
+      "SERVICE": "සර්විස්",
+      "REPAIR": "අලුත්වැඩියාව",
+      "TYRE": "ටයර්",
+      "OTHER": "වෙනත්"
+    },
+    "materialCategory": {
+      "CEMENT": "සිමෙන්ති",
+      "SAND": "වැලි",
+      "AGGREGATE": "ගල් / මෙටල්",
+      "STEEL": "යකඩ",
+      "BRICKS_BLOCKS": "ගඩොල් / බ්ලොක්",
+      "TIMBER": "දැව",
+      "HARDWARE": "හාඩ්වෙයාර්",
+      "FUEL": "ඉන්ධන",
+      "OTHER": "වෙනත්"
+    },
+    "purchasePaymentType": { "CASH": "මුදලට", "CREDIT": "ණයට" },
+    "expenseCategory": {
+      "FUEL": "ඉන්ධන",
+      "TRANSPORT": "ප්‍රවාහන",
+      "MEALS": "කෑම",
+      "EQUIPMENT_HIRE": "යන්ත්‍ර කුලිය",
+      "SUBCONTRACT": "උප කොන්ත්‍රාත්",
+      "SMALL_TOOLS": "කුඩා උපකරණ",
+      "UTILITIES": "විදුලි / ජල බිල්",
+      "PERMITS_FEES": "බලපත්‍ර සහ ගාස්තු",
+      "REPAIRS": "අලුත්වැඩියා",
+      "OFFICE": "කාර්යාල",
+      "OTHER": "වෙනත්"
+    },
+    "expensePaidBy": { "CASH": "මුදලින්", "BANK": "බැංකුවෙන්", "CREDIT": "ණයට" },
+    "payrollStatus": { "DRAFT": "කෙටුම්පත", "FINALIZED": "අවසන් කළා" }
+  }
+}
