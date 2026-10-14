@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import {
+  CopyObjectCommand,
   CreateBucketCommand,
   DeleteObjectCommand,
   GetObjectCommand,
@@ -9,6 +10,7 @@ import {
   S3Client,
   S3ServiceException,
 } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Env } from '../../config/env.js';
@@ -101,6 +103,50 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
       }),
     );
     return { etag: result.ETag };
+  }
+
+  /**
+   * Streams a body of unknown length to S3 (multipart upload in 5 MB parts, so big files are
+   * never held in memory). Aborting `signal` cancels the upload.
+   */
+  async uploadStream(input: {
+    key: string;
+    body: Readable;
+    contentType: string;
+    metadata?: Record<string, string>;
+    signal?: AbortSignal;
+  }): Promise<void> {
+    const upload = new Upload({
+      client: this.client,
+      params: {
+        Bucket: this.bucket,
+        Key: input.key,
+        Body: input.body,
+        ContentType: input.contentType,
+        Metadata: input.metadata,
+      },
+      queueSize: 2,
+      partSize: 5 * 1024 * 1024,
+      leavePartsOnError: false,
+    });
+    const onAbort = () => void upload.abort().catch(() => undefined);
+    input.signal?.addEventListener('abort', onAbort, { once: true });
+    try {
+      await upload.done();
+    } finally {
+      input.signal?.removeEventListener('abort', onAbort);
+    }
+  }
+
+  /** Server-side copy to a new key (used to restore an old document version). */
+  async copyObject(sourceKey: string, targetKey: string): Promise<void> {
+    await this.client.send(
+      new CopyObjectCommand({
+        Bucket: this.bucket,
+        Key: targetKey,
+        CopySource: `${this.bucket}/${sourceKey.split('/').map(encodeURIComponent).join('/')}`,
+      }),
+    );
   }
 
   async getObjectStream(key: string): Promise<{ stream: Readable; info: ObjectInfo }> {

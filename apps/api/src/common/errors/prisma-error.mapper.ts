@@ -47,7 +47,8 @@ export function findPgCode(err: unknown, depth = 0): string | undefined {
   return undefined;
 }
 
-function constraintName(err: unknown): string | undefined {
+/** The constraint / field names of a unique or FK violation, e.g. "code" or "workerId,effectiveFrom". */
+export function constraintName(err: unknown): string | undefined {
   const e = asErrorLike(err);
   const fromMeta = e?.meta?.constraint ?? e?.meta?.target ?? e?.meta?.field_name;
   if (typeof fromMeta === 'string') return fromMeta;

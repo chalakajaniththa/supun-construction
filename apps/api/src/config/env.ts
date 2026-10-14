@@ -28,6 +28,8 @@ export const envSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/, 'must be a valid S3 bucket name')
     .default('supun-docs'),
   GOTENBERG_URL: z.url(),
+  /** Largest document upload in megabytes. */
+  MAX_UPLOAD_MB: z.coerce.number().int().min(1).max(1024).default(50),
   SEED_SAMPLE_DATA: booleanString,
   COOKIE_SECURE: booleanString,
 });

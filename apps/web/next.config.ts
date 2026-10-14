@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: new URL('../..', import.meta.url).pathname,
   transpilePackages: ['@sc/shared'],
   poweredByHeader: false,
+  experimental: {
+    // Document uploads go through the /api rewrite. With a proxy (src/proxy.ts) present, Next
+    // buffers request bodies and cuts them at 10 MB by default; the API allows MAX_UPLOAD_MB (50).
+    proxyClientMaxBodySize: '60mb',
+    // Large uploads / downloads through the rewrite must not time out after 30 s.
+    proxyTimeout: 300_000,
+  },
   turbopack: {
     root: new URL('../..', import.meta.url).pathname,
     rules: {

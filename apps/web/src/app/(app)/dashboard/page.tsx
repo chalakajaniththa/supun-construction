@@ -90,7 +90,7 @@ export default async function DashboardPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-11 justify-start text-base">
-                <Link href="/documents">
+                <Link href="/documents?upload=1">
                   <FileUp aria-hidden />
                   {t('uploadDocument')}
                 </Link>

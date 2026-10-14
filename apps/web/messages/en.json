@@ -41,7 +41,15 @@
     "status": {
       "active": "Active",
       "inactive": "Inactive"
-    }
+    },
+    "choose": "Choose…",
+    "clear": "Clear",
+    "pickDate": "Pick a date",
+    "savedOk": "Saved.",
+    "deleted": "Deleted.",
+    "yes": "Yes",
+    "no": "No",
+    "comingSoonTab": "This part will be added in a later update."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -79,7 +87,8 @@
       "payroll": "Salary rates",
       "reminders": "Reminders",
       "billing": "Billing",
-      "password": "Password"
+      "password": "Password",
+      "clients": "Clients"
     },
     "company": {
       "title": "Company information",
@@ -178,20 +187,51 @@
       "PASSWORD_TOO_SHORT": "Use at least 8 characters.",
       "PASSWORDS_DO_NOT_MATCH": "The two new passwords are not the same.",
       "PASSWORD_SAME_AS_OLD": "The new password must be different from the current one.",
-      "DAYS_LIST": "Enter whole numbers between 1 and 365, separated by commas."
-    }
+      "DAYS_LIST": "Enter whole numbers between 1 and 365, separated by commas.",
+      "TOO_LONG": "This is too long.",
+      "INVALID_NIC": "Enter a NIC like 851234567V or 198512345678.",
+      "NIC_TAKEN": "Another worker already has this NIC number.",
+      "REG_NO_TAKEN": "Another machine or vehicle already has this number.",
+      "RATE_DATE_TAKEN": "There is already a rate from this date.",
+      "END_BEFORE_START": "This date cannot be before the start date.",
+      "EXPIRY_BEFORE_ISSUE": "The expiry date cannot be before the issue date.",
+      "DUPLICATE_CATEGORY": "Each category can be used only once."
+    },
+    "UNSUPPORTED_FILE_TYPE": "This type of file cannot be uploaded. Use PDF, photos (JPG, PNG, WEBP, HEIC), Word / Excel files, drawings (DWG, DXF) or ZIP.",
+    "FILE_TOO_LARGE": "The file is too big. Please choose a smaller file.",
+    "FILE_REQUIRED": "Please choose a file to upload.",
+    "OWNER_NOT_FOUND": "The project, machine or person for this document was not found.",
+    "CLIENT_HAS_PROJECTS": "This client still has projects, so it cannot be deleted."
   },
   "enums": {
-    "notificationSeverity": { "INFO": "Info", "WARNING": "Warning", "DANGER": "Urgent" },
-    "backupStatus": { "RUNNING": "Running", "SUCCESS": "Successful", "FAILED": "Failed" },
-    "backupTrigger": { "SCHEDULED": "Automatic", "MANUAL": "Manual" },
+    "notificationSeverity": {
+      "INFO": "Info",
+      "WARNING": "Warning",
+      "DANGER": "Urgent"
+    },
+    "backupStatus": {
+      "RUNNING": "Running",
+      "SUCCESS": "Successful",
+      "FAILED": "Failed"
+    },
+    "backupTrigger": {
+      "SCHEDULED": "Automatic",
+      "MANUAL": "Manual"
+    },
     "backupDestination": {
       "LOCAL": "This computer",
       "GDRIVE": "Google Drive",
       "BOTH": "This computer and Google Drive"
     },
-    "auditAction": { "CREATE": "Added", "UPDATE": "Changed", "DELETE": "Removed" },
-    "clientType": { "GOVERNMENT": "Government", "PRIVATE": "Private" },
+    "auditAction": {
+      "CREATE": "Added",
+      "UPDATE": "Changed",
+      "DELETE": "Removed"
+    },
+    "clientType": {
+      "GOVERNMENT": "Government",
+      "PRIVATE": "Private"
+    },
     "supplierType": {
       "MATERIAL": "Materials",
       "HARDWARE": "Hardware",
@@ -208,7 +248,10 @@
       "IRRIGATION": "Irrigation",
       "OTHER": "Other"
     },
-    "projectSource": { "GOVERNMENT_TENDER": "Government tender", "PRIVATE": "Private work" },
+    "projectSource": {
+      "GOVERNMENT_TENDER": "Government tender",
+      "PRIVATE": "Private work"
+    },
     "projectStatus": {
       "PLANNING": "Planning",
       "ONGOING": "Ongoing",
@@ -224,14 +267,22 @@
       "OVERHEAD": "Overhead",
       "OTHER": "Other"
     },
-    "variationStatus": { "PENDING": "Waiting", "APPROVED": "Approved", "REJECTED": "Rejected" },
+    "variationStatus": {
+      "PENDING": "Waiting",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
     "certificateStatus": {
       "DRAFT": "Draft",
       "SUBMITTED": "Submitted",
       "CERTIFIED": "Certified",
       "PAID": "Paid"
     },
-    "paymentMethod": { "CASH": "Cash", "CHEQUE": "Cheque", "BANK_TRANSFER": "Bank transfer" },
+    "paymentMethod": {
+      "CASH": "Cash",
+      "CHEQUE": "Cheque",
+      "BANK_TRANSFER": "Bank transfer"
+    },
     "clientPaymentKind": {
       "IPC_PAYMENT": "Bill payment",
       "ADVANCE": "Advance",
@@ -244,7 +295,11 @@
       "ADVANCE_PAYMENT_GUARANTEE": "Advance payment guarantee",
       "RETENTION_GUARANTEE": "Retention guarantee"
     },
-    "bondStatus": { "ACTIVE": "Active", "RELEASED": "Released", "EXPIRED": "Expired" },
+    "bondStatus": {
+      "ACTIVE": "Active",
+      "RELEASED": "Released",
+      "EXPIRED": "Expired"
+    },
     "documentOwnerType": {
       "COMPANY": "Company",
       "PROJECT": "Project",
@@ -285,15 +340,24 @@
       "SUPERVISOR": "Supervisor",
       "OTHER": "Other"
     },
-    "workerType": { "DAILY": "Daily paid", "PERMANENT": "Permanent" },
-    "allocationStatus": { "PLANNED": "Planned", "CANCELLED": "Cancelled" },
+    "workerType": {
+      "DAILY": "Daily paid",
+      "PERMANENT": "Permanent"
+    },
+    "allocationStatus": {
+      "PLANNED": "Planned",
+      "CANCELLED": "Cancelled"
+    },
     "attendanceStatus": {
       "PRESENT": "Present",
       "HALF_DAY": "Half day",
       "ABSENT": "Absent",
       "LEAVE": "Leave"
     },
-    "advanceStatus": { "OPEN": "Not yet recovered", "RECOVERED": "Recovered" },
+    "advanceStatus": {
+      "OPEN": "Not yet recovered",
+      "RECOVERED": "Recovered"
+    },
     "assetCategory": {
       "JCB_BACKHOE": "JCB / backhoe",
       "EXCAVATOR": "Excavator",
@@ -308,14 +372,21 @@
       "TOOL": "Tool",
       "OTHER": "Other"
     },
-    "assetOwnership": { "OWNED": "Own", "HIRED_IN": "Hired" },
+    "assetOwnership": {
+      "OWNED": "Own",
+      "HIRED_IN": "Hired"
+    },
     "assetStatus": {
       "AVAILABLE": "Available",
       "IN_USE": "In use",
       "UNDER_REPAIR": "Under repair",
       "DISPOSED": "Disposed"
     },
-    "meterType": { "HOURS": "Engine hours", "KM": "Kilometres", "NONE": "No meter" },
+    "meterType": {
+      "HOURS": "Engine hours",
+      "KM": "Kilometres",
+      "NONE": "No meter"
+    },
     "maintenanceType": {
       "SERVICE": "Service",
       "REPAIR": "Repair",
@@ -333,7 +404,10 @@
       "FUEL": "Fuel",
       "OTHER": "Other"
     },
-    "purchasePaymentType": { "CASH": "Cash", "CREDIT": "Credit" },
+    "purchasePaymentType": {
+      "CASH": "Cash",
+      "CREDIT": "Credit"
+    },
     "expenseCategory": {
       "FUEL": "Fuel",
       "TRANSPORT": "Transport",
@@ -347,7 +421,358 @@
       "OFFICE": "Office",
       "OTHER": "Other"
     },
-    "expensePaidBy": { "CASH": "Cash", "BANK": "Bank", "CREDIT": "Credit" },
-    "payrollStatus": { "DRAFT": "Draft", "FINALIZED": "Finalized" }
+    "expensePaidBy": {
+      "CASH": "Cash",
+      "BANK": "Bank",
+      "CREDIT": "Credit"
+    },
+    "payrollStatus": {
+      "DRAFT": "Draft",
+      "FINALIZED": "Finalized"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "The people and offices you work for.",
+    "add": "Add client",
+    "addTitle": "Add a client",
+    "editTitle": "Edit client",
+    "edit": "Edit",
+    "formDescription": "Government office, school society, company or private person.",
+    "empty": "No clients yet. Add the first one.",
+    "allTypes": "All clients",
+    "deleteConfirm": "Delete the client \"{name}\"? It will be hidden from lists, but kept in the history.",
+    "fields": {
+      "name": "Name",
+      "type": "Type",
+      "contactPerson": "Contact person",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "notes": "Notes",
+      "projects": "Projects",
+      "actions": "Actions"
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "All your sites and contracts.",
+    "add": "New project",
+    "addTitle": "New project",
+    "addSubtitle": "Fill in what you know now. You can change it later.",
+    "editTitle": "Edit project",
+    "backToList": "All projects",
+    "manageClients": "Manage clients",
+    "newClient": "New client",
+    "empty": "No projects yet. Add your first project.",
+    "allStatuses": "All statuses",
+    "allTypes": "All types",
+    "allSources": "Government & private",
+    "deleteConfirm": "Delete the project \"{name}\"? It will be hidden from lists, but kept in the history.",
+    "months": "{n} months",
+    "tabs": {
+      "overview": "Overview",
+      "boq": "BOQ & progress",
+      "bills": "Bills & payments",
+      "variations": "Variations & time",
+      "bonds": "Bonds",
+      "costs": "Costs",
+      "team": "Team & machines",
+      "documents": "Documents"
+    },
+    "sections": {
+      "basic": "Project details",
+      "basicHint": "Name, type and who the work is for.",
+      "contract": "Contract",
+      "contractHint": "Contract value, retention and advance. Retention starts with your billing settings.",
+      "dates": "Dates"
+    },
+    "fields": {
+      "code": "Project code",
+      "name": "Project name",
+      "type": "Type of work",
+      "source": "Government or private",
+      "status": "Status",
+      "client": "Client",
+      "location": "Location",
+      "description": "Description",
+      "contractValue": "Contract value",
+      "totalBudget": "Total budget",
+      "contractNo": "Contract number",
+      "tenderNo": "Tender number",
+      "retentionPct": "Retention held from each bill (%)",
+      "retentionCapPct": "Retention limit (% of contract)",
+      "advanceAmount": "Mobilization advance",
+      "advanceRecoveryPct": "Advance recovered from each bill (%)",
+      "dlpMonths": "Defects liability period (months)",
+      "progressPct": "Work done (%)",
+      "progressHint": "Only for projects without a BOQ.",
+      "supervisor": "Site supervisor",
+      "startDate": "Start date",
+      "plannedEndDate": "Planned finish date",
+      "revisedEndDate": "New finish date (extension)",
+      "actualEndDate": "Actual finish date",
+      "dates": "Dates",
+      "notes": "Notes"
+    },
+    "budget": {
+      "title": "Budget",
+      "description": "How much you expect to spend on each part of the work. Only you see this.",
+      "category": "Category",
+      "amount": "Amount",
+      "notes": "Notes",
+      "total": "Total budget",
+      "save": "Save budget",
+      "saved": "Budget saved."
+    }
+  },
+  "workers": {
+    "title": "Workers",
+    "subtitle": "Everyone who works for you, with their pay.",
+    "add": "Add worker",
+    "addTitle": "Add a worker",
+    "addSubtitle": "The starting pay is saved as the first pay rate.",
+    "editTitle": "Edit worker",
+    "backToList": "All workers",
+    "empty": "No workers yet. Add the first one.",
+    "allTypes": "Daily & permanent",
+    "allSkills": "All skills",
+    "onlyActive": "Working now",
+    "onlyInactive": "Not working now",
+    "everyone": "Everyone",
+    "perDay": "{amount} / day",
+    "perMonth": "{amount} / month",
+    "deleteConfirm": "Delete the worker \"{name}\"? They will be hidden from lists, but kept in the history.",
+    "tabs": {
+      "profile": "Profile",
+      "rates": "Pay rates",
+      "attendance": "Attendance",
+      "advances": "Advances",
+      "payslips": "Payslips",
+      "documents": "Documents"
+    },
+    "sections": {
+      "personal": "Personal details",
+      "work": "Work",
+      "startingPay": "Starting pay",
+      "startingPayHint": "Later pay changes are added under \"Pay rates\".",
+      "bank": "EPF and bank"
+    },
+    "fields": {
+      "code": "Code",
+      "fullName": "Full name",
+      "nameSinhala": "Name in Sinhala",
+      "nic": "NIC number",
+      "nicHint": "Old (851234567V) or new (198512345678). Leave empty if not known.",
+      "phone": "Phone",
+      "address": "Address",
+      "dateOfBirth": "Date of birth",
+      "emergencyContact": "Emergency contact",
+      "skill": "Skill",
+      "type": "Pay type",
+      "typeHint": "Daily paid: paid for each day worked. Permanent: monthly salary with EPF / ETF.",
+      "joinedDate": "Joined on",
+      "leftDate": "Left on",
+      "active": "Working now",
+      "activeHint": "Turn off when the worker leaves. Their history is kept.",
+      "currentRate": "Current pay",
+      "dailyRate": "Daily rate",
+      "monthlySalary": "Monthly salary",
+      "otHourlyRate": "Overtime rate per hour",
+      "otHint": "Leave empty to calculate it from the normal pay.",
+      "epfNo": "EPF number",
+      "bankName": "Bank and branch",
+      "bankAccountNo": "Bank account number",
+      "notes": "Notes"
+    },
+    "rates": {
+      "title": "Pay rate history",
+      "description": "The pay on any day is the latest rate that started on or before that day.",
+      "add": "Add new rate",
+      "addDescription": "For a pay rise or change. Older rates are kept for past salaries.",
+      "added": "New pay rate saved.",
+      "effectiveFrom": "Starts from",
+      "dailyRate": "Daily rate",
+      "monthlySalary": "Monthly salary",
+      "otHourlyRate": "Overtime per hour",
+      "otHint": "Leave empty to calculate it from the normal pay.",
+      "otDefault": "Calculated",
+      "current": "Current",
+      "future": "Upcoming",
+      "deleteConfirm": "Delete the pay rate starting {date}? Use this only to remove a mistake."
+    }
+  },
+  "assets": {
+    "title": "Machines & Vehicles",
+    "subtitle": "Machines, vehicles and tools, with their papers.",
+    "add": "Add machine",
+    "addTitle": "Add a machine or vehicle",
+    "addSubtitle": "Vehicles get reminders for licence, insurance and other papers.",
+    "editTitle": "Edit machine",
+    "backToList": "All machines",
+    "empty": "No machines or vehicles yet. Add the first one.",
+    "allCategories": "All kinds",
+    "allStatuses": "All statuses",
+    "deleteConfirm": "Delete \"{name}\"? It will be hidden from lists, but kept in the history.",
+    "tabs": {
+      "info": "Details",
+      "usage": "Usage",
+      "maintenance": "Service & repairs",
+      "allocations": "Bookings",
+      "documents": "Documents"
+    },
+    "sections": {
+      "basic": "Machine details",
+      "registration": "Registration and purchase",
+      "meter": "Meter, service and cost",
+      "meterHint": "Machines are serviced by engine hours, vehicles by kilometres. The rates are used for project costs."
+    },
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "category": "Kind",
+      "status": "Status",
+      "make": "Make",
+      "model": "Model",
+      "yearOfManufacture": "Year made",
+      "isVehicle": "This is a road vehicle",
+      "isVehicleHint": "Suggests revenue licence, insurance, emission test and fitness documents.",
+      "registrationNo": "Registration number",
+      "chassisNo": "Chassis number",
+      "engineNo": "Engine number",
+      "ownership": "Own or hired",
+      "purchaseDate": "Bought on",
+      "purchaseCost": "Purchase price",
+      "meterType": "Meter",
+      "currentMeter": "Meter reading now",
+      "serviceIntervalMeter": "Service every",
+      "lastServiceMeter": "Meter at last service",
+      "internalRatePerHour": "Cost to projects per hour",
+      "internalRatePerDay": "Cost to projects per day",
+      "nextExpiry": "Papers",
+      "notes": "Notes"
+    }
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "subtitle": "Shops, dealers and subcontractors you buy from.",
+    "add": "Add supplier",
+    "addTitle": "Add a supplier",
+    "editTitle": "Edit supplier",
+    "formDescription": "A shop, dealer, fuel station or subcontractor.",
+    "backToList": "All suppliers",
+    "empty": "No suppliers yet. Add the first one.",
+    "allTypes": "All types",
+    "deleteConfirm": "Delete the supplier \"{name}\"? It will be hidden from lists, but kept in the history.",
+    "tabs": {
+      "info": "Details",
+      "statement": "Statement",
+      "documents": "Documents"
+    },
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "phone": "Phone",
+      "address": "Address",
+      "notes": "Notes"
+    }
+  },
+  "purchases": {
+    "title": "Purchases & Store",
+    "subtitle": "What you buy, what is in the store, and the list of materials.",
+    "tabs": {
+      "purchases": "Purchases",
+      "store": "Store",
+      "materials": "Materials"
+    }
+  },
+  "materials": {
+    "add": "Add material",
+    "addTitle": "Add a material",
+    "editTitle": "Edit material",
+    "edit": "Edit",
+    "formDescription": "Materials you buy, like cement, sand or steel.",
+    "empty": "No materials yet. Add the first one.",
+    "allCategories": "All categories",
+    "deleteConfirm": "Delete the material \"{name}\"? It will be hidden from lists, but kept in the history.",
+    "fields": {
+      "name": "Name",
+      "nameSinhala": "Name in Sinhala",
+      "category": "Category",
+      "unit": "Unit",
+      "actions": "Actions"
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Company papers and every document in the system.",
+    "companyHint": "Company papers such as the CIDA registration, certificates and insurance.",
+    "empty": "No documents yet. Upload the first one.",
+    "allOwners": "Everything",
+    "allCategories": "All kinds",
+    "expiringFilter": "Expiry",
+    "expiringAny": "Any expiry",
+    "expiringWithin": "Expired or expiring within {days} days",
+    "noPreview": "This file cannot be shown here. Download it to open it.",
+    "versionNo": "Version {n}",
+    "deleteConfirm": "Delete the document \"{title}\"? It will be hidden, but its files are kept.",
+    "tabs": {
+      "company": "Company documents",
+      "all": "All documents"
+    },
+    "fields": {
+      "title": "Title",
+      "owner": "Belongs to",
+      "category": "Kind",
+      "version": "Version",
+      "uploaded": "Uploaded",
+      "expiry": "Expiry",
+      "actions": "Actions",
+      "issueDate": "Issue date",
+      "expiryDate": "Expiry date",
+      "expiryHint": "You will get a reminder before this date.",
+      "note": "Note"
+    },
+    "actions": {
+      "upload": "Upload document",
+      "newVersion": "Upload new version",
+      "history": "History",
+      "preview": "View",
+      "download": "Download",
+      "restore": "Make this the current version"
+    },
+    "upload": {
+      "title": "Upload a document",
+      "description": "Choose the file, then say what it is. Dates are optional.",
+      "dropHere": "Drop a file here, or click to choose one",
+      "allowed": "PDF, photos, Word / Excel, drawings or ZIP — up to {mb} MB",
+      "submit": "Upload",
+      "uploading": "Uploading… {pct}%",
+      "uploadingShort": "Uploading…",
+      "done": "Document uploaded."
+    },
+    "version": {
+      "title": "Upload a new version",
+      "description": "The new file becomes the current version of \"{title}\". Older versions stay in the history.",
+      "submit": "Upload new version",
+      "done": "New version uploaded."
+    },
+    "history": {
+      "title": "Version history",
+      "current": "Current",
+      "restoredFrom": "Copy of version {n}",
+      "uploaded": "uploaded {date}",
+      "issued": "Issued {date}",
+      "restoreTitle": "Use version {n} again?",
+      "restoreText": "A copy of this version becomes the newest version. Nothing is deleted.",
+      "restored": "The old version is current again."
+    },
+    "expiry": {
+      "expired": "Expired {date}",
+      "today": "Expires today",
+      "soon": "{date} · {days} days left",
+      "ok": "Valid to {date}"
+    }
   }
 }

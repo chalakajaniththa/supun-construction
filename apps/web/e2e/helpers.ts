@@ -31,3 +31,42 @@ export async function setLocale(page: Page, locale: 'en' | 'si'): Promise<void> 
   }
   await expect(page.locator('html')).toHaveAttribute('lang', locale);
 }
+
+/** Picks an option of a Radix select found by its label. */
+export async function selectOption(
+  page: Page,
+  label: string | RegExp,
+  option: string,
+): Promise<void> {
+  await page.getByLabel(label, { exact: typeof label === 'string' }).click();
+  await page.getByRole('option', { name: option, exact: true }).click();
+}
+
+/** "15/10/2026" — the calendar's data-day format for the en-GB test browser. */
+export function calendarDay(date: Date): string {
+  return date.toLocaleDateString('en-GB');
+}
+
+/** Opens a DateInput by its label and clicks a day (navigating back `monthsBack` months first). */
+export async function pickDate(
+  page: Page,
+  label: string,
+  date: Date,
+  monthsBack = 0,
+): Promise<void> {
+  await page.getByLabel(label, { exact: true }).click();
+  for (let i = 0; i < monthsBack; i++) {
+    await page.getByRole('button', { name: /previous month/i }).click();
+  }
+  await page
+    .locator(`button[data-day="${calendarDay(date)}"]`)
+    .first()
+    .click();
+}
+
+/** A small valid PDF for uploads. */
+export function samplePdf(text: string): Buffer {
+  return Buffer.from(
+    `%PDF-1.4\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n2 0 obj << /Type /Pages /Kids [] /Count 0 >> endobj\n% ${text}\ntrailer << /Root 1 0 R >>\n%%EOF\n`,
+  );
+}

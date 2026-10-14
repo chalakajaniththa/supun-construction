@@ -13,6 +13,11 @@ export const ERROR_CODES = [
   'PAYROLL_LOCKED',
   'INSUFFICIENT_STOCK',
   'UNKNOWN_SETTING',
+  'UNSUPPORTED_FILE_TYPE',
+  'FILE_TOO_LARGE',
+  'FILE_REQUIRED',
+  'OWNER_NOT_FOUND',
+  'CLIENT_HAS_PROJECTS',
   'INTERNAL_ERROR',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

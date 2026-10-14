@@ -56,6 +56,6 @@ test.describe('login & logout', () => {
     await page.locator('#password').fill(ADMIN.password);
     await page.getByTestId('login-submit').click();
     await expect(page).toHaveURL(/\/projects$/);
-    await expect(page.getByRole('heading', { name: 'Coming soon' })).toBeVisible();
+    await expect(page.getByTestId('page-title')).toHaveText('Projects');
   });
 });

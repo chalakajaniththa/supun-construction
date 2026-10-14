@@ -33,7 +33,8 @@ export interface DataTableProps<T extends RowData> {
   search?: string;
   onSearchChange?: (search: string) => void;
   isLoading?: boolean;
-  emptyMessage?: string;
+  /** Text or a node (e.g. an EmptyState with an "Add" button). */
+  emptyMessage?: React.ReactNode;
   getRowId?: (row: T) => string;
   onRowClick?: (row: T) => void;
   toolbar?: React.ReactNode;
@@ -133,7 +134,7 @@ export function DataTable<T extends RowData>({
                   className={cn('text-[0.95rem]', onRowClick && 'cursor-pointer')}
                 >
                   {row.getAllCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
+                    <TableCell key={cell.id} className="py-3 whitespace-normal">
                       <table.FlexRender cell={cell} />
                     </TableCell>
                   ))}

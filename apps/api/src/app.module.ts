@@ -7,10 +7,17 @@ import { SerializeInterceptor } from './common/money/serialize.interceptor.js';
 import { PrismaModule } from './common/prisma/prisma.module.js';
 import { StorageModule } from './common/storage/storage.module.js';
 import { validateEnv } from './config/env.js';
+import { AssetsModule } from './modules/assets/assets.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { ClientsModule } from './modules/clients/clients.module.js';
+import { DocumentsModule } from './modules/documents/documents.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { MaterialsModule } from './modules/materials/materials.module.js';
+import { ProjectsModule } from './modules/projects/projects.module.js';
 import { SettingsModule } from './modules/settings/settings.module.js';
+import { SuppliersModule } from './modules/suppliers/suppliers.module.js';
+import { WorkersModule } from './modules/workers/workers.module.js';
 
 @Module({
   imports: [
@@ -21,6 +28,13 @@ import { SettingsModule } from './modules/settings/settings.module.js';
     SettingsModule,
     AuditModule,
     HealthModule,
+    ClientsModule,
+    ProjectsModule,
+    WorkersModule,
+    AssetsModule,
+    SuppliersModule,
+    MaterialsModule,
+    DocumentsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

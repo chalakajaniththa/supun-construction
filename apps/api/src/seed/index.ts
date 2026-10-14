@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import { pathToFileURL } from 'node:url';
+import { ConfigService } from '@nestjs/config';
 import { createPrismaClient } from '../common/prisma/prisma.service.js';
+import { StorageService } from '../common/storage/storage.service.js';
 import { validateEnv } from '../config/env.js';
 import { seedBase } from './base.js';
 import { seedSampleData } from './sample-data.js';
@@ -9,6 +11,7 @@ import { seedSampleData } from './sample-data.js';
  * Container start: `prisma migrate deploy && node dist/seed/index.js && node dist/main.js`.
  * 1. base seed (admin + default settings) — always, idempotent
  * 2. sample data — only when SEED_SAMPLE_DATA=true and the DB has no projects
+ *    (clients, projects + budgets, workers + rates, assets, suppliers, materials, documents)
  */
 export async function runSeed(): Promise<void> {
   const env = validateEnv(process.env);
@@ -26,9 +29,13 @@ export async function runSeed(): Promise<void> {
     if (env.SEED_SAMPLE_DATA) {
       const projects = await prisma.project.count();
       if (projects === 0) {
+        const storage = new StorageService(new ConfigService(env));
+        await storage.ensureBucket();
         const loaded = await seedSampleData(prisma, {
           fresh: base.createdSettings.includes('company'),
+          storage,
         });
+        storage.onModuleDestroy();
         console.warn(
           loaded ? '[seed] sample data loaded' : '[seed] sample data: nothing new to add',
         );
