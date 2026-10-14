@@ -15,7 +15,7 @@
 | Step | Status | Date | Commit |
 |---|---|---|---|
 | 1 — Foundation | ✅ Done | 2026-10-14 | bbd7eaa |
-| 2 — Master data & documents | ✅ Done | 2026-10-15 | (see Step 2 section) |
+| 2 — Master data & documents | ✅ Done | 2026-10-15 | 411fde4 |
 | 3 — Daily operations | ⬜ Not started | | |
 | 4 — Money | ⬜ Not started | | |
 | 5 — Dashboard, reminders & reports | ⬜ Not started | | |
