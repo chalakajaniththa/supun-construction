@@ -4,8 +4,6 @@ import type { PayrollLineDto, PayrollRunDto, PayrollRunSummaryDto } from '@sc/sh
 import {
   ChevronLeft,
   ChevronRight,
-  FileSpreadsheet,
-  FileText,
   Lock,
   Pencil,
   RefreshCw,
@@ -47,6 +45,7 @@ import { useApi, useInvalidate } from '@/hooks/use-resource';
 import { ApiError, api } from '@/lib/api-client';
 import { toDec } from '@/lib/decimal';
 import { formatMoney, formatMonth, formatQty, todayInColombo } from '@/lib/format';
+import { ReportDownloadButton } from '@/components/reports/download-button';
 import { OpenAdvances } from './open-advances';
 
 /** "2026-10" ± n months */
@@ -444,26 +443,30 @@ export function PayrollView() {
                 {t('sheetTitle', { month: formatMonth(month) })}
               </CardTitle>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-11 text-base"
-                  disabled
-                  title={t('exportSoon')}
-                >
-                  <FileText aria-hidden />
-                  {t('payslipsPdf')}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-11 text-base"
-                  disabled
-                  title={t('exportSoon')}
-                >
-                  <FileSpreadsheet aria-hidden />
-                  {t('sheetExcel')}
-                </Button>
+                <ReportDownloadButton
+                  reportId="payslips"
+                  format="pdf"
+                  params={{ month }}
+                  label={t('payslipsPdf')}
+                />
+                <ReportDownloadButton
+                  reportId="payroll-sheet"
+                  format="pdf"
+                  params={{ month }}
+                  label={t('sheetPdf')}
+                />
+                <ReportDownloadButton
+                  reportId="payroll-sheet"
+                  format="xlsx"
+                  params={{ month }}
+                  label={t('sheetExcel')}
+                />
+                <ReportDownloadButton
+                  reportId="epf-etf"
+                  format="pdf"
+                  params={{ month }}
+                  label={t('epfPdf')}
+                />
               </div>
             </CardHeader>
             <CardContent className="px-3">

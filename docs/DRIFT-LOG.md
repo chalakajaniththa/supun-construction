@@ -18,7 +18,7 @@
 | 2 — Master data & documents | ✅ Done | 2026-10-15 | 411fde4 |
 | 3 — Daily operations | ✅ Done | 2026-10-15 | feba827 |
 | 4 — Money | ✅ Done | 2026-10-15 | dd7279d |
-| 5 — Dashboard, reminders & reports | ⬜ Not started | | |
+| 5 — Dashboard, reminders & reports | 🟨 Partial (Playwright, full-stack check, seed, drift details left) | 2026-10-15 | see git log |
 | 6 — Backup, packaging & polish | ⬜ Not started | | |
 
 (Status values: ⬜ Not started · 🟨 In progress / partial · ✅ Done)
@@ -367,3 +367,44 @@
 
 ### Needs human (cannot be done by the agent)
 - Nothing for Step 4.
+
+## Step 5 — Dashboard, reminders & reports (2026-10-15)
+
+**Result:** 🟨 Partial — backend, web UI, unit + API e2e tests done; Playwright specs, full-stack Docker check, visual pass and final drift details NOT done (the session ran out of usage).
+
+### Versions pinned (added)
+- API: `@nestjs/schedule` 12.0.2, `handlebars` 4.7.9, `nodemailer` 10.0.12 (ships its own types), `intl-messageformat` 11.2.15. Web: `recharts` 3.10.1.
+- Fonts: Noto Sans + Noto Sans Sinhala (Regular/Bold TTF, notofonts repo) + OFL.txt in `apps/api/src/reports/templates/fonts/` (copied to dist by `nest-cli.json` assets).
+
+### Decisions / deviations
+- **Report labels:** the API reads the web's `apps/web/messages/{en,si}.json` (`common/i18n/i18n.service.ts`, ICU via intl-messageformat). Docker copies them to `/app/messages` (`docker/api.Dockerfile`). Locale = `?locale=` then the `NEXT_LOCALE` cookie.
+- **Reminders** (`modules/reminders`): pure rules in `calc/rules.ts`; `ReminderScanner` runs at 06:00 Asia/Colombo, on start (`REMINDERS_ON_START`, false in `.env.test`), on `POST /reminders/run`, and after every successful POST/PATCH/PUT/DELETE under /documents, /bonds, /projects, /assets, /daily-entry, /settings (`ReminderTriggerInterceptor`, awaited, scans serialised). Dedupe keys: `doc:{docId}:{versionId}:{step}`, `bond:{id}:{expiry}:{step}`, `asset:{id}:service:{lastServiceMeter}:{state}`, `project:{id}:deadline:{end}:{step}`. Expired projects past deadline are DANGER. **BOND_COPY documents are skipped** (the bond itself reminds). "Days left" is computed from `dueDate` at display time (shared `notificationValues`).
+- Optional e-mail digest (`digest.service.ts`, English) when `SMTP_HOST` is set; env `SMTP_*` added.
+- **Dashboard** `GET /dashboard`: spent = project costs (`CostingService.monthlyActuals`, loads once per project, slices per month with pure `sliceCostingInput`) + expenses without a project; workers today = attendance PRESENT/HALF else today's allocations; attention = top 8 open notifications + health flags (not stored). ~0.45 s on sample data. Backup = `null` (Step 6). KPI money shows whole rupees (`formatMoneyWhole`), exact on hover.
+- **Reports** (`modules/reports`): builders (pure, `builders/*.ts`) → `ReportDoc` → PDF (`render/pdf-renderer.ts`, Handlebars `src/reports/templates/layout.hbs` + `footer.hbs` page numbers, fonts base64, Gotenberg A4) or Excel (`render/xlsx-renderer.ts`). R3 payslips and R9 IPC are PDF only. Catalogue `REPORTS` + param schemas in `packages/shared/src/schemas/insights.ts`. R11 receivable/retention are "as of today". Empty date range = this month for R6/R7, all time for R1/R8.
+- Detail pages honour `?tab=` (`useTabParam` in `detail-page.tsx`) so reminder links open the right tab.
+- Export buttons now live on Payroll, Project → Costs, Bills (printer icon, non-draft), Supplier statement, Worker → Payslips.
+- i18n parity test now parses ICU arguments (`icuArgs`) — the old `{word}` regex counted plural branch text as variables.
+- Sinhala pass: unified site = වැඩබිම, service = සර්විස්, company = සමාගම, e-mail = ඊමේල්, records ≠ වාර්තා; README translation note added.
+- New error codes: `REPORT_NOT_FOUND, REPORT_FORMAT_NOT_AVAILABLE, NO_PAYROLL_FOR_MONTH, PDF_FAILED`.
+
+### Schema changes
+- None.
+
+### Gotchas
+- Never `pkill -f dist/main.js` (killed the shell again) — stop by port.
+- Handlebars `../` inside `{{#each sections}}{{#if}}` reaches the root — verify the payslip mini-header renders after page breaks (not checked visually yet).
+
+### Test summary (so far)
+- Unit: 476 passed (shared 87 · api 350 · web 39). API e2e: `test/insights.e2e-spec.ts` 33 passed (other e2e files not re-run this step). Playwright: not run.
+
+### Unfinished (next session must do)
+- [ ] Playwright spec for step 5 (dashboard 4 KPIs/attention/projects, bell count = list, open notification → entity, R1 PDF + R2 Excel download events, Sinhala dashboard) + add new pages to `e2e/visual.spec.ts`; run all specs.
+- [ ] Re-run all API e2e files (regression) and `pnpm -r lint` / `typecheck` after the last message edits.
+- [ ] `docker compose down -v && docker compose up -d --build --wait` (Dockerfile now copies messages) and check `docker compose logs api` (reminder scan on start).
+- [ ] Visual check EN/SI at 1280/1440 (dashboard was checked in SI at 1280; reports panel, notifications page, payroll buttons not yet).
+- [ ] Seed: notifications come from the start-up scan; consider making a sample notification read/resolved.
+- [ ] Final commit message `feat(step-5): dashboard, reminders and reports` once complete; update the Status row.
+
+### Needs human
+- SMTP credentials for the optional e-mail digest (optional).

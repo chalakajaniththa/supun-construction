@@ -2,7 +2,9 @@
 
 import { ArrowLeft, Construction, Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -106,4 +108,21 @@ export function ComingSoonPanel() {
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * The open tab of a detail page. Starts from `?tab=` (links from reminders, e.g. an asset's
+ * documents) and follows it when the link changes while the page is open.
+ */
+export function useTabParam<T extends string>(tabs: readonly T[], fallback: T) {
+  const params = useSearchParams();
+  const fromUrl = params.get('tab');
+  const valid = (v: string | null): v is T => v !== null && (tabs as readonly string[]).includes(v);
+  const [tab, setTab] = useState<T>(valid(fromUrl) ? fromUrl : fallback);
+  const [seen, setSeen] = useState(fromUrl);
+  if (fromUrl !== seen) {
+    setSeen(fromUrl);
+    if (valid(fromUrl)) setTab(fromUrl);
+  }
+  return [tab, setTab] as const;
 }

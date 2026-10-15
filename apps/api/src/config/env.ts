@@ -1,9 +1,11 @@
 import { z } from 'zod';
 
-const booleanString = z
-  .enum(['true', 'false', '1', '0', ''])
-  .default('false')
-  .transform((v) => v === 'true' || v === '1');
+const boolWithDefault = (def: 'true' | 'false') =>
+  z
+    .enum(['true', 'false', '1', '0', ''])
+    .default(def)
+    .transform((v) => (v === '' ? def === 'true' : v === 'true' || v === '1'));
+const booleanString = boolWithDefault('false');
 
 /** Environment schema — the API refuses to start when a required variable is missing or invalid. */
 export const envSchema = z.object({
@@ -32,6 +34,17 @@ export const envSchema = z.object({
   MAX_UPLOAD_MB: z.coerce.number().int().min(1).max(1024).default(50),
   SEED_SAMPLE_DATA: booleanString,
   COOKIE_SECURE: booleanString,
+  /** Run the reminder scan once when the API starts (the daily 06:00 job runs regardless). */
+  REMINDERS_ON_START: boolWithDefault('true'),
+  /** Where en.json / si.json live (default: ./messages or ../web/messages). */
+  MESSAGES_DIR: z.string().optional(),
+  /** Optional daily reminder e-mail. Leave SMTP_HOST empty to switch it off. */
+  SMTP_HOST: z.string().trim().optional(),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+  SMTP_SECURE: booleanString,
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

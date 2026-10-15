@@ -3,10 +3,19 @@ import {
   formatDate,
   formatDateTime,
   formatMoney,
+  formatMoneyWhole,
   formatPercent,
   formatQty,
   todayInColombo,
 } from './format';
+
+describe('formatMoneyWhole', () => {
+  it('rounds to whole rupees', () => {
+    expect(formatMoneyWhole('8801064.89')).toBe('Rs. 8,801,065');
+    expect(formatMoneyWhole('-0.4')).toBe('Rs. 0');
+    expect(formatMoneyWhole(null)).toBe('—');
+  });
+});
 
 describe('formatMoney', () => {
   it.each([

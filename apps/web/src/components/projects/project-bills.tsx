@@ -34,6 +34,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { ReportDownloadButton } from '@/components/reports/download-button';
 import {
   Select,
   SelectContent,
@@ -631,6 +632,7 @@ function SummaryCards({ s }: { s: FinanceSummaryDto }) {
 export function ProjectBills({ project }: { project: ProjectDetailDto }) {
   const t = useTranslations('bills');
   const tp = useTranslations('payments');
+  const tr = useTranslations('reports');
   const enumLabel = useEnumLabel();
   const invalidate = useInvalidate();
   const { data: summary } = useApi<FinanceSummaryDto>(
@@ -763,6 +765,16 @@ export function ProjectBills({ project }: { project: ProjectDetailDto }) {
                             >
                               {t('actions.backToDraft')}
                             </Button>
+                          ) : null}
+                          {b.status !== 'DRAFT' ? (
+                            <ReportDownloadButton
+                              reportId="ipc"
+                              format="pdf"
+                              params={{ projectId: project.id, certificateId: b.id }}
+                              label={tr('print')}
+                              iconOnly
+                              testId={`bill-print-${b.number}`}
+                            />
                           ) : null}
                           <Button
                             variant="ghost"

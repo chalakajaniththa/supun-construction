@@ -22,7 +22,9 @@ export type Resource =
   | 'daily-entry'
   | 'attendance'
   | 'payroll'
-  | 'bonds';
+  | 'bonds'
+  | 'notifications'
+  | 'dashboard';
 
 export type ListParams = Record<string, string | number | boolean | undefined | null>;
 

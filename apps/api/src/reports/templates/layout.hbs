@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<title>{{title}}</title>
+<style>
+{{{fontsCss}}}
+@page { size: A4 {{#if landscape}}landscape{{else}}portrait{{/if}}; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans', 'Noto Sans Sinhala', sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  color: #1a1f2b;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  border-bottom: 2px solid #1d4ed8; padding-bottom: 8px; margin-bottom: 10px; }
+.company { display: flex; gap: 10px; align-items: center; }
+.company img { max-height: 48px; max-width: 120px; }
+.company-name { font-size: 14pt; font-weight: 700; color: #1d4ed8; }
+.company-line { font-size: 8.5pt; color: #4b5563; }
+.meta { text-align: right; font-size: 8.5pt; color: #4b5563; }
+h1 { font-size: 15pt; margin: 4px 0 0; }
+.subtitle { font-size: 10.5pt; color: #374151; margin: 2px 0 6px; }
+.filters { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 8.5pt; color: #374151;
+  background: #f3f4f6; border-radius: 4px; padding: 5px 8px; margin: 6px 0 10px; }
+.filters b { font-weight: 700; color: #111827; }
+section { margin: 0 0 14px; }
+section.break { break-before: page; }
+h2 { font-size: 11pt; margin: 0 0 4px; color: #111827; }
+.note { font-size: 8.5pt; color: #6b7280; margin: 0 0 4px; }
+table { width: 100%; border-collapse: collapse; }
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th { background: #e5edff; color: #1e3a8a; font-weight: 700; text-align: left;
+  padding: 4px 5px; border: 1px solid #c7d2fe; font-size: 8.5pt; vertical-align: bottom; }
+td { padding: 3px 5px; border: 1px solid #e5e7eb; vertical-align: top; }
+tbody tr:nth-child(even) td { background: #fafafa; }
+td.r, th.r { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.c, th.c { text-align: center; }
+td.d { white-space: nowrap; }
+.mini-header { display: flex; justify-content: space-between; font-size: 8.5pt; color: #1d4ed8;
+  border-bottom: 1px solid #c7d2fe; padding-bottom: 3px; margin-bottom: 8px; }
+tfoot td { font-weight: 700; background: #eef2ff; border-top: 2px solid #1d4ed8; }
+table.dense th, table.dense td { padding: 2px 2px; font-size: 7.5pt; }
+.empty { color: #6b7280; font-style: italic; padding: 6px 0; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 3px 18px; max-width: 520px; }
+.kv .v { text-align: right; font-variant-numeric: tabular-nums; }
+.kv .strong { font-weight: 700; font-size: 10.5pt; border-top: 1px solid #9ca3af; padding-top: 2px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="company">
+    {{#if company.logo}}<img src="{{company.logo}}" alt="">{{/if}}
+    <div>
+      <div class="company-name">{{company.name}}</div>
+      {{#if company.address}}<div class="company-line">{{company.address}}</div>{{/if}}
+      <div class="company-line">{{#if company.phone}}{{company.phone}}{{/if}}{{#if company.email}} · {{company.email}}{{/if}}</div>
+      {{#if company.cidaGrade}}<div class="company-line">{{cidaLabel}}: {{company.cidaGrade}}</div>{{/if}}
+    </div>
+  </div>
+  <div class="meta">{{generatedLabel}}<br>{{generatedAt}}</div>
+</div>
+<h1>{{title}}</h1>
+{{#if subtitle}}<div class="subtitle">{{subtitle}}</div>{{/if}}
+{{#if filters.length}}
+<div class="filters">{{#each filters}}<span>{{label}}: <b>{{value}}</b></span>{{/each}}</div>
+{{/if}}
+{{#each sections}}
+<section class="{{#if pageBreakBefore}}break{{/if}}">
+  {{#if pageBreakBefore}}<div class="mini-header"><b>{{../company.name}}</b><span>{{../title}}</span></div>{{/if}}
+  {{#if title}}<h2>{{title}}</h2>{{/if}}
+  {{#if note}}<p class="note">{{note}}</p>{{/if}}
+  {{#if isTable}}
+    {{#if rows.length}}
+    <table class="{{#if dense}}dense{{/if}}">
+      <thead><tr>{{#each columns}}<th class="{{align}}">{{label}}</th>{{/each}}</tr></thead>
+      <tbody>
+      {{#each rows}}<tr>{{#each this}}<td class="{{align}}">{{text}}</td>{{/each}}</tr>
+      {{/each}}
+      </tbody>
+      {{#if totals}}<tfoot><tr>{{#each totals}}<td class="{{align}}">{{text}}</td>{{/each}}</tr></tfoot>{{/if}}
+    </table>
+    {{else}}
+    <p class="empty">{{../emptyLabel}}</p>
+    {{/if}}
+  {{/if}}
+  {{#if isKeyValue}}
+    <div class="kv">
+      {{#each items}}<div class="{{#if strong}}strong{{/if}}">{{label}}</div><div class="v {{#if strong}}strong{{/if}}">{{value}}</div>
+      {{/each}}
+    </div>
+  {{/if}}
+</section>
+{{/each}}
+</body>
+</html>

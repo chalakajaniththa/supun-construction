@@ -21,7 +21,6 @@
     "english": "English",
     "sinhala": "සිංහල",
     "notifications": "Notifications",
-    "notificationsSoon": "Reminders will show here soon.",
     "menu": "Menu",
     "openMenu": "Open menu",
     "userMenu": "Account",
@@ -135,22 +134,40 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "greeting": "Good day!",
-    "subtitle": "Here is a quick look at your business.",
     "kpi": {
       "activeProjects": "Active projects",
       "workersToday": "Workers on site today",
       "spentThisMonth": "Spent this month",
       "toReceive": "Money to receive"
     },
-    "notYet": "Will show once data is entered",
     "needsAttention": "Needs attention",
     "nothingNeedsAttention": "Nothing needs your attention right now.",
     "activeProjects": "Active projects",
     "noActiveProjects": "No active projects yet.",
     "quickActions": "Quick actions",
     "addExpense": "Add expense",
-    "uploadDocument": "Upload document"
+    "uploadDocument": "Upload document",
+    "greetingMorning": "Good morning!",
+    "greetingAfternoon": "Good afternoon!",
+    "greetingEvening": "Good evening!",
+    "todayIs": "Today is {date}.",
+    "kpiNote": {
+      "activeProjects": "{count, plural, =0 {none on hold} one {# on hold or planned} other {# on hold or planned}}",
+      "workersRecorded": "recorded today",
+      "workersPlanned": "planned for today (not recorded yet)",
+      "spentThisMonth": "in {month}",
+      "toReceive": "from bills not paid yet"
+    },
+    "seeAll": "See all ({count})",
+    "chartTitle": "Spent and received — last 6 months",
+    "spent": "Spent",
+    "received": "Received",
+    "projectCol": "Project",
+    "clientCol": "Client",
+    "progressCol": "Time · budget · work done",
+    "statusCol": "Status",
+    "loadError": "The dashboard could not be loaded.",
+    "retry": "Try again"
   },
   "errors": {
     "VALIDATION_FAILED": "Some values are not correct. Please check the form.",
@@ -212,7 +229,8 @@
       "BEFORE_PREVIOUS_BILL": "Must be after the date of the previous bill.",
       "BILL_NOT_SUBMITTED": "This bill is still a draft.",
       "NOT_FOUND": "Not found.",
-      "DUPLICATE": "Already in the list."
+      "DUPLICATE": "Already in the list.",
+      "INVALID_MONTH": "Pick a month"
     },
     "UNSUPPORTED_FILE_TYPE": "This type of file cannot be uploaded. Use PDF, photos (JPG, PNG, WEBP, HEIC), Word / Excel files, drawings (DWG, DXF) or ZIP.",
     "FILE_TOO_LARGE": "The file is too big. Please choose a smaller file.",
@@ -231,7 +249,11 @@
     "CERTIFICATE_STATUS_INVALID": "This bill cannot be moved to that status.",
     "CERTIFICATE_NOT_PAID_IN_FULL": "The payments recorded for this bill are less than its net amount.",
     "CERTIFICATE_HAS_PAYMENTS": "Payments are recorded for this bill.",
-    "IMPORT_FILE_INVALID": "This file could not be read, or it has no BOQ items."
+    "IMPORT_FILE_INVALID": "This file could not be read, or it has no BOQ items.",
+    "REPORT_NOT_FOUND": "This report does not exist.",
+    "REPORT_FORMAT_NOT_AVAILABLE": "This report cannot be made in that format.",
+    "NO_PAYROLL_FOR_MONTH": "Salaries for this month have not been calculated yet. Open Payroll and press Calculate first.",
+    "PDF_FAILED": "The PDF could not be made right now. Please try again in a minute."
   },
   "enums": {
     "notificationSeverity": {
@@ -555,7 +577,6 @@
       "save": "Save budget",
       "saved": "Budget saved."
     },
-    "costsHelp": "Expenses of this project. The full cost picture (labour, materials, machines) comes in a later update.",
     "team": {
       "workers": "Workers booked (next 2 weeks)",
       "machines": "Machines booked (next 2 weeks)",
@@ -1174,7 +1195,6 @@
   },
   "payroll": {
     "subtitle": "Salaries of daily and permanent workers.",
-    "comingSoon": "Salary calculation comes in the next update. The advances given so far are listed below.",
     "openAdvances": "Open advances",
     "totalToRecover": "Total to take back",
     "noAdvances": "No open advances.",
@@ -1200,7 +1220,6 @@
     "draftHelp": "This is a draft. Check the numbers, change the deductions if needed, then finalize the month.",
     "lockedHelp": "This month is finalized and its attendance is locked.",
     "sheetTitle": "Salary sheet — {month}",
-    "exportSoon": "Printing and Excel come with the reports in the next update.",
     "payslipsPdf": "Payslips (PDF)",
     "sheetExcel": "Salary sheet (Excel)",
     "noLines": "No one worked this month.",
@@ -1232,12 +1251,15 @@
     "epfTotal": "EPF to pay this month (8% + 12%): {amount}",
     "payslips": {
       "title": "Payslips",
-      "help": "One line for each month's salary. Printed payslips come in the next update.",
+      "help": "One line for each month's salary. Press the printer icon for the payslip (PDF).",
       "empty": "No salaries calculated for this worker yet.",
       "month": "Month",
       "deductions": "Deductions",
-      "status": "Status"
-    }
+      "status": "Status",
+      "pdf": "Payslip (PDF)"
+    },
+    "sheetPdf": "Salary sheet (PDF)",
+    "epfPdf": "EPF / ETF (PDF)"
   },
   "health": {
     "title": "How the project is going",
@@ -1537,7 +1559,7 @@
     "empty": "No bonds yet.",
     "deleteConfirm": "Remove bond {ref}?",
     "copies": "Bond copies",
-    "copiesHelp": "Upload a scan of each bond. Set its expiry date so you get a reminder.",
+    "copiesHelp": "Upload a scan of each bond. The reminder comes from the bond's expiry date above.",
     "fields": {
       "type": "Type",
       "bank": "Bank",
@@ -1547,6 +1569,311 @@
       "expiryDate": "Expires on",
       "status": "Status",
       "notes": "Notes"
+    }
+  },
+  "notifications": {
+    "title": "Reminders",
+    "description": "Papers and bonds that expire, machines due for a service and project deadlines.",
+    "company": "the company",
+    "units": {
+      "HOURS": "hours",
+      "KM": "km"
+    },
+    "titles": {
+      "documentExpires": "{category} of {owner} expires {days, plural, =0 {today} =1 {tomorrow} other {in # days}}",
+      "documentExpired": "{category} of {owner} expired {days, plural, =0 {today} =1 {yesterday} other {# days ago}}",
+      "bondExpires": "{bondType} {referenceNo} of {project} expires {days, plural, =0 {today} =1 {tomorrow} other {in # days}}",
+      "bondExpired": "{bondType} {referenceNo} of {project} expired {days, plural, =0 {today} =1 {yesterday} other {# days ago}}",
+      "serviceDue": "{asset} is due for a service at {dueAt} {unit}",
+      "serviceOverdue": "{asset} is overdue for a service (it was due at {dueAt} {unit})",
+      "deadlineSoon": "{project} must be finished {days, plural, =0 {today} =1 {tomorrow} other {in # days}}",
+      "deadlinePassed": "{project} was due to finish {days, plural, =1 {yesterday} other {# days ago}}",
+      "overBudget": "{project} has spent more than its budget",
+      "costAheadOfProgress": "{project}: spending is running ahead of the work done",
+      "behindSchedule": "{project} is behind schedule"
+    },
+    "types": {
+      "DOCUMENT_EXPIRY": "Papers",
+      "BOND_EXPIRY": "Bonds",
+      "SERVICE_DUE": "Service",
+      "PROJECT_DEADLINE": "Deadlines",
+      "HEALTH": "Projects"
+    },
+    "digest": {
+      "subject": "{company}: {count, plural, one {# reminder} other {# reminders}} today",
+      "intro": "Good morning. These {count, plural, one {item needs} other {# items need}} your attention:"
+    },
+    "bell": "Reminders",
+    "bellCount": "{count, plural, =0 {No new reminders} one {# new reminder} other {# new reminders}}",
+    "empty": "Nothing to remind you about. All good!",
+    "seeAll": "See all reminders",
+    "markAllRead": "Mark all as seen",
+    "markedAllRead": "All reminders marked as seen.",
+    "markRead": "Mark as seen",
+    "new": "New",
+    "resolved": "Done",
+    "resolvedHelp": "This was sorted out (for example a new paper was uploaded).",
+    "status": {
+      "open": "Open",
+      "all": "All, including done"
+    },
+    "allTypes": "All kinds",
+    "allSeverities": "All levels",
+    "runNow": "Check again now",
+    "ranOk": "Checked. {open, plural, =0 {Nothing open.} one {# reminder open.} other {# reminders open.}}",
+    "due": "Due {date}",
+    "noneOpen": "No open reminders.",
+    "noneAll": "No reminders yet."
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Pick a report, choose the filters and download it as PDF (to print) or Excel.",
+    "downloadPdf": "Download PDF",
+    "downloadExcel": "Download Excel",
+    "downloading": "Making the file…",
+    "downloaded": "Downloaded {file}",
+    "pdfOnly": "PDF only",
+    "chooseFirst": "Please choose: {fields}",
+    "open": "Open",
+    "print": "Print (PDF)",
+    "export": "Excel",
+    "filters": {
+      "project": "Project",
+      "month": "Month",
+      "from": "From",
+      "to": "To",
+      "worker": "Worker",
+      "allWorkers": "All workers",
+      "asset": "Machine or vehicle",
+      "allAssets": "All machines",
+      "supplier": "Supplier",
+      "allSuppliers": "All suppliers (balances)",
+      "certificate": "Bill (IPC)",
+      "noBills": "This project has no bills yet.",
+      "daysAhead": "Days ahead",
+      "expenseCategory": "Kind of expense",
+      "allCategories": "All kinds",
+      "allProjects": "All projects",
+      "dateRangeHelp": "Leave empty for this month.",
+      "dateRangeAllHelp": "Leave empty for all time."
+    },
+    "list": {
+      "project-cost": {
+        "name": "Project cost summary",
+        "description": "Budget against actual cost by category, with every entry."
+      },
+      "payroll-sheet": {
+        "name": "Monthly salary sheet",
+        "description": "Everyone's pay for the month, with totals and a column to sign."
+      },
+      "payslips": {
+        "name": "Payslips",
+        "description": "One payslip per worker per page, ready to print."
+      },
+      "epf-etf": {
+        "name": "EPF / ETF summary",
+        "description": "Contributions of permanent staff for the month."
+      },
+      "attendance": {
+        "name": "Attendance sheet",
+        "description": "A month grid of who came to work, day by day."
+      },
+      "asset-utilisation": {
+        "name": "Machine use",
+        "description": "Hours, fuel and cost per machine and project, plus repairs."
+      },
+      "expenses": {
+        "name": "Expenses",
+        "description": "Expenses in a period, by kind and by project."
+      },
+      "supplier-statement": {
+        "name": "Supplier statement",
+        "description": "What we bought and paid, and what we still owe."
+      },
+      "ipc": {
+        "name": "Bill (IPC) printout",
+        "description": "A progress bill with every step of the calculation."
+      },
+      "expiry": {
+        "name": "Expiring papers and bonds",
+        "description": "Documents and bonds that expire soon or have expired."
+      },
+      "business-summary": {
+        "name": "Monthly business summary",
+        "description": "Money in, money out, per project, money to receive and retention held."
+      }
+    },
+    "common": {
+      "generated": "Printed",
+      "cidaGrade": "CIDA grade",
+      "empty": "Nothing to show.",
+      "sheet": "Report",
+      "total": "Total",
+      "project": "Project",
+      "month": "Month",
+      "period": "Period",
+      "fromOnly": "from {date}",
+      "untilOnly": "until {date}",
+      "allTime": "All time",
+      "date": "Date",
+      "description": "Description",
+      "reference": "Reference",
+      "amount": "Amount",
+      "category": "Category",
+      "type": "Type",
+      "quantity": "Qty",
+      "unit": "Unit",
+      "code": "Code",
+      "name": "Name",
+      "status": "Status",
+      "client": "Client",
+      "asset": "Machine",
+      "supplier": "Supplier",
+      "count": "Count",
+      "noProject": "No project (office / general)",
+      "allProjects": "All projects"
+    },
+    "projectCost": {
+      "summary": "Budget and actual",
+      "estimatedNote": "* Part of the labour cost is estimated from pay rates, because those months' salaries are not finalized yet.",
+      "budget": "Budget",
+      "actual": "Actual",
+      "variance": "Left",
+      "used": "Used %"
+    },
+    "payroll": {
+      "draftNote": "Draft — the salaries for this month are not finalized yet.",
+      "workers": "Workers",
+      "sheet": "Salary sheet",
+      "days": "Days",
+      "otHours": "OT hours",
+      "basic": "Basic",
+      "otPay": "OT pay",
+      "gross": "Gross",
+      "epfEmployee": "EPF 8%",
+      "advance": "Advance",
+      "other": "Other",
+      "net": "Net pay",
+      "signature": "Signature",
+      "employerCost": "Cost to the company",
+      "epfEmployer": "EPF 12% (company)",
+      "etfEmployer": "ETF 3% (company)",
+      "employerTotal": "Total cost"
+    },
+    "payslip": {
+      "title": "Payslip",
+      "epfNo": "EPF no.",
+      "halfDays": "Half days"
+    },
+    "epf": {
+      "earnings": "Earnings",
+      "epfTotal": "EPF total",
+      "toPay": "To pay",
+      "epfToPay": "EPF to pay (20%)",
+      "etfToPay": "ETF to pay (3%)"
+    },
+    "attendance": {
+      "codes": {
+        "PRESENT": "P",
+        "HALF_DAY": "H",
+        "ABSENT": "A",
+        "LEAVE": "L"
+      },
+      "worked": "Days",
+      "absent": "Absent",
+      "leave": "Leave",
+      "ot": "OT h",
+      "sheet": "Attendance"
+    },
+    "assets": {
+      "summary": "Per machine",
+      "byProject": "Per project",
+      "maintenance": "Service and repairs",
+      "days": "Days used",
+      "hours": "Hours",
+      "litres": "Fuel (l)",
+      "fuel": "Fuel cost",
+      "machineCost": "Machine cost",
+      "repairs": "Repairs",
+      "meter": "Meter"
+    },
+    "expenses": {
+      "byCategory": "By kind",
+      "byProject": "By project",
+      "summary": "Summary",
+      "list": "All expenses",
+      "paidBy": "Paid by"
+    },
+    "suppliers": {
+      "statement": "Statement",
+      "opening": "Owed at the start",
+      "debit": "Bought on credit",
+      "credit": "Paid",
+      "closing": "Owed at the end",
+      "balance": "Owed",
+      "kinds": {
+        "PURCHASE": "Purchase",
+        "EXPENSE": "Expense",
+        "PAYMENT": "Payment"
+      },
+      "balancesTitle": "What we owe suppliers",
+      "asOf": "As of",
+      "balances": "Balances",
+      "creditBought": "Bought on credit",
+      "paid": "Paid",
+      "owed": "We owe"
+    },
+    "ipc": {
+      "titleIpc": "Interim Payment Certificate (IPC)",
+      "titleBill": "Progress bill",
+      "contractNo": "Contract no.",
+      "period": "Period",
+      "calculation": "Calculation",
+      "cumulative": "Work done to date",
+      "previous": "Less: billed before",
+      "gross": "Work done this bill",
+      "retention": "Less: retention ({pct}%)",
+      "advance": "Less: advance recovery ({pct}%)",
+      "other": "Less: other deductions",
+      "net": "Amount payable",
+      "contract": "Contract",
+      "contractValue": "Contract value (with approved variations)",
+      "measured": "Measured work done (BOQ)",
+      "retentionCap": "Retention limit",
+      "retentionHeld": "Retention held so far",
+      "advanceBalance": "Advance still to recover",
+      "paid": "Paid against this bill",
+      "submitted": "Submitted on",
+      "certified": "Certified on",
+      "signatures": "Signatures",
+      "contractor": "Contractor",
+      "engineer": "Engineer / client"
+    },
+    "expiry": {
+      "expiredAgo": "expired {days, plural, =0 {today} =1 {1 day ago} other {# days ago}}",
+      "daysLeft": "{days, plural, =0 {today} =1 {1 day left} other {# days left}}",
+      "window": "Showing",
+      "nextDays": "expired, and the next {days} days",
+      "documents": "Documents",
+      "bonds": "Bonds",
+      "expiry": "Expires",
+      "left": "Time left",
+      "document": "Document",
+      "owner": "Belongs to",
+      "bank": "Bank"
+    },
+    "summary": {
+      "atAGlance": "The month at a glance",
+      "sheet": "Summary",
+      "received": "Money received",
+      "spent": "Money spent",
+      "onProjects": "on projects",
+      "overhead": "office and general (no project)",
+      "receivable": "Money to receive (today)",
+      "retentionHeld": "Retention held (today)",
+      "perProject": "Per project",
+      "spentMonth": "Spent",
+      "receivedMonth": "Received"
     }
   }
 }

@@ -15,6 +15,7 @@ import { DateInput } from '@/components/forms/date-input';
 import { useEnumLabel } from '@/components/forms/enum-select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ReportDownloadButton } from '@/components/reports/download-button';
 import {
   Table,
   TableBody,
@@ -115,6 +116,18 @@ export function ProjectCosts({
               {t('allTime')}
             </Button>
           ) : null}
+          <div className="flex flex-wrap gap-2">
+            <ReportDownloadButton
+              reportId="project-cost"
+              format="pdf"
+              params={{ projectId, from: from || undefined, to: to || undefined }}
+            />
+            <ReportDownloadButton
+              reportId="project-cost"
+              format="xlsx"
+              params={{ projectId, from: from || undefined, to: to || undefined }}
+            />
+          </div>
           <p className="ml-auto text-right">
             <span className="block text-sm text-muted-foreground">{t('totalSpent')}</span>
             <span className="text-2xl font-semibold tabular-nums" data-testid="costs-total">

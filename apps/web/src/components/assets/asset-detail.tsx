@@ -3,9 +3,14 @@
 import type { AssetDto } from '@sc/shared';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { DeleteButton } from '@/components/delete-button';
-import { BackButton, DetailState, DetailTabs, EditButton } from '@/components/detail-page';
+import {
+  BackButton,
+  DetailState,
+  DetailTabs,
+  useTabParam,
+  EditButton,
+} from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ExpiryBadge } from '@/components/documents/expiry-badge';
 import { useEnumLabel } from '@/components/forms/enum-select';
@@ -29,7 +34,7 @@ export function AssetDetail({ id }: { id: string }) {
   const router = useRouter();
   const { data: a, error } = useDetail<AssetDto>('assets', id);
   const remove = useRemove('assets');
-  const [tab, setTab] = useState<Tab>('info');
+  const [tab, setTab] = useTabParam<Tab>(TABS, 'info');
 
   if (!a) return <DetailState error={error} backHref="/assets" />;
   const meterUnit = a.meterType === 'NONE' ? '' : ` ${enumLabel('MeterType', a.meterType)}`;

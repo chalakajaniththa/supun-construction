@@ -143,7 +143,47 @@ export interface CostingResult {
   estimated: boolean;
 }
 
+/** The part of an input inside [from, to] (days, inclusive) — for per-month totals. */
+export function sliceCostingInput(input: CostingInput, from: string, to: string): CostingInput {
+  const inside = (d: string) => d >= from && d <= to;
+  const fromMonth = from.slice(0, 7);
+  const toMonth = to.slice(0, 7);
+  return {
+    ...input,
+    labour: input.labour
+      .map((w) => ({
+        ...w,
+        days: w.days.filter((d) => inside(d.date)),
+        finalized: w.finalized.filter((f) => f.month >= fromMonth && f.month <= toMonth),
+      }))
+      .filter((w) => w.days.length > 0),
+    purchases: input.purchases.filter((x) => inside(x.date)),
+    issues: input.issues.filter((x) => inside(x.date)),
+    usage: input.usage.filter((x) => inside(x.date)),
+    expenses: input.expenses.filter((x) => inside(x.date)),
+  };
+}
+
 const present = (v: DecimalInput | null | undefined) => v !== null && v !== undefined && v !== '';
+
+/**
+ * Internal machine cost of one usage log: hours × hourly rate, else one day × daily rate (when
+ * there is no hourly rate), else 0. Fuel is separate.
+ */
+export function machineCost(u: {
+  hoursUsed: DecimalInput;
+  ratePerHour: DecimalInput | null;
+  ratePerDay: DecimalInput | null;
+}): { hourly: boolean; daily: boolean; amount: Decimal } {
+  const hourly = present(u.ratePerHour);
+  const daily = !hourly && present(u.ratePerDay);
+  const amount = hourly
+    ? roundMoney(dec(u.hoursUsed).times(dec(u.ratePerHour)))
+    : daily
+      ? roundMoney(dec(u.ratePerDay))
+      : new Decimal(0);
+  return { hourly, daily, amount };
+}
 
 /** Labour cost of one worker on one project (an entry per worker). */
 export function labourEntry(w: LabourWorker, settings: PayrollSettings): CostEntry | null {
@@ -212,13 +252,7 @@ export function calculateCosts(input: CostingInput): CostingResult {
     });
   }
   for (const u of input.usage) {
-    const hourly = present(u.ratePerHour);
-    const daily = !hourly && present(u.ratePerDay);
-    const amount = hourly
-      ? roundMoney(dec(u.hoursUsed).times(dec(u.ratePerHour)))
-      : daily
-        ? roundMoney(dec(u.ratePerDay))
-        : new Decimal(0);
+    const { hourly, daily, amount } = machineCost(u);
     add('EQUIPMENT', {
       kind: 'MACHINE',
       date: u.date,

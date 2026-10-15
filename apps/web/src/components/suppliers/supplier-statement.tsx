@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { ReportDownloadButton } from '@/components/reports/download-button';
 import {
   Table,
   TableBody,
@@ -186,15 +187,27 @@ export function SupplierStatement({ supplierId }: { supplierId: string }) {
             </span>
           </p>
         </div>
-        <Button
-          size="lg"
-          className="h-11 text-base"
-          onClick={() => setOpen(true)}
-          data-testid="add-payment"
-        >
-          <HandCoins aria-hidden />
-          {t('addPayment')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <ReportDownloadButton
+            reportId="supplier-statement"
+            format="pdf"
+            params={{ supplierId, from: from || undefined, to: to || undefined }}
+          />
+          <ReportDownloadButton
+            reportId="supplier-statement"
+            format="xlsx"
+            params={{ supplierId, from: from || undefined, to: to || undefined }}
+          />
+          <Button
+            size="lg"
+            className="h-11 text-base"
+            onClick={() => setOpen(true)}
+            data-testid="add-payment"
+          >
+            <HandCoins aria-hidden />
+            {t('addPayment')}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
         <div className="flex flex-wrap items-end gap-3">

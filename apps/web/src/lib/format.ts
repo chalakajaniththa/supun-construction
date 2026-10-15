@@ -31,6 +31,15 @@ export function formatMoney(value: DecimalLike, opts: { symbol?: boolean } = {})
   return text.startsWith('-') ? `-Rs. ${text.slice(1)}` : `Rs. ${text}`;
 }
 
+/** Money rounded to whole rupees, "Rs. 1,250,000" — for big headline numbers only. */
+export function formatMoneyWhole(value: DecimalLike): string {
+  const d = toDecimal(value);
+  if (!d) return '—';
+  const r = d.toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
+  const text = group((r.isZero() ? r.abs() : r).toFixed(0));
+  return text.startsWith('-') ? `-Rs. ${text.slice(1)}` : `Rs. ${text}`;
+}
+
 /** Quantity with up to 3 decimals, grouped: "1,250.5". */
 export function formatQty(value: DecimalLike, maxDecimals = 3): string {
   const d = toDecimal(value);

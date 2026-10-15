@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useEnumLabel } from '@/components/forms/enum-select';
 import { StatusChip } from '@/components/status-chip';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ReportDownloadButton } from '@/components/reports/download-button';
 import {
   Table,
   TableBody,
@@ -17,7 +18,7 @@ import { useApi } from '@/hooks/use-resource';
 import { toDec } from '@/lib/decimal';
 import { formatMoney, formatMonth, formatQty } from '@/lib/format';
 
-/** Worker detail → Payslips: one line per payroll month (PDF payslips come with the reports). */
+/** Worker detail → Payslips: one line per payroll month (each with a printable PDF payslip). */
 export function PayslipsPanel({ workerId }: { workerId: string }) {
   const t = useTranslations('payroll');
   const enumLabel = useEnumLabel();
@@ -44,6 +45,7 @@ export function PayslipsPanel({ workerId }: { workerId: string }) {
                 <TableHead className={right}>{t('payslips.deductions')}</TableHead>
                 <TableHead className={right}>{t('cols.net')}</TableHead>
                 <TableHead className="whitespace-normal">{t('payslips.status')}</TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -68,6 +70,18 @@ export function PayslipsPanel({ workerId }: { workerId: string }) {
                       <StatusChip status={p.run.status}>
                         {enumLabel('PayrollStatus', p.run.status)}
                       </StatusChip>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <ReportDownloadButton
+                        reportId="payslips"
+                        format="pdf"
+                        params={{
+                          month: `${p.run.year}-${String(p.run.month).padStart(2, '0')}`,
+                          workerId,
+                        }}
+                        label={t('payslips.pdf')}
+                        iconOnly
+                      />
                     </TableCell>
                   </TableRow>
                 );

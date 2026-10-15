@@ -15,3 +15,4 @@ export * from './schemas/operations';
 export * from './schemas/payroll';
 export * from './schemas/finance';
 export * from './time';
+export * from './schemas/insights';

@@ -3,9 +3,14 @@
 import type { ProjectDetailDto } from '@sc/shared';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { DeleteButton } from '@/components/delete-button';
-import { BackButton, DetailState, DetailTabs, EditButton } from '@/components/detail-page';
+import {
+  BackButton,
+  DetailState,
+  DetailTabs,
+  useTabParam,
+  EditButton,
+} from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { useEnumLabel } from '@/components/forms/enum-select';
 import { InfoList } from '@/components/info-list';
@@ -43,7 +48,7 @@ export function ProjectDetail({ id }: { id: string }) {
   const router = useRouter();
   const { data: p, error } = useDetail<ProjectDetailDto>('projects', id);
   const remove = useRemove('projects', { also: ['clients'] });
-  const [tab, setTab] = useState<Tab>('overview');
+  const [tab, setTab] = useTabParam<Tab>(TABS, 'overview');
 
   if (!p) return <DetailState error={error} backHref="/projects" />;
 

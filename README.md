@@ -26,3 +26,10 @@ pnpm dev                     # API :4000 + web :3000
 
 Checks: `pnpm -r typecheck`, `pnpm -r lint`, `pnpm -r test`, `pnpm test:e2e:api`
 (dev infra), `pnpm test:e2e:web` (full Docker stack on :3000).
+
+## Translations
+
+> Sinhala text should be reviewed by a native speaker; edit `apps/web/messages/si.json`.
+
+All screen text lives in `apps/web/messages/en.json` and `si.json` (same keys in both). Reports and
+reminder e-mails use the same files.

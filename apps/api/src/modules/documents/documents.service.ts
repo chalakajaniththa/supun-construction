@@ -123,6 +123,19 @@ export class DocumentsService {
     return paginated(await this.withOwners(rows), total, q);
   }
 
+  /**
+   * Every non-deleted document whose current version expires on or before `until` (expired ones
+   * included), soonest first — for reminders and the expiry report.
+   */
+  async expiringUntil(until: string): Promise<DocumentView[]> {
+    const rows = await this.prisma.document.findMany({
+      where: { deletedAt: null, currentVersion: { expiryDate: { lte: dayToDate(until) } } },
+      include: withCurrent,
+      orderBy: [{ currentVersion: { expiryDate: 'asc' } }, { title: 'asc' }],
+    });
+    return this.withOwners(rows);
+  }
+
   async get(id: string): Promise<DocumentDetailView> {
     const row = await this.prisma.document.findFirst({
       where: { id, deletedAt: null },

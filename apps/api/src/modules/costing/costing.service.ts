@@ -7,7 +7,13 @@ import type { Prisma, Project } from '../../generated/prisma/client.js';
 import { BoqService } from '../boq/boq.service.js';
 import { PayrollService } from '../payroll/payroll.service.js';
 import { SettingsService } from '../settings/settings.service.js';
-import { type CostingResult, type LabourWorker, calculateCosts } from './calc/costing.js';
+import {
+  type CostingInput,
+  type CostingResult,
+  type LabourWorker,
+  calculateCosts,
+  sliceCostingInput,
+} from './calc/costing.js';
 import { projectHealth } from './calc/health.js';
 
 /** Project actual cost vs budget, and health (time / budget / physical progress + flags). */
@@ -20,8 +26,28 @@ export class CostingService {
     private readonly boq: BoqService,
   ) {}
 
-  /** Everything the costing calculator needs for one project and (optional) date range. */
   async compute(project: Project, from?: string, to?: string): Promise<CostingResult> {
+    return calculateCosts(await this.loadInput(project, from, to));
+  }
+
+  /**
+   * Actual cost per month (dashboard / monthly summary): loads the whole range once, then runs
+   * the calculator on each month's slice — the same result as compute() per month.
+   */
+  async monthlyActuals(
+    project: Project,
+    months: readonly { month: string; from: string; to: string }[],
+  ): Promise<Map<string, CostingResult>> {
+    const out = new Map<string, CostingResult>();
+    if (!months.length) return out;
+    const input = await this.loadInput(project, months[0]!.from, months[months.length - 1]!.to);
+    for (const m of months)
+      out.set(m.month, calculateCosts(sliceCostingInput(input, m.from, m.to)));
+    return out;
+  }
+
+  /** Everything the costing calculator needs for one project and (optional) date range. */
+  async loadInput(project: Project, from?: string, to?: string): Promise<CostingInput> {
     const date: Prisma.DateTimeFilter | undefined =
       from || to
         ? { ...(from ? { gte: dayToDate(from) } : {}), ...(to ? { lte: dayToDate(to) } : {}) }
@@ -101,7 +127,7 @@ export class CostingService {
       });
     }
 
-    return calculateCosts({
+    return {
       budget: Object.fromEntries(budget.map((b) => [b.category, b.amount.toString()])),
       settings,
       labour: [...labour.values()],
@@ -141,7 +167,7 @@ export class CostingService {
         amount: x.amount.toString(),
         supplier: x.supplier?.name ?? null,
       })),
-    });
+    };
   }
 
   async costs(projectId: string, q: CostQuery) {

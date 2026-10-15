@@ -3,9 +3,14 @@
 import type { WorkerDto } from '@sc/shared';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import { DeleteButton } from '@/components/delete-button';
-import { BackButton, DetailState, DetailTabs, EditButton } from '@/components/detail-page';
+import {
+  BackButton,
+  DetailState,
+  DetailTabs,
+  useTabParam,
+  EditButton,
+} from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { useEnumLabel } from '@/components/forms/enum-select';
 import { InfoList } from '@/components/info-list';
@@ -33,7 +38,7 @@ export function WorkerDetail({ id }: { id: string }) {
   const router = useRouter();
   const { data: w, error } = useDetail<WorkerDto>('workers', id);
   const remove = useRemove('workers');
-  const [tab, setTab] = useState<Tab>('profile');
+  const [tab, setTab] = useTabParam<Tab>(TABS, 'profile');
 
   if (!w) return <DetailState error={error} backHref="/workers" />;
 

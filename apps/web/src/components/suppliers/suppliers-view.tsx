@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { type DataTableColumn, DataTable } from '@/components/data-table/data-table';
 import { DeleteButton } from '@/components/delete-button';
-import { BackButton, DetailState, DetailTabs } from '@/components/detail-page';
+import { BackButton, DetailState, DetailTabs, useTabParam } from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { EmptyState } from '@/components/empty-state';
 import { EnumFilter, useEnumLabel } from '@/components/forms/enum-select';
@@ -141,7 +141,7 @@ export function SupplierDetail({ id }: { id: string }) {
   const router = useRouter();
   const { data: s, error } = useDetail<SupplierDto>('suppliers', id);
   const remove = useRemove('suppliers');
-  const [tab, setTab] = useState<Tab>('info');
+  const [tab, setTab] = useTabParam<Tab>(TABS, 'info');
   const [editOpen, setEditOpen] = useState(false);
 
   if (!s) return <DetailState error={error} backHref="/suppliers" />;

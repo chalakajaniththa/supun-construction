@@ -1,6 +1,13 @@
 import { DEFAULT_SETTINGS } from '@sc/shared';
 import { describe, expect, it } from 'vitest';
-import { type CostingInput, EXPENSE_TO_BUDGET, calculateCosts, labourEntry } from './costing.js';
+import {
+  type CostingInput,
+  EXPENSE_TO_BUDGET,
+  calculateCosts,
+  labourEntry,
+  machineCost,
+  sliceCostingInput,
+} from './costing.js';
 import { projectHealth, timeElapsedPct } from './health.js';
 
 const settings = DEFAULT_SETTINGS.payroll;
@@ -371,5 +378,73 @@ describe('health', () => {
       '40.00',
       '45.00',
     ]);
+  });
+});
+
+describe('machineCost', () => {
+  it.each([
+    [{ hoursUsed: '6.5', ratePerHour: '6500', ratePerDay: '50000' }, '42250.00', true, false],
+    [{ hoursUsed: '0', ratePerHour: null, ratePerDay: '7500' }, '7500.00', false, true],
+    [{ hoursUsed: '4', ratePerHour: null, ratePerDay: null }, '0.00', false, false],
+  ])('%o → %s', (u, amount, hourly, daily) => {
+    const r = machineCost(u);
+    expect(r.amount.toFixed(2)).toBe(amount);
+    expect([r.hourly, r.daily]).toEqual([hourly, daily]);
+  });
+});
+
+describe('sliceCostingInput (per-month totals)', () => {
+  const worker = {
+    workerId: 'w1',
+    code: 'W-0001',
+    name: 'Sunil',
+    type: 'DAILY' as const,
+    rates: [{ effectiveFrom: '2026-01-01', dailyRate: '4000' }],
+    days: [
+      { date: '2026-09-29', status: 'PRESENT' as const, otHours: '0' },
+      { date: '2026-09-30', status: 'HALF_DAY' as const, otHours: '0' },
+      { date: '2026-10-01', status: 'PRESENT' as const, otHours: '2' },
+    ],
+    finalized: [{ month: '2026-09', days: '1.5', cost: '9000' }],
+  };
+  const input: CostingInput = {
+    ...empty,
+    labour: [worker],
+    expenses: [
+      {
+        id: 'x1',
+        date: '2026-09-30',
+        category: 'MEALS',
+        description: 'Tea',
+        amount: '500',
+        supplier: null,
+      },
+      {
+        id: 'x2',
+        date: '2026-10-01',
+        category: 'FUEL',
+        description: 'Diesel',
+        amount: '1200.50',
+        supplier: null,
+      },
+    ],
+  };
+
+  it('the months add up to the whole range', () => {
+    const sep = calculateCosts(sliceCostingInput(input, '2026-09-01', '2026-09-30'));
+    const oct = calculateCosts(sliceCostingInput(input, '2026-10-01', '2026-10-31'));
+    const all = calculateCosts(input);
+    expect(sep.total.actual.plus(oct.total.actual).toFixed(2)).toBe(all.total.actual.toFixed(2));
+    // September uses the finalized payroll share, October is estimated from the rate
+    expect(cat(sep, 'LABOUR').actual.toFixed(2)).toBe('9000.00');
+    expect(cat(sep, 'LABOUR').estimated).toBe(false);
+    expect(cat(oct, 'LABOUR').estimated).toBe(true);
+    expect(cat(oct, 'EQUIPMENT').actual.toFixed(2)).toBe('1200.50');
+  });
+
+  it('drops workers without days in the slice', () => {
+    const s = sliceCostingInput(input, '2026-11-01', '2026-11-30');
+    expect(s.labour).toEqual([]);
+    expect(calculateCosts(s).total.actual.toFixed(2)).toBe('0.00');
   });
 });

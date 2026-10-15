@@ -82,11 +82,13 @@ export function ProgressTriple({
           key={r.key}
           className={cn(
             'grid items-center gap-x-3',
-            compact ? 'grid-cols-[4.5rem_1fr_3rem]' : 'grid-cols-[minmax(7rem,10rem)_1fr_4rem]',
+            compact ? 'grid-cols-[auto_1fr_3rem]' : 'grid-cols-[minmax(7rem,10rem)_1fr_4rem]',
           )}
           data-testid={`bar-${r.key}`}
         >
-          <span className={cn('text-muted-foreground', compact && 'text-sm')}>{r.label}</span>
+          <span className={cn('text-muted-foreground', compact && 'text-sm whitespace-nowrap')}>
+            {r.label}
+          </span>
           <ProgressBar
             value={r.value}
             tone={r.tone}

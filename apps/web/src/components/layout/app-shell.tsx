@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { BrandMark, useCompanyName } from './brand';
 import { DefaultPasswordBanner } from './default-password-banner';
 import { LanguageToggle } from './language-toggle';
+import { NotificationBell } from './notification-bell';
 import { SidebarNav } from './sidebar-nav';
 import { UserMenu } from './user-menu';
 
@@ -78,19 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2">
             <LanguageToggle />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-lg"
-                  aria-label={t('notifications')}
-                  data-testid="bell"
-                >
-                  <Bell className="size-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('notificationsSoon')}</TooltipContent>
-            </Tooltip>
+            <NotificationBell />
             <UserMenu />
           </div>
         </header>
