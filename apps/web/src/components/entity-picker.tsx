@@ -64,7 +64,7 @@ export function EntityPicker<T extends { id: string }>({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <div className="flex items-center gap-2">
+      <div className="flex w-full min-w-0 items-center gap-1">
         <PopoverTrigger asChild>
           <Button
             id={id}
@@ -74,7 +74,7 @@ export function EntityPicker<T extends { id: string }>({
             aria-expanded={open}
             aria-invalid={invalid || undefined}
             className={cn(
-              'h-11 w-full justify-between text-base font-normal',
+              'h-11 min-w-0 flex-1 justify-between text-base font-normal',
               !label && 'text-muted-foreground',
             )}
           >
@@ -104,6 +104,7 @@ export function EntityPicker<T extends { id: string }>({
             placeholder={t('search')}
             aria-label={t('search')}
             className="h-10 pl-9"
+            data-testid="picker-search"
           />
         </div>
         <ul className="max-h-72 overflow-y-auto" role="listbox">

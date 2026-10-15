@@ -63,7 +63,8 @@
     "payroll": "Payroll",
     "reports": "Reports",
     "documents": "Documents",
-    "settings": "Settings"
+    "settings": "Settings",
+    "expenses": "Expenses"
   },
   "auth": {
     "title": "Welcome",
@@ -195,13 +196,25 @@
       "RATE_DATE_TAKEN": "There is already a rate from this date.",
       "END_BEFORE_START": "This date cannot be before the start date.",
       "EXPIRY_BEFORE_ISSUE": "The expiry date cannot be before the issue date.",
-      "DUPLICATE_CATEGORY": "Each category can be used only once."
+      "DUPLICATE_CATEGORY": "Each category can be used only once.",
+      "INVALID_TIME": "Enter a time like 08:00.",
+      "END_TIME_BEFORE_START": "The end time must be after the start time.",
+      "RANGE_TOO_LONG": "This period is too long. Choose two months or less.",
+      "TOO_MANY": "There are too many rows.",
+      "DUPLICATE_WORKER": "This worker is in the list twice.",
+      "END_METER_BEFORE_START": "The end reading cannot be less than the start reading.",
+      "SUPPLIER_REQUIRED_FOR_CREDIT": "Choose the supplier when it is bought on credit.",
+      "NO_LINES": "Add at least one item.",
+      "RECOVERY_MORE_THAN_AMOUNT": "This cannot be more than the advance.",
+      "PICK_SOMEONE": "Choose at least one."
     },
     "UNSUPPORTED_FILE_TYPE": "This type of file cannot be uploaded. Use PDF, photos (JPG, PNG, WEBP, HEIC), Word / Excel files, drawings (DWG, DXF) or ZIP.",
     "FILE_TOO_LARGE": "The file is too big. Please choose a smaller file.",
     "FILE_REQUIRED": "Please choose a file to upload.",
     "OWNER_NOT_FOUND": "The project, machine or person for this document was not found.",
-    "CLIENT_HAS_PROJECTS": "This client still has projects, so it cannot be deleted."
+    "CLIENT_HAS_PROJECTS": "This client still has projects, so it cannot be deleted.",
+    "ATTENDANCE_EXISTS_OTHER_PROJECT": "This worker is already marked at another project on this day.",
+    "ADVANCE_HAS_RECOVERIES": "Part of this advance was already taken back from a salary, so it cannot be changed."
   },
   "enums": {
     "notificationSeverity": {
@@ -524,6 +537,14 @@
       "total": "Total budget",
       "save": "Save budget",
       "saved": "Budget saved."
+    },
+    "costsHelp": "Expenses of this project. The full cost picture (labour, materials, machines) comes in a later update.",
+    "team": {
+      "workers": "Workers booked (next 2 weeks)",
+      "machines": "Machines booked (next 2 weeks)",
+      "assignWorkers": "Assign workers",
+      "assignMachines": "Assign machines",
+      "help": "Bookings from today for two weeks. Change them on the Schedule."
     }
   },
   "workers": {
@@ -651,6 +672,59 @@
       "internalRatePerDay": "Cost to projects per day",
       "nextExpiry": "Papers",
       "notes": "Notes"
+    },
+    "service": {
+      "state": {
+        "OK": "Service OK",
+        "DUE_SOON": "Service due soon",
+        "OVERDUE": "Service overdue",
+        "NOT_TRACKED": "Not tracked"
+      },
+      "units": {
+        "HOURS": "hours",
+        "KM": "km"
+      },
+      "left": "{value} {unit} left",
+      "over": "{value} {unit} over"
+    },
+    "usage": {
+      "title": "Usage log",
+      "totals": "Total work: {hours} · Fuel: {litres} L ({cost})",
+      "date": "Date",
+      "project": "Project",
+      "start": "Start meter",
+      "end": "End meter",
+      "hours": "Hours",
+      "fuel": "Fuel",
+      "fuelCost": "Fuel cost",
+      "operator": "Operator",
+      "empty": "No usage recorded yet.",
+      "newer": "Newer",
+      "older": "Older",
+      "help": "Usage is recorded on the Daily Entry page."
+    },
+    "maintenance": {
+      "title": "Service & repairs",
+      "add": "Add record",
+      "addTitle": "New service or repair",
+      "editTitle": "Change service or repair",
+      "formDescription": "Services, repairs and tyres.",
+      "empty": "No service or repair recorded yet.",
+      "edit": "Edit",
+      "deleteConfirm": "Delete this record?",
+      "serviceHint": "A service resets the service counter at this reading.",
+      "fields": {
+        "date": "Date",
+        "type": "Type",
+        "description": "What was done",
+        "meterReading": "Meter reading",
+        "cost": "Cost",
+        "supplier": "Garage / supplier"
+      }
+    },
+    "allocations": {
+      "title": "Bookings",
+      "help": "Bookings from last week to next month. Change them on the Schedule."
     }
   },
   "suppliers": {
@@ -675,7 +749,45 @@
       "type": "Type",
       "phone": "Phone",
       "address": "Address",
-      "notes": "Notes"
+      "notes": "Notes",
+      "balance": "We owe"
+    },
+    "statement": {
+      "title": "Statement",
+      "owed": "We owe",
+      "addPayment": "Add payment",
+      "from": "From",
+      "to": "To",
+      "beginning": "Beginning",
+      "today": "Today",
+      "allTime": "All time",
+      "date": "Date",
+      "what": "What",
+      "reference": "Bill / cheque no.",
+      "debit": "Bought on credit",
+      "credit": "Paid",
+      "balance": "Balance",
+      "opening": "Opening balance",
+      "closing": "Closing balance",
+      "empty": "Nothing in this period.",
+      "kind": {
+        "PURCHASE": "Credit purchase",
+        "EXPENSE": "Credit expense",
+        "PAYMENT": "Payment"
+      },
+      "deletePayment": "Delete this payment of {amount}?",
+      "help": "Only credit purchases and credit expenses add to what we owe. Cash purchases are already paid."
+    },
+    "payment": {
+      "title": "Add payment",
+      "owed": "We owe {amount} now.",
+      "date": "Date",
+      "amount": "Amount",
+      "method": "Paid by",
+      "reference": "Cheque / reference no.",
+      "referenceHint": "If there is one",
+      "notes": "Note",
+      "saved": "Payment saved."
     }
   },
   "purchases": {
@@ -684,7 +796,34 @@
     "tabs": {
       "purchases": "Purchases",
       "store": "Store",
-      "materials": "Materials"
+      "materials": "Materials",
+      "issues": "Issues to projects"
+    },
+    "add": "New purchase",
+    "addTitle": "New purchase",
+    "editTitle": "Change purchase",
+    "formDescription": "One bill from a supplier. Each item goes to the main store or straight to a project.",
+    "saved": "Purchase saved.",
+    "empty": "No purchases yet.",
+    "lines": "Items",
+    "addLine": "Add item",
+    "total": "Total",
+    "items": "Items",
+    "mainStore": "Main store",
+    "allPaymentTypes": "Cash and credit",
+    "deleteConfirm": "Delete this purchase?",
+    "fields": {
+      "supplier": "Supplier",
+      "date": "Date",
+      "paymentType": "Cash or credit",
+      "invoiceNo": "Bill / invoice no.",
+      "notes": "Note",
+      "material": "Material",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "deliverTo": "Delivered to",
+      "amount": "Amount",
+      "actions": "Actions"
     }
   },
   "materials": {
@@ -774,5 +913,254 @@
       "soon": "{date} · {days} days left",
       "ok": "Valid to {date}"
     }
+  },
+  "schedule": {
+    "title": "Schedule",
+    "subtitle": "Plan who and which machine works where. Nobody can be booked twice at the same time.",
+    "assignTeam": "Assign team",
+    "assignMachines": "Assign machines",
+    "assignTeamHelp": "Book several workers to one project for one or more days.",
+    "assignMachinesHelp": "Book several machines to one project for one or more days.",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "thisWeek": "This week",
+    "show": "Show",
+    "workers": "Workers",
+    "machines": "Machines",
+    "worker": "Worker",
+    "machine": "Machine",
+    "allSkills": "All skills",
+    "allCategories": "All kinds",
+    "addFor": "Book {name} on {date}",
+    "legend": "Projects",
+    "help": "Click an empty day to book someone. Click a coloured block to change or cancel it.",
+    "saved": "Booking saved.",
+    "cancelled": "Booking cancelled.",
+    "addTitle": "New booking",
+    "editTitle": "Change booking",
+    "cancelBooking": "Cancel booking",
+    "cancelConfirm": "Cancel this booking? The time becomes free again.",
+    "pickWorkers": "Choose workers",
+    "pickMachines": "Choose machines",
+    "selected": "{n} chosen",
+    "busyAt": "Busy: {projects}",
+    "free": "Free",
+    "pickSomeone": "Choose at least one.",
+    "window": "{from} – {to}, {start} to {end} each day",
+    "assign": "Assign",
+    "assigned": "{n} bookings added.",
+    "openSchedule": "Open schedule",
+    "noBookings": "No bookings in this period.",
+    "fields": {
+      "project": "Project",
+      "date": "Day",
+      "time": "Time",
+      "startTime": "From",
+      "endTime": "To",
+      "operator": "Operator (driver)",
+      "notes": "Note",
+      "fromDate": "First day",
+      "toDate": "Last day",
+      "skipSundays": "Leave out Sundays"
+    },
+    "conflict": {
+      "title": "Already booked",
+      "description": "Someone is already booked at that time, so nothing was saved.",
+      "alreadyAt": "Already at {project} on {date}, {from}–{to}",
+      "more": "…and {n} more.",
+      "hint": "Choose another time or another person, or change the existing booking first."
+    }
+  },
+  "daily": {
+    "title": "Daily Entry",
+    "subtitle": "Record a day at a site: who came, machine hours and fuel, and money spent.",
+    "date": "Date",
+    "project": "Project (site)",
+    "chooseProject": "Choose a project…",
+    "today": "Today",
+    "pickProjectFirst": "Choose a project to start.",
+    "loadFailed": "This day could not be loaded. Please try again.",
+    "sections": {
+      "attendance": "Attendance",
+      "usage": "Machines",
+      "expenses": "Expenses"
+    },
+    "copyFromYesterday": "Copy from last day",
+    "copyNothing": "No earlier day with attendance was found.",
+    "copied": "Copied from {date}.",
+    "markAllPresent": "Mark all present",
+    "addWorker": "Add a worker…",
+    "noWorkers": "Nobody is planned for this day. Add a worker above.",
+    "notPlanned": "Not planned",
+    "alreadyAt": "Already marked at {project} on this day",
+    "statusLabel": "Attendance of {name}",
+    "status": {
+      "PRESENT": "Present",
+      "HALF_DAY": "Half day",
+      "ABSENT": "Absent",
+      "LEAVE": "Leave"
+    },
+    "otHours": "OT hours",
+    "otHoursFor": "Overtime hours of {name}",
+    "note": "Note",
+    "noteFor": "Note for {name}",
+    "clearRow": "Clear",
+    "attendanceHelp": "People planned on the Schedule are listed here. Rows without a choice are not saved.",
+    "addMachine": "Add a machine…",
+    "noMachines": "No machines are planned. Add one above if a machine worked here.",
+    "km": "km",
+    "hours": "hours",
+    "meterNow": "meter now {value} {unit}",
+    "startMeter": "Start ({unit})",
+    "endMeter": "End ({unit})",
+    "hoursWorked": "Hours worked",
+    "fuelLitres": "Fuel (litres)",
+    "fuelCost": "Fuel cost",
+    "operator": "Operator",
+    "addExpense": "Add expense",
+    "noExpenses": "No expenses for this day.",
+    "category": "Category",
+    "description": "What for",
+    "amount": "Amount",
+    "paidBy": "Paid by",
+    "supplier": "Supplier",
+    "totals": {
+      "people": "People at work",
+      "halfDays": "{n, plural, one {# half day} other {# half days}}",
+      "machineHours": "Machine hours",
+      "expenses": "Spent"
+    },
+    "unsaved": "Not saved yet",
+    "savedOk": "The day is saved.",
+    "locked": "Salaries for this month are finalized, so this day can no longer be changed.",
+    "otherProjectError": "Already marked at another project on this day: {names}",
+    "rowError": "{section}, row {row}: {message}"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "subtitle": "Money spent at sites and in the office.",
+    "add": "Add expense",
+    "addTitle": "New expense",
+    "editTitle": "Change expense",
+    "edit": "Edit",
+    "formDescription": "Leave the project empty for office or general costs.",
+    "empty": "No expenses yet.",
+    "allCategories": "All categories",
+    "allProjects": "All projects",
+    "noProject": "Office / general",
+    "deleteConfirm": "Delete the expense \"{description}\"?",
+    "from": "From",
+    "to": "To",
+    "any": "Any day",
+    "clearDates": "Clear dates",
+    "total": "Total",
+    "projectHint": "Empty = office or general cost",
+    "receipt": "Receipt",
+    "receiptTitle": "Receipt – {description}",
+    "receiptAttached": "Receipt attached.",
+    "removeReceipt": "Remove receipt",
+    "attachReceipt": "Receipt",
+    "fields": {
+      "date": "Date",
+      "category": "Category",
+      "description": "What for",
+      "amount": "Amount",
+      "paidBy": "Paid by",
+      "project": "Project",
+      "supplier": "Supplier",
+      "asset": "Machine / vehicle",
+      "receipt": "Receipt",
+      "actions": "Actions"
+    }
+  },
+  "attendance": {
+    "title": "Attendance",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "weekdays": {
+      "0": "Mon",
+      "1": "Tue",
+      "2": "Wed",
+      "3": "Thu",
+      "4": "Fri",
+      "5": "Sat",
+      "6": "Sun"
+    },
+    "summary": {
+      "daysWorked": "Days worked",
+      "present": "Present",
+      "halfDays": "Half days",
+      "absent": "Absent / leave",
+      "otHours": "OT hours"
+    },
+    "short": {
+      "PRESENT": "Present",
+      "HALF_DAY": "Half",
+      "ABSENT": "Absent",
+      "LEAVE": "Leave"
+    },
+    "help": "Attendance is recorded on the Daily Entry page."
+  },
+  "advances": {
+    "title": "Salary advances",
+    "add": "Give advance",
+    "addTitle": "New advance",
+    "editTitle": "Change advance",
+    "formDescription": "Money given before payday. It is taken back from the salary.",
+    "saved": "Advance saved.",
+    "empty": "No advances given.",
+    "stillToRecover": "Still to take back: {amount}",
+    "inFull": "All at once",
+    "edit": "Edit",
+    "deleteConfirm": "Delete this advance of {amount}?",
+    "recoveryHint": "How much to take back from each month's salary. Leave empty to take it all at once.",
+    "help": "Once part of an advance is taken back from a salary, it can no longer be changed.",
+    "fields": {
+      "date": "Date",
+      "amount": "Amount",
+      "reason": "Reason",
+      "recoveryPerMonth": "Take back per month",
+      "recovered": "Taken back",
+      "balance": "Still owed",
+      "status": "Status"
+    }
+  },
+  "store": {
+    "issueTitle": "Issue from the store",
+    "issueDescription": "Send material from the main store to a project. Its cost moves to that project.",
+    "issued": "Issued to the project.",
+    "notEnough": "Not enough in the store. Only {available} {unit} left.",
+    "inStore": "In the store: {qty} {unit}",
+    "avgCost": "average {cost}",
+    "issue": "Issue",
+    "issueToProject": "Issue to a project",
+    "stockHelp": "Materials bought for the main store and not yet sent to a site.",
+    "totalValue": "Store value",
+    "emptyStock": "The store is empty. Purchases delivered to the main store show here.",
+    "bought": "Bought",
+    "issuedQty": "Issued",
+    "inStoreQty": "In store",
+    "averageCost": "Average cost",
+    "value": "Value",
+    "unitCost": "Unit cost",
+    "amount": "Amount",
+    "undo": "Undo",
+    "undoConfirm": "Undo this issue? The quantity goes back to the store.",
+    "emptyIssues": "Nothing has been issued yet.",
+    "fields": {
+      "material": "Material",
+      "project": "Project",
+      "date": "Date",
+      "quantity": "Quantity",
+      "notes": "Note"
+    }
+  },
+  "payroll": {
+    "subtitle": "Salaries of daily and permanent workers.",
+    "comingSoon": "Salary calculation comes in the next update. The advances given so far are listed below.",
+    "openAdvances": "Open advances",
+    "totalToRecover": "Total to take back",
+    "noAdvances": "No open advances.",
+    "worker": "Worker"
   }
 }

@@ -15,8 +15,7 @@ export default async function PurchasesPage({
 }) {
   const t = await getTranslations('purchases');
   const { tab } = await searchParams;
-  // Until purchases exist (Step 3), the materials catalog is the useful tab.
-  const initialTab = tab === 'purchases' || tab === 'store' ? tab : 'materials';
+  const initialTab = tab === 'store' || tab === 'issues' || tab === 'materials' ? tab : 'purchases';
   return (
     <>
       <PageHeader title={t('title')} description={t('subtitle')} />

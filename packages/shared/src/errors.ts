@@ -18,6 +18,8 @@ export const ERROR_CODES = [
   'FILE_REQUIRED',
   'OWNER_NOT_FOUND',
   'CLIENT_HAS_PROJECTS',
+  'ATTENDANCE_EXISTS_OTHER_PROJECT',
+  'ADVANCE_HAS_RECOVERIES',
   'INTERNAL_ERROR',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

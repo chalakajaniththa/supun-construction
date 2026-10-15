@@ -7,7 +7,20 @@ import { queryKeys } from '@/lib/query-keys';
 
 /** REST resources of the API (plural nouns). */
 export type Resource =
-  'clients' | 'projects' | 'workers' | 'assets' | 'suppliers' | 'materials' | 'documents';
+  | 'clients'
+  | 'projects'
+  | 'workers'
+  | 'assets'
+  | 'suppliers'
+  | 'materials'
+  | 'documents'
+  | 'allocations'
+  | 'expenses'
+  | 'purchases'
+  | 'store'
+  | 'advances'
+  | 'daily-entry'
+  | 'attendance';
 
 export type ListParams = Record<string, string | number | boolean | undefined | null>;
 
@@ -21,6 +34,24 @@ export function useList<T>(
     queryKey: queryKeys.list(resource, params),
     queryFn: ({ signal }) => api<Paginated<T>>(`/${resource}`, { query: params, signal }),
     placeholderData: keepPreviousData,
+    enabled: opts.enabled,
+  });
+}
+
+/**
+ * GET any path, cached under `resource` (so useInvalidate(resource) refreshes it).
+ * For endpoints that are not a plain list / detail (e.g. /store/stock, /assets/:id/usage).
+ */
+export function useApi<T>(
+  resource: Resource,
+  path: string,
+  params?: ListParams,
+  opts: { enabled?: boolean; keepPrevious?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: [resource, 'api', path, params ?? {}],
+    queryFn: ({ signal }) => api<T>(path, { query: params, signal }),
+    placeholderData: opts.keepPrevious === false ? undefined : keepPreviousData,
     enabled: opts.enabled,
   });
 }

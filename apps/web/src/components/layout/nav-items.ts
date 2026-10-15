@@ -5,6 +5,7 @@ import {
   FileText,
   HardHat,
   LayoutDashboard,
+  Receipt,
   ReceiptText,
   Settings,
   ShoppingCart,
@@ -17,6 +18,7 @@ import {
 export type NavKey =
   | 'dashboard'
   | 'daily'
+  | 'expenses'
   | 'projects'
   | 'schedule'
   | 'workers'
@@ -32,12 +34,17 @@ export interface NavItem {
   key: NavKey;
   href: string;
   icon: LucideIcon;
+  /** Shown indented under the item before it (e.g. Expenses under Daily Entry). */
+  sub?: boolean;
+  /** Only active on exactly this path (its sub-items have their own entries). */
+  exact?: boolean;
 }
 
 /** Sidebar items, in the order of overview §8. Labels come from messages `nav.<key>`. */
 export const NAV_ITEMS: NavItem[] = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { key: 'daily', href: '/daily', icon: ClipboardPen },
+  { key: 'daily', href: '/daily', icon: ClipboardPen, exact: true },
+  { key: 'expenses', href: '/daily/expenses', icon: Receipt, sub: true },
   { key: 'projects', href: '/projects', icon: Building2 },
   { key: 'schedule', href: '/schedule', icon: CalendarDays },
   { key: 'workers', href: '/workers', icon: HardHat },
@@ -50,6 +57,6 @@ export const NAV_ITEMS: NavItem[] = [
   { key: 'settings', href: '/settings', icon: Settings },
 ];
 
-export function isActive(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(`${href}/`);
+export function isActive(pathname: string, href: string, exact = false): boolean {
+  return pathname === href || (!exact && pathname.startsWith(`${href}/`));
 }

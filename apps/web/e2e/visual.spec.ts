@@ -20,6 +20,13 @@ const PAGES = [
   '/assets/new',
   '/suppliers',
   '/purchases',
+  '/purchases?tab=store',
+  '/purchases?tab=issues',
+  '/purchases?tab=materials',
+  '/schedule',
+  '/daily',
+  '/daily/expenses',
+  '/payroll',
   '/documents',
   '/documents?tab=all',
   '/login',
@@ -28,11 +35,21 @@ const PAGES = [
 const DETAILS = ['/projects', '/workers', '/assets', '/suppliers'] as const;
 const WIDTHS = [1280, 1440] as const;
 const RAW_KEY =
-  /\b(common|nav|auth|settings|dashboard|errors|enums|projects|clients|workers|assets|suppliers|materials|purchases|documents)\.[a-zA-Z]+(\.[a-zA-Z_]+)*\b/;
+  /\b(common|nav|auth|settings|dashboard|errors|enums|projects|clients|workers|assets|suppliers|materials|purchases|documents|schedule|daily|expenses|attendance|advances|store|payroll)\.[a-zA-Z]+(\.[a-zA-Z_]+)*\b/;
+
+/** Tables whose content is wider than their box (the user would have to scroll sideways). */
+const clippedTables = (page: import('@playwright/test').Page) =>
+  page.evaluate(() =>
+    [...document.querySelectorAll('[data-slot="table-container"]')]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1)
+      .map(
+        (el) => `${el.querySelector('th')?.textContent ?? '?'} ${el.scrollWidth}/${el.clientWidth}`,
+      ),
+  );
 
 for (const locale of ['en', 'si'] as const) {
   test(`pages render cleanly in ${locale}`, async ({ page }) => {
-    test.setTimeout(300_000);
+    test.setTimeout(900_000);
     const errors = trackErrors(page);
     await login(page);
     await setLocale(page, locale);
@@ -49,6 +66,7 @@ for (const locale of ['en', 'si'] as const) {
           () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
         );
         expect(overflow, `horizontal overflow on ${path} at ${width}px`).toBe(false);
+        expect(await clippedTables(page), `clipped table on ${path} at ${width}px`).toEqual([]);
         const name = path.replace(/[/?=]+/g, '_').replace(/^_/, '');
         await page.screenshot({
           path: `e2e/screenshots/${locale}-${width}-${name}.png`,
@@ -71,13 +89,29 @@ for (const locale of ['en', 'si'] as const) {
           path: `e2e/screenshots/${locale}-${width}-${list.slice(1)}-detail.png`,
           fullPage: true,
         });
-        await page.getByTestId('tab-documents').click();
-        await expect(page.getByTestId('document-panel')).toBeVisible();
-        await page.waitForLoadState('networkidle');
-        await page.screenshot({
-          path: `e2e/screenshots/${locale}-${width}-${list.slice(1)}-documents.png`,
-          fullPage: true,
-        });
+        // every tab of the detail page
+        const tabs = await page
+          .getByRole('tab')
+          .evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')));
+        for (const tab of tabs) {
+          if (!tab) continue;
+          await page.getByTestId(tab).click();
+          await page.waitForLoadState('networkidle');
+          const tabText = await page.locator('body').innerText();
+          expect(tabText, `raw i18n key on ${list} ${tab}`).not.toMatch(RAW_KEY);
+          const tabOverflow = await page.evaluate(
+            () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+          );
+          expect(tabOverflow, `horizontal overflow on ${list} ${tab} at ${width}px`).toBe(false);
+          expect(
+            await clippedTables(page),
+            `clipped table on ${list} ${tab} at ${width}px`,
+          ).toEqual([]);
+          await page.screenshot({
+            path: `e2e/screenshots/${locale}-${width}-${list.slice(1)}-${tab}.png`,
+            fullPage: true,
+          });
+        }
       }
     }
     // the login page (logged out)

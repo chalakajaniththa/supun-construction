@@ -16,7 +16,7 @@
 |---|---|---|---|
 | 1 — Foundation | ✅ Done | 2026-10-14 | bbd7eaa |
 | 2 — Master data & documents | ✅ Done | 2026-10-15 | 411fde4 |
-| 3 — Daily operations | ⬜ Not started | | |
+| 3 — Daily operations | ✅ Done | 2026-10-15 | (see Step 3 entry) |
 | 4 — Money | ⬜ Not started | | |
 | 5 — Dashboard, reminders & reports | ⬜ Not started | | |
 | 6 — Backup, packaging & polish | ⬜ Not started | | |
@@ -222,3 +222,68 @@
 
 ### Needs human (cannot be done by the agent)
 - Nothing for Step 2.
+
+## Step 3 — Daily operations (2026-10-15)
+
+**Result:** ✅ Done
+
+### Versions pinned
+- No new dependencies (API or web).
+
+### Deviations from the plan
+- **No schema change / no migration** — the Step 1 model already had everything (allocations, attendance, usage, maintenance, purchases, issues, supplier payments, advances).
+- **`PATCH /allocations/:id` / `POST /allocations/:id/cancel`** look the id up in `WorkerAllocation` first, then `AssetAllocation` (ids are UUIDs, no kind in the URL).
+- **Hours from meters only for HOURS meters.** For KM meters `endMeter − startMeter` is the distance (km) and `hoursUsed` is typed (or 0); NONE meters type the hours. Shared helper `usageFromMeters()` / `subtractQty()` (exact, no floats) in `packages/shared/src/schemas/operations.ts`, used by API and the Daily Entry form.
+- **"Copy from yesterday"** = the most recent earlier day (within 31 days) that has attendance for this project (not strictly "yesterday"; Sundays/holidays have none). Button label "Copy from last day".
+- **Daily Entry offers LEAVE** as a 4th status button (needed for permanent staff); the step file listed Present/Half/Absent.
+- Documents page (Step 2) tweaks to fit 1280px in Sinhala: the all-owners list no longer shows the "Uploaded" column, file names cap at `max-w-52`, version label and expiry badge may wrap (`ExpiryBadge wrap`).
+- `DeleteButton` got `iconOnly`; `EntityPicker` shrinks in grid cells (`min-w-0 flex-1`) and its search box has `data-testid="picker-search"`.
+
+### Decisions made (not specified by the plan)
+- **Time:** Asia/Colombo is a fixed +05:30 (no DST) → `packages/shared/src/time.ts`: `colomboInstant(day,'HH:mm')`, `colomboDay`, `colomboTime`, `colomboDayRange`, `shiftDay`, `daysBetween`, `mondayOf`, `monthRange`, `DEFAULT_WORK_START/END` (08:00/17:00). Times in the API/UI are "HH:mm"; `endTime > startTime` (no overnight bookings).
+- **Allocations API:** `POST /allocations/workers` `{workerIds[], projectId, fromDate, toDate?, startTime, endTime, skipSundays?, notes}` (assets: `assetIds[]`, `operatorWorkerId?`) → one row per day per resource, max 62 days. Conflicts are looked up **before** inserting (so all are listed), inserted with `createManyAndReturn` in a transaction; a racing 23P01 re-runs the lookup. 409 `ALLOCATION_OVERLAP` `details.conflicts: AllocationConflict[]` (resource name/code, project, existing start/end, requested start/end). Pure calcs: `modules/allocations/calc/slots.ts` (`buildSlots`, `overlaps`, `findConflicts`). `GET /allocations?kind=&from=&to=` (days, Colombo; `includeCancelled=true` optional) returns a plain array. `GET /allocations/availability?kind=&fromDate=&toDate=&startTime=&endTime=&skipSundays=` → `{free, busy:[{…, projects[]}]}` (active workers / not-disposed assets).
+- **Daily Entry API:** `GET /daily-entry?date&projectId` → `{date, project, locked, workers[], usage[], expenses[]}`; rows = planned (allocation overlapping that Colombo day) ∪ already recorded. `PUT /daily-entry` is the **full set** for that project+day: attendance upserted by (worker, day), rows left out deleted; usage logs/expenses updated by `id`, new ones created, missing ones deleted. All in one transaction (`timeout 30s`). Row errors use paths like `expenses.1.supplierId`. Attendance already at **another non-null project** that day → 409 `ATTENDANCE_EXISTS_OTHER_PROJECT` `details.conflicts[{workerName, projectName…}]`; attendance with `projectId = null` is simply taken over. `asset.currentMeter = max(current, endMeter)` (never goes back). `GET /attendance?workerId|projectId&from&to` → `{items, summary}`.
+- **Payroll lock:** `common/payroll/payroll-lock.ts` (`lockedMonths`, `assertNotLocked`) — a FINALIZED `PayrollRun` for the month → 409 `PAYROLL_LOCKED`; `GET /daily-entry` returns `locked`. Step 4 must call `assertNotLocked` from any other attendance-editing path.
+- **Expenses:** `/expenses` CRUD (hard delete — not master data; audit log keeps the trace), list has `totalAmount`; CREDIT needs a supplier (`SUPPLIER_REQUIRED_FOR_CREDIT`). Receipts = documents (ownerType PROJECT, or COMPANY when no project; category RECEIPT) uploaded by `components/daily/receipt-button.tsx`.
+- **Assets:** `GET /assets/:id/usage` (paginated + `totals`), `GET /assets/:id/service-status` (`calc/service-status.ts`: used = current − last service; OVERDUE ≥ interval, DUE_SOON ≥ 90%, NOT_TRACKED without meter/interval/last service), `/assets/:id/maintenance` CRUD. A SERVICE record sets `lastServiceMeter` (reading, or current meter); a reading above the meter moves the meter forward; editing/deleting a SERVICE record recomputes from the latest remaining SERVICE record (left unchanged if none).
+- **Purchases & store:** `/purchases` CRUD (PATCH with `lines` replaces all lines); line amount = round(qty × price) and total computed server-side (`calc/stock.ts`). `GET /store/stock` (`purchasedQty, issuedQty, stock, averageCost, value`, `totalValue`), `GET/POST /store/issues`, `DELETE /store/issues/:id` ("undo"). **Average cost** = Σamount/Σqty of store purchase lines (all-time for the stock value; up to the issue date for an issue's `unitCost`, falling back to all-time). Stock changes are serialised with `pg_advisory_xact_lock(hashtext(materialId))`. Over-issue → 409 `INSUFFICIENT_STOCK` `details.available`; editing/deleting a store purchase that would leave negative stock → same 409.
+- **Suppliers:** `GET /suppliers` items carry `balance`; `GET /suppliers/balances`; `GET /suppliers/:id/statement?from&to` (`calc/balance.ts` `buildStatement`: opening balance from earlier items, same-day order purchase → expense → payment, running balance); `POST/DELETE /suppliers/:id/payments`. Only CREDIT purchases and CREDIT expenses count.
+- **Advances:** `GET /advances?status&workerId` (+`totalBalance`), `GET/POST /workers/:id/advances`, `PATCH/DELETE …/:advanceId` only while there are no recoveries (409 `ADVANCE_HAS_RECOVERIES`). `recovered`/`balance` come from `AdvanceRecovery` rows (Step 4 creates them). `recoveryPerMonth` empty = recover all at once; must be ≤ amount.
+- New error codes: `ATTENDANCE_EXISTS_OTHER_PROJECT`, `ADVANCE_HAS_RECOVERIES`. New validation codes: `INVALID_TIME, END_TIME_BEFORE_START, RANGE_TOO_LONG, TOO_MANY, DUPLICATE_WORKER, END_METER_BEFORE_START, SUPPLIER_REQUIRED_FOR_CREDIT, NO_LINES, RECOVERY_MORE_THAN_AMOUNT, PICK_SOMEONE`.
+- Audit entities: `WorkerAllocation`, `AssetAllocation`, `Allocation` (patch/cancel), `DailyEntry`, `Expense`, `MaintenanceRecord`, `Purchase`, `MaterialIssue`, `SupplierPayment`, `Advance`.
+- **Web:**
+  - `/schedule` (`components/schedule/*`): week grid, Workers | Machines toggle, skill/category filter, project colours (`lib/project-colors.ts`, hash of project id), click empty cell → `AllocationDialog`, click block → edit/cancel, "Assign team/machines" → `AssignDialog` (availability list with Busy/Free), overlaps → `ConflictDialog` (`overlapConflicts(err)`).
+  - `/daily` (`components/daily/daily-entry-view.tsx`): date + project in the URL (`?date=&project=`), last project remembered in localStorage (`daily.projectId`, try/catch). The form is plain React state; after a save the parent bumps a `version` key so the form restarts from the saved data. Sticky save bar (`lg:left-64` = sidebar width), unsaved warning + `beforeunload`. A usage row is only sent when it has an id or any of end meter / hours / fuel; an attendance row only with a status.
+  - `/daily/expenses` (sidebar sub-item: `NavItem.sub`, Daily Entry uses `exact`), also the Project → Costs tab (`ExpensesList projectId`). Dashboard "Add expense" → `/daily/expenses?add=1`.
+  - Project → Team & Machines (`projects/project-team.tsx`), Worker → Attendance calendar / Advances, Asset → Usage / Service & repairs (with service badge, also in the asset header) / Bookings, Supplier → Statement + Add payment, list "We owe" column, Purchases & Store tabs `purchases | store | issues | materials` (default now `purchases`), Payroll page = notice + open advances.
+  - `hooks/use-resource.ts`: new resources + `useApi(resource, path, params)` for non-list endpoints (invalidated with the resource name).
+- **Sample data** (`apps/api/src/seed/sample-operations.ts`, deterministic PRNG seeded by `today`): teams per ONGOING project (road / school / house), allocations Mon–Sat for the last 60 days **and the next 7 days**, JCB 2 (AST-002) at the road in the morning and the house in the afternoon on Mon/Wed/Fri, driver W-0024 splits on Saturdays; attendance up to **yesterday** (none today, so Daily Entry is ready to try) with ~6% half days, absences, leave for permanent staff, ~22% OT; usage logs whose meters end exactly at each asset's current meter; service states vary (JCB 1 / Tipper 1 due soon, roller overdue); ~145 expenses (weekly credit machine hire and electrical subcontract, double-cab petrol on credit), 6 with receipt PDFs; 25 purchases, 17 store issues (never more than in stock), 12 supplier payments (balances ≥ 0), 8 open advances, maintenance records. `seedSampleData` now also returns supplier and material ids.
+
+### Schema changes (migrations added in this step)
+- None.
+
+### Gotchas / things the next step must know
+- Payroll (Step 4): attendance is written only by `PUT /daily-entry`; add `assertNotLocked()` to anything else that writes attendance, and set `Attendance.payrollRunId` on finalize. The sample has **no** payroll runs yet and no advance recoveries — Step 4 must add "one finalized month + current month draft" to the seed (the overview's sample spec).
+- Costing (Step 4): fuel cost lives on usage logs (`fuelCost`); FUEL expenses are separate (e.g. double-cab petrol, `projectId = null`). Equipment for KM vehicles = days × `internalRatePerDay`; `hoursUsed` on KM logs is typed working hours, not distance.
+- shadcn `TableCell`/`TableHead` are `whitespace-nowrap`; in narrow tables add `whitespace-normal`. The visual spec now also fails on **clipped tables** (`[data-slot=table-container]` wider than its box).
+- Seeded projects get today's allocations; Playwright flows create their own project/workers/material (stamped names) via `page.request` so they never clash with seeded bookings. Pickers: use `getByTestId('picker-search')` (placeholder is translated).
+- Next dev: the API preview (`.claude/launch.json` "api") runs the **built** dist — rebuild + restart after API changes.
+
+### Useful commands
+- One spec: `pnpm --filter @sc/api exec vitest run --config ./vitest.config.e2e.ts test/daily-operations.e2e-spec.ts` · `pnpm --filter @sc/web exec playwright test e2e/daily-operations.spec.ts`
+- Rebuild only the web container: `docker compose up -d --build --wait web`
+- Reset dev DB with fresh sample data: `docker compose -f docker-compose.dev.yml down -v && pnpm dev:infra && pnpm --filter @sc/api db:deploy && pnpm --filter @sc/api db:seed`
+
+### Test summary
+- Unit: 281 passed (shared 87 · api 164 · web 30) — new: Colombo time helpers, meters/hours, step-3 schemas, slots/overlap, service status, weighted average/stock, supplier balance/statement
+- API e2e: 100 passed (Step 1–2: 79 · daily operations 20 · sample seed +1)
+- Playwright: 24 passed against a fresh `docker compose down -v && up -d --build --wait` stack (earlier 18 · daily operations 6: schedule bulk assign + overlap dialog, Daily Entry save/reload with receipt, purchase → store → issue, supplier statement + payment, Sinhala smoke); visual spec covers every new page and **every detail tab** in EN/SI at 1280/1440 px
+
+### Unfinished / known issues (carry over)
+- [ ] Schedule rows come from `GET /workers|/assets?pageSize=100` (enough for this business; paging needed beyond 100).
+- [ ] Changing date/project in Daily Entry with unsaved edits discards them silently (only page unload warns).
+- [ ] Carried from Step 2: company logo / worker photo UI, NIC re-use after soft delete, API image size.
+
+### Needs human (cannot be done by the agent)
+- Nothing for Step 3.
+

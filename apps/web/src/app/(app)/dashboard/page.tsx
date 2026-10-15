@@ -84,7 +84,7 @@ export default async function DashboardPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-11 justify-start text-base">
-                <Link href="/daily">
+                <Link href="/daily/expenses?add=1">
                   <Receipt aria-hidden />
                   {t('addExpense')}
                 </Link>

@@ -75,7 +75,7 @@ export function DocumentTable({
           >
             {row.original.title}
           </button>
-          <p className="max-w-72 truncate text-sm text-muted-foreground">
+          <p className="max-w-52 truncate text-sm text-muted-foreground">
             {row.original.currentVersion?.fileName}
           </p>
         </div>
@@ -121,24 +121,30 @@ export function DocumentTable({
       id: 'version',
       header: t('fields.version'),
       cell: ({ row }) => (
-        <span data-testid="document-version" className="whitespace-nowrap">
+        <span data-testid="document-version">
           {t('versionNo', { n: row.original.currentVersion?.versionNo ?? 0 })}
         </span>
       ),
     },
-    {
-      id: 'uploaded',
-      header: t('fields.uploaded'),
-      cell: ({ row }) => (
-        <span className="whitespace-nowrap">
-          {formatDate(row.original.currentVersion?.uploadedAt)}
-        </span>
-      ),
-    },
+    // The list across all owners has the extra "Belongs to" column; it leaves out the upload date
+    // (still in the version history) so the actions fit at 1280px.
+    ...(showOwner
+      ? []
+      : [
+          {
+            id: 'uploaded',
+            header: t('fields.uploaded'),
+            cell: ({ row }) => (
+              <span className="whitespace-nowrap">
+                {formatDate(row.original.currentVersion?.uploadedAt)}
+              </span>
+            ),
+          } satisfies DataTableColumn<DocumentDto>,
+        ]),
     {
       id: 'expiry',
       header: t('fields.expiry'),
-      cell: ({ row }) => <ExpiryBadge expiry={row.original.currentVersion?.expiryDate} />,
+      cell: ({ row }) => <ExpiryBadge expiry={row.original.currentVersion?.expiryDate} wrap />,
     },
     {
       id: 'actions',

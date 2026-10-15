@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { type DataTableColumn, DataTable } from '@/components/data-table/data-table';
 import { DeleteButton } from '@/components/delete-button';
-import { BackButton, ComingSoonPanel, DetailState, DetailTabs } from '@/components/detail-page';
+import { BackButton, DetailState, DetailTabs } from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { EmptyState } from '@/components/empty-state';
 import { EnumFilter, useEnumLabel } from '@/components/forms/enum-select';
@@ -19,14 +19,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { useListState } from '@/hooks/use-list-state';
 import { useDetail, useList, useRemove } from '@/hooks/use-resource';
+import { formatMoney } from '@/lib/format';
 import { SupplierDialog } from './supplier-dialog';
+import { SupplierStatement } from './supplier-statement';
 
 export function SuppliersView() {
   const t = useTranslations('suppliers');
   const enumLabel = useEnumLabel();
   const router = useRouter();
   const list = useListState({ type: undefined as string | undefined });
-  const { data, isLoading } = useList<SupplierDto>('suppliers', list.params);
+  const { data, isLoading } = useList<SupplierDto & { balance: string }>('suppliers', list.params);
   const [open, setOpen] = useState(false);
 
   const addButton = (
@@ -40,7 +42,7 @@ export function SuppliersView() {
       {t('add')}
     </Button>
   );
-  const columns: DataTableColumn<SupplierDto>[] = [
+  const columns: DataTableColumn<SupplierDto & { balance: string }>[] = [
     {
       id: 'code',
       header: t('fields.code'),
@@ -66,12 +68,28 @@ export function SuppliersView() {
       header: t('fields.type'),
       cell: ({ row }) => enumLabel('SupplierType', row.original.type),
     },
-    { id: 'phone', header: t('fields.phone'), cell: ({ row }) => row.original.phone ?? '—' },
+    {
+      id: 'phone',
+      header: t('fields.phone'),
+      cell: ({ row }) => <span className="whitespace-nowrap">{row.original.phone ?? '—'}</span>,
+    },
     {
       id: 'address',
       header: t('fields.address'),
       cell: ({ row }) => (
         <span className="line-clamp-1 max-w-64">{row.original.address ?? '—'}</span>
+      ),
+    },
+    {
+      id: 'balance',
+      header: () => <span className="block text-right">{t('fields.balance')}</span>,
+      cell: ({ row }) => (
+        <span
+          className={`block text-right whitespace-nowrap tabular-nums ${Number(row.original.balance) > 0 ? 'font-semibold' : 'text-muted-foreground'}`}
+          data-testid="supplier-balance"
+        >
+          {formatMoney(row.original.balance)}
+        </span>
       ),
     },
   ];
@@ -168,7 +186,7 @@ export function SupplierDetail({ id }: { id: string }) {
           </Card>
         </TabsContent>
         <TabsContent value="statement">
-          <ComingSoonPanel />
+          <SupplierStatement supplierId={s.id} />
         </TabsContent>
         <TabsContent value="documents">
           <DocumentPanel ownerType="SUPPLIER" ownerId={s.id} />

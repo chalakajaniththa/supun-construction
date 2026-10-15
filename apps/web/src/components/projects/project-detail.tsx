@@ -21,7 +21,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { useDetail, useRemove } from '@/hooks/use-resource';
 import { formatDate, formatMoney, formatPercent } from '@/lib/format';
+import { ExpensesList } from '@/components/daily/expenses-list';
 import { BudgetEditor } from './budget-editor';
+import { ProjectTeam } from './project-team';
 import { ProjectForm } from './project-form';
 
 const TABS = [
@@ -145,7 +147,14 @@ export function ProjectDetail({ id }: { id: string }) {
           </div>
           <BudgetEditor projectId={p.id} lines={p.budgetLines} />
         </TabsContent>
-        {(['boq', 'bills', 'variations', 'bonds', 'costs', 'team'] as const).map((k) => (
+        <TabsContent value="costs" className="flex flex-col gap-3">
+          <p className="text-muted-foreground">{t('costsHelp')}</p>
+          <ExpensesList projectId={p.id} projectName={p.name} />
+        </TabsContent>
+        <TabsContent value="team">
+          <ProjectTeam project={p} />
+        </TabsContent>
+        {(['boq', 'bills', 'variations', 'bonds'] as const).map((k) => (
           <TabsContent key={k} value={k}>
             <ComingSoonPanel />
           </TabsContent>

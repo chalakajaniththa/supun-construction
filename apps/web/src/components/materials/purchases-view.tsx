@@ -2,24 +2,29 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { ComingSoonPanel, DetailTabs } from '@/components/detail-page';
+import { DetailTabs } from '@/components/detail-page';
 import { TabsContent } from '@/components/ui/tabs';
 import { MaterialsManager } from './materials-manager';
+import { PurchasesList } from './purchases-list';
+import { IssuesList, StoreStock } from './store-view';
 
-const TABS = ['purchases', 'store', 'materials'] as const;
-type Tab = (typeof TABS)[number];
+export const PURCHASE_TABS = ['purchases', 'store', 'issues', 'materials'] as const;
+export type PurchaseTab = (typeof PURCHASE_TABS)[number];
 
-/** Purchases & Store. Step 2 builds the materials catalog; purchases and the store come in Step 3. */
-export function PurchasesView({ initialTab }: { initialTab: Tab }) {
+/** Purchases & Store: purchases, store stock, issues to projects and the materials catalog. */
+export function PurchasesView({ initialTab }: { initialTab: PurchaseTab }) {
   const t = useTranslations('purchases');
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const [tab, setTab] = useState<PurchaseTab>(initialTab);
   return (
-    <DetailTabs tabs={TABS} value={tab} onChange={setTab} label={(k) => t(`tabs.${k}`)}>
+    <DetailTabs tabs={PURCHASE_TABS} value={tab} onChange={setTab} label={(k) => t(`tabs.${k}`)}>
       <TabsContent value="purchases">
-        <ComingSoonPanel />
+        <PurchasesList />
       </TabsContent>
       <TabsContent value="store">
-        <ComingSoonPanel />
+        <StoreStock />
+      </TabsContent>
+      <TabsContent value="issues">
+        <IssuesList />
       </TabsContent>
       <TabsContent value="materials">
         <MaterialsManager />

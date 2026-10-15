@@ -21,6 +21,7 @@ import type { StorageService } from '../common/storage/storage.service.js';
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
 import { storageKeyFor } from '../modules/documents/documents.service.js';
 import { makePdf, makePng } from './files.js';
+import { seedOperations } from './sample-operations.js';
 
 /** Sample company details (fictional; overview §10). */
 export const SAMPLE_COMPANY: CompanySettings = {
@@ -954,10 +955,14 @@ export async function seedSampleData(
         assetIds.push(row.id);
       }
 
+      const supplierIds: string[] = [];
       for (const [i, s] of SUPPLIERS.entries()) {
-        await tx.supplier.create({ data: { ...s, code: `SUP-${String(i + 1).padStart(3, '0')}` } });
+        const row = await tx.supplier.create({
+          data: { ...s, code: `SUP-${String(i + 1).padStart(3, '0')}` },
+        });
+        supplierIds.push(row.id);
       }
-      await tx.material.createMany({
+      const materials = await tx.material.createManyAndReturn({
         data: MATERIALS.map((m) => ({
           name: m.name,
           nameSinhala: m.si,
@@ -965,12 +970,14 @@ export async function seedSampleData(
           category: m.category,
         })),
       });
+      const materialIds = new Map(materials.map((m) => [m.name, m.id]));
 
-      return { projectIds, workerIds, assetIds };
+      return { projectIds, workerIds, assetIds, supplierIds, materialIds };
     },
     { timeout: 60_000 },
   );
 
+  await seedOperations(prisma, ids, today, opts.storage);
   if (opts.storage) {
     await seedDocuments(prisma, opts.storage, today, ids);
   }

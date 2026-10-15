@@ -21,6 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { useDetail, useRemove } from '@/hooks/use-resource';
 import { formatDate } from '@/lib/format';
+import { AdvancesPanel } from './advances-panel';
+import { AttendanceCalendar } from './attendance-calendar';
 import { RateHistory } from './rate-history';
 import { WorkerForm } from './worker-form';
 import { useRateText } from './workers-list';
@@ -101,11 +103,15 @@ export function WorkerDetail({ id }: { id: string }) {
         <TabsContent value="rates">
           <RateHistory worker={w} />
         </TabsContent>
-        {(['attendance', 'advances', 'payslips'] as const).map((k) => (
-          <TabsContent key={k} value={k}>
-            <ComingSoonPanel />
-          </TabsContent>
-        ))}
+        <TabsContent value="attendance">
+          <AttendanceCalendar workerId={w.id} />
+        </TabsContent>
+        <TabsContent value="advances">
+          <AdvancesPanel worker={w} />
+        </TabsContent>
+        <TabsContent value="payslips">
+          <ComingSoonPanel />
+        </TabsContent>
         <TabsContent value="documents">
           <DocumentPanel ownerType="WORKER" ownerId={w.id} />
         </TabsContent>

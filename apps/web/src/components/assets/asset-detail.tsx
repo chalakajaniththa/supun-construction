@@ -5,13 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { DeleteButton } from '@/components/delete-button';
-import {
-  BackButton,
-  ComingSoonPanel,
-  DetailState,
-  DetailTabs,
-  EditButton,
-} from '@/components/detail-page';
+import { BackButton, DetailState, DetailTabs, EditButton } from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { ExpiryBadge } from '@/components/documents/expiry-badge';
 import { useEnumLabel } from '@/components/forms/enum-select';
@@ -23,6 +17,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { useDetail, useRemove } from '@/hooks/use-resource';
 import { formatDate, formatMoney, formatQty } from '@/lib/format';
 import { AssetForm } from './asset-form';
+import { AssetAllocationsPanel, MaintenancePanel, ServiceBadge, UsagePanel } from './asset-ops';
 
 const TABS = ['info', 'usage', 'maintenance', 'allocations', 'documents'] as const;
 type Tab = (typeof TABS)[number];
@@ -64,6 +59,7 @@ export function AssetDetail({ id }: { id: string }) {
             <CardHeader className="flex flex-row flex-wrap items-center gap-3">
               <CardTitle className="text-lg">{t('sections.basic')}</CardTitle>
               <StatusChip status={a.status}>{enumLabel('AssetStatus', a.status)}</StatusChip>
+              <ServiceBadge asset={a} />
               {a.nextExpiry ? (
                 <span className="flex items-center gap-2 text-sm text-muted-foreground">
                   {t('fields.nextExpiry')}: <ExpiryBadge expiry={a.nextExpiry} />
@@ -134,11 +130,15 @@ export function AssetDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
         </TabsContent>
-        {(['usage', 'maintenance', 'allocations'] as const).map((k) => (
-          <TabsContent key={k} value={k}>
-            <ComingSoonPanel />
-          </TabsContent>
-        ))}
+        <TabsContent value="usage">
+          <UsagePanel asset={a} />
+        </TabsContent>
+        <TabsContent value="maintenance">
+          <MaintenancePanel asset={a} />
+        </TabsContent>
+        <TabsContent value="allocations">
+          <AssetAllocationsPanel asset={a} />
+        </TabsContent>
         <TabsContent value="documents">
           <DocumentPanel ownerType="ASSET" ownerId={a.id} isVehicle={a.isVehicle} />
         </TabsContent>

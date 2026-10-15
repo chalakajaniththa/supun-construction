@@ -16,6 +16,7 @@ export function DeleteButton({
   label,
   variant = 'outline',
   testId = 'delete-button',
+  iconOnly = false,
 }: {
   description: string;
   onDelete: () => Promise<unknown>;
@@ -23,6 +24,8 @@ export function DeleteButton({
   label?: string;
   variant?: 'outline' | 'ghost';
   testId?: string;
+  /** Only the bin icon (for narrow table rows); the label becomes the accessible name. */
+  iconOnly?: boolean;
 }) {
   const t = useTranslations('common');
   const errorMessage = useErrorMessage();
@@ -33,13 +36,14 @@ export function DeleteButton({
       <Button
         type="button"
         variant={variant}
-        size="lg"
+        size={iconOnly ? 'icon-lg' : 'lg'}
         className="h-11 text-base text-destructive hover:text-destructive"
         onClick={() => setOpen(true)}
         data-testid={testId}
+        aria-label={iconOnly ? (label ?? t('delete')) : undefined}
       >
         <Trash2 aria-hidden />
-        {label ?? t('delete')}
+        {iconOnly ? null : (label ?? t('delete'))}
       </Button>
       <ConfirmDialog
         open={open}

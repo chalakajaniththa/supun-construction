@@ -91,3 +91,22 @@ export function todayInColombo(now: Date = new Date()): string {
     day: '2-digit',
   }).format(now);
 }
+
+/** "Mon 12" style day header for the schedule (en-GB, fixed for both languages like formatDate). */
+export function formatWeekday(day: string, opts: { short?: boolean } = {}): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    ...(opts.short ? {} : { month: 'short' }),
+    timeZone: 'UTC',
+  }).format(new Date(`${day}T00:00:00Z`));
+}
+
+/** "Oct 2026" for a "YYYY-MM" month. */
+export function formatMonth(month: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${month}-01T00:00:00Z`));
+}
