@@ -8,6 +8,8 @@ export function configureApp(app: INestApplication): void {
   // Requests arrive through the Next.js rewrite proxy; trust it for req.ip (login rate limit).
   express.set('trust proxy', 'loopback, linklocal, uniquelocal');
   express.disable('x-powered-by');
+  // BOQ imports send up to 1,000 rows as JSON.
+  express.useBodyParser('json', { limit: '2mb' });
   app.use(cookieParser());
   app.enableShutdownHooks();
 }

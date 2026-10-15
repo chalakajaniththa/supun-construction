@@ -1,6 +1,6 @@
 'use client';
 
-import type { DocumentDto, DocumentOwnerType } from '@sc/shared';
+import type { DocumentCategory, DocumentDto, DocumentOwnerType } from '@sc/shared';
 import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -19,10 +19,13 @@ export function DocumentPanel({
   ownerType,
   ownerId,
   isVehicle,
+  category,
 }: {
   ownerType: DocumentOwnerType;
   ownerId?: string | null;
   isVehicle?: boolean;
+  /** Only this category (e.g. bond copies on the Bonds tab); also the upload default. */
+  category?: DocumentCategory;
 }) {
   const t = useTranslations('documents');
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -31,6 +34,7 @@ export function DocumentPanel({
     ...list.params,
     ownerType,
     ownerId: ownerId ?? undefined,
+    category,
   });
   const uploadButton = (
     <Button
@@ -63,6 +67,7 @@ export function DocumentPanel({
         ownerType={ownerType}
         ownerId={ownerId}
         isVehicle={isVehicle}
+        defaultCategory={category}
       />
     </section>
   );

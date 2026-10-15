@@ -12,11 +12,15 @@ import { AllocationsModule } from './modules/allocations/allocations.module.js';
 import { AssetsModule } from './modules/assets/assets.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { BillingModule } from './modules/billing/billing.module.js';
+import { BondsModule } from './modules/bonds/bonds.module.js';
+import { BoqModule } from './modules/boq/boq.module.js';
 import { ClientsModule } from './modules/clients/clients.module.js';
 import { DailyEntryModule } from './modules/daily-entry/daily-entry.module.js';
 import { DocumentsModule } from './modules/documents/documents.module.js';
 import { ExpensesModule } from './modules/expenses/expenses.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { PayrollModule } from './modules/payroll/payroll.module.js';
 import { MaterialsModule } from './modules/materials/materials.module.js';
 import { ProjectsModule } from './modules/projects/projects.module.js';
 import { PurchasesModule } from './modules/purchases/purchases.module.js';
@@ -45,6 +49,10 @@ import { WorkersModule } from './modules/workers/workers.module.js';
     ExpensesModule,
     PurchasesModule,
     AdvancesModule,
+    PayrollModule,
+    BoqModule,
+    BillingModule,
+    BondsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

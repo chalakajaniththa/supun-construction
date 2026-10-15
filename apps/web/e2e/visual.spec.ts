@@ -32,10 +32,17 @@ const PAGES = [
   '/login',
 ] as const;
 /** List pages whose first row opens a detail page (checked too). */
-const DETAILS = ['/projects', '/workers', '/assets', '/suppliers'] as const;
+const DETAILS = [
+  '/projects',
+  // the sample road project has a BOQ, bills, a variation and bonds (step 4 tabs)
+  '/projects?search=Rural road',
+  '/workers',
+  '/assets',
+  '/suppliers',
+] as const;
 const WIDTHS = [1280, 1440] as const;
 const RAW_KEY =
-  /\b(common|nav|auth|settings|dashboard|errors|enums|projects|clients|workers|assets|suppliers|materials|purchases|documents|schedule|daily|expenses|attendance|advances|store|payroll)\.[a-zA-Z]+(\.[a-zA-Z_]+)*\b/;
+  /\b(common|nav|auth|settings|dashboard|errors|enums|projects|clients|workers|assets|suppliers|materials|purchases|documents|schedule|daily|expenses|attendance|advances|store|payroll|health|costs|boq|variations|eot|bills|payments|bonds)\.[a-zA-Z]+(\.[a-zA-Z_]+)*\b/;
 
 /** Tables whose content is wider than their box (the user would have to scroll sideways). */
 const clippedTables = (page: import('@playwright/test').Page) =>
@@ -74,9 +81,19 @@ for (const locale of ['en', 'si'] as const) {
         });
       }
       for (const list of DETAILS) {
-        await page.goto(list);
+        const [path, query] = list.split('?search=');
+        await page.goto(path!);
+        if (query) {
+          // the list keeps its search in state, not in the URL: type it
+          await page.locator('input[type="search"]').first().fill(query);
+          await expect(page.locator('tbody a[href^="/"]').first()).toContainText(query);
+        }
         await page.locator('tbody a[href^="/"]').first().click();
-        await expect(page).toHaveURL(new RegExp(`${list}/[0-9a-f-]{36}$`));
+        const base = list.split('?')[0]!;
+        const name = list.includes('?')
+          ? `${base.slice(1)}-${list.split('=')[1]!.split(' ')[0]!.toLowerCase()}`
+          : base.slice(1);
+        await expect(page).toHaveURL(new RegExp(`${base}/[0-9a-f-]{36}$`));
         await expect(page.getByTestId('edit-button')).toBeVisible();
         await page.waitForLoadState('networkidle');
         const text = await page.locator('body').innerText();
@@ -86,7 +103,7 @@ for (const locale of ['en', 'si'] as const) {
         );
         expect(overflow, `horizontal overflow on ${list} detail at ${width}px`).toBe(false);
         await page.screenshot({
-          path: `e2e/screenshots/${locale}-${width}-${list.slice(1)}-detail.png`,
+          path: `e2e/screenshots/${locale}-${width}-${name}-detail.png`,
           fullPage: true,
         });
         // every tab of the detail page
@@ -108,7 +125,7 @@ for (const locale of ['en', 'si'] as const) {
             `clipped table on ${list} ${tab} at ${width}px`,
           ).toEqual([]);
           await page.screenshot({
-            path: `e2e/screenshots/${locale}-${width}-${list.slice(1)}-${tab}.png`,
+            path: `e2e/screenshots/${locale}-${width}-${name}-${tab}.png`,
             fullPage: true,
           });
         }

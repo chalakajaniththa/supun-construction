@@ -176,7 +176,8 @@ describe('sample data seed', () => {
     expect(await p.expense.count({ where: { receiptDocumentId: { not: null } } })).toBeGreaterThan(
       3,
     );
-    expect(await p.purchase.count()).toBe(25);
+    // 25 in the 60-day history + 14 earlier (step 4: costs before the history window)
+    expect(await p.purchase.count()).toBe(39);
     expect(await p.materialIssue.count()).toBeGreaterThanOrEqual(15);
     const stock = await get('/store/stock');
     for (const row of stock.body.items) expect(Number(row.stock)).toBeGreaterThanOrEqual(0);
@@ -184,9 +185,75 @@ describe('sample data seed', () => {
     const balances = (await get('/suppliers/balances')).body as { balance: string }[];
     for (const b of balances) expect(Number(b.balance)).toBeGreaterThanOrEqual(0);
     expect(balances.filter((b) => Number(b.balance) > 0).length).toBeGreaterThanOrEqual(4);
+    // 8 advances; last month's payroll recovered one of them in full
     const advances = await get('/advances?status=OPEN');
-    expect(advances.body.total).toBe(8);
+    expect(advances.body.total).toBe(7);
     expect(await p.maintenanceRecord.count()).toBeGreaterThanOrEqual(10);
+  });
+
+  it('step 4: last month finalized, BOQs, bills, bonds and a project story', async () => {
+    const p = ctx.prisma;
+    const get = (path: string) => ctx.http().get(path).set('Cookie', cookie);
+    const runs = (await get('/payroll/runs')).body as {
+      year: number;
+      month: number;
+      status: string;
+    }[];
+    expect(runs.map((r) => [r.year, r.month, r.status])).toEqual([[2026, 9, 'FINALIZED']]);
+    expect(await p.advanceRecovery.count()).toBeGreaterThan(0);
+    // September attendance is locked, August's is not
+    const inMonth = (from: string, to: string) => ({ gte: new Date(from), lte: new Date(to) });
+    expect(
+      await p.attendance.count({
+        where: { payrollRunId: null, date: inMonth('2026-09-01', '2026-09-30') },
+      }),
+    ).toBe(0);
+    expect(
+      await p.attendance.count({
+        where: { payrollRunId: null, date: inMonth('2026-08-01', '2026-08-31') },
+      }),
+    ).toBeGreaterThan(0);
+
+    const project = async (name: string) =>
+      p.project.findFirstOrThrow({ where: { name: { contains: name } } });
+    const road = await project('Rural road');
+    const school = await project('classroom');
+    const culvert = await project('Box culvert');
+    const drain = await project('Drain');
+    const house = await project('house');
+    expect(await p.boqItem.count({ where: { projectId: road.id } })).toBeGreaterThanOrEqual(25);
+    expect(await p.boqItem.count({ where: { projectId: school.id } })).toBeGreaterThanOrEqual(30);
+    expect(await p.variation.count({ where: { status: 'APPROVED' } })).toBe(1);
+    expect(await p.extensionOfTime.count()).toBe(1);
+
+    const bills = async (id: string) =>
+      ((await get(`/projects/${id}/certificates`)).body as { code: string; status: string }[]).map(
+        (c) => [c.code.slice(-2), c.status],
+      );
+    expect(await bills(road.id)).toEqual([
+      ['01', 'PAID'],
+      ['02', 'CERTIFIED'],
+    ]);
+    expect(await bills(school.id)).toEqual([['01', 'SUBMITTED']]);
+    expect((await bills(culvert.id)).every(([, s]) => s === 'PAID')).toBe(true);
+
+    const roadMoney = (await get(`/projects/${road.id}/finance-summary`)).body;
+    expect(Number(roadMoney.receivable)).toBeGreaterThan(0);
+    expect(Number(roadMoney.advanceRecovered)).toBeGreaterThan(0);
+    expect(Number(roadMoney.advanceBalance)).toBeGreaterThan(0);
+    const culvertMoney = (await get(`/projects/${culvert.id}/finance-summary`)).body;
+    expect(culvertMoney).toMatchObject({ receivable: '0.00', retentionHeld: '222500.00' });
+
+    const bonds = (await get('/bonds?expiringWithin=30')).body as { referenceNo: string }[];
+    expect(bonds.map((b) => b.referenceNo)).toEqual(['BOC/PB/2026/0418']);
+    expect(await p.bond.count({ where: { status: 'RELEASED' } })).toBe(1);
+
+    const health = (await get('/projects/health')).body as { projectId: string; flags: string[] }[];
+    const flags = (id: string) => health.find((h) => h.projectId === id)!.flags;
+    expect(flags(road.id)).toEqual([]);
+    expect(flags(house.id)).toEqual([]);
+    expect(flags(school.id)).toEqual(['BEHIND_SCHEDULE']);
+    expect(flags(drain.id)).toContain('OVER_BUDGET');
   });
 
   it('does nothing when projects already exist', async () => {

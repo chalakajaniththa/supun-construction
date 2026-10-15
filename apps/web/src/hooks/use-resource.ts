@@ -20,7 +20,9 @@ export type Resource =
   | 'store'
   | 'advances'
   | 'daily-entry'
-  | 'attendance';
+  | 'attendance'
+  | 'payroll'
+  | 'bonds';
 
 export type ListParams = Record<string, string | number | boolean | undefined | null>;
 

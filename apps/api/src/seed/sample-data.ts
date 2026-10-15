@@ -21,6 +21,7 @@ import type { StorageService } from '../common/storage/storage.service.js';
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
 import { storageKeyFor } from '../modules/documents/documents.service.js';
 import { makePdf, makePng } from './files.js';
+import { SAMPLE_BOND_COPIES, seedFinance } from './sample-finance.js';
 import { seedOperations } from './sample-operations.js';
 
 /** Sample company details (fictional; overview §10). */
@@ -159,7 +160,7 @@ const PROJECTS: SampleProject[] = [
     budget: {
       LABOUR: '7200000.00',
       MATERIALS: '14800000.00',
-      EQUIPMENT: '1600000.00',
+      EQUIPMENT: '4800000.00',
       SUBCONTRACT: '2900000.00',
       OVERHEAD: '1100000.00',
     },
@@ -198,7 +199,7 @@ const PROJECTS: SampleProject[] = [
     contractValue: '18500000.00',
     start: -120,
     end: 90,
-    progressPct: '45',
+    progressPct: '50',
     supervisor: 'W-0021',
     budget: {
       LABOUR: '4300000.00',
@@ -978,6 +979,7 @@ export async function seedSampleData(
   );
 
   await seedOperations(prisma, ids, today, opts.storage);
+  await seedFinance(prisma, ids, today);
   if (opts.storage) {
     await seedDocuments(prisma, opts.storage, today, ids);
   }
@@ -1104,6 +1106,17 @@ async function seedDocuments(
     note: 'First draft',
   });
   docs.at(-2)!.versions[1]!.note = 'Approved plan';
+
+  // Bond copies (expiry = the bond's expiry; see sample-finance.ts)
+  for (const b of SAMPLE_BOND_COPIES) {
+    docs.push({
+      ownerType: 'PROJECT',
+      ownerId: ids.projectIds.get(b.project)!,
+      category: 'BOND_COPY',
+      title: b.title,
+      versions: [{ file: pdf(b.file, b.title, b.bank), issue: b.issue, expiry: b.expiry }],
+    });
+  }
 
   // Company documents
   docs.push(

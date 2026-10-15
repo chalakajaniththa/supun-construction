@@ -5,13 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { DeleteButton } from '@/components/delete-button';
-import {
-  BackButton,
-  ComingSoonPanel,
-  DetailState,
-  DetailTabs,
-  EditButton,
-} from '@/components/detail-page';
+import { BackButton, DetailState, DetailTabs, EditButton } from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { useEnumLabel } from '@/components/forms/enum-select';
 import { InfoList } from '@/components/info-list';
@@ -21,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { useDetail, useRemove } from '@/hooks/use-resource';
 import { formatDate } from '@/lib/format';
+import { PayslipsPanel } from './payslips-panel';
 import { AdvancesPanel } from './advances-panel';
 import { AttendanceCalendar } from './attendance-calendar';
 import { RateHistory } from './rate-history';
@@ -110,7 +105,7 @@ export function WorkerDetail({ id }: { id: string }) {
           <AdvancesPanel worker={w} />
         </TabsContent>
         <TabsContent value="payslips">
-          <ComingSoonPanel />
+          <PayslipsPanel workerId={w.id} />
         </TabsContent>
         <TabsContent value="documents">
           <DocumentPanel ownerType="WORKER" ownerId={w.id} />

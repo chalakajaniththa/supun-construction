@@ -5,13 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { DeleteButton } from '@/components/delete-button';
-import {
-  BackButton,
-  ComingSoonPanel,
-  DetailState,
-  DetailTabs,
-  EditButton,
-} from '@/components/detail-page';
+import { BackButton, DetailState, DetailTabs, EditButton } from '@/components/detail-page';
 import { DocumentPanel } from '@/components/documents/document-panel';
 import { useEnumLabel } from '@/components/forms/enum-select';
 import { InfoList } from '@/components/info-list';
@@ -21,8 +15,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TabsContent } from '@/components/ui/tabs';
 import { useDetail, useRemove } from '@/hooks/use-resource';
 import { formatDate, formatMoney, formatPercent } from '@/lib/format';
-import { ExpensesList } from '@/components/daily/expenses-list';
 import { BudgetEditor } from './budget-editor';
+import { ProjectBills } from './project-bills';
+import { ProjectBonds } from './project-bonds';
+import { ProjectBoq } from './project-boq';
+import { ProjectCosts } from './project-costs';
+import { ProjectHealthPanel } from './project-health';
+import { ProjectVariations } from './project-variations';
 import { ProjectTeam } from './project-team';
 import { ProjectForm } from './project-form';
 
@@ -67,6 +66,7 @@ export function ProjectDetail({ id }: { id: string }) {
       />
       <DetailTabs tabs={TABS} value={tab} onChange={setTab} label={(k) => t(`tabs.${k}`)}>
         <TabsContent value="overview" className="flex flex-col gap-5">
+          <ProjectHealthPanel project={p} />
           <Card>
             <CardHeader className="flex flex-row flex-wrap items-center gap-3">
               <CardTitle className="text-lg">{t('sections.basic')}</CardTitle>
@@ -147,18 +147,24 @@ export function ProjectDetail({ id }: { id: string }) {
           </div>
           <BudgetEditor projectId={p.id} lines={p.budgetLines} />
         </TabsContent>
-        <TabsContent value="costs" className="flex flex-col gap-3">
-          <p className="text-muted-foreground">{t('costsHelp')}</p>
-          <ExpensesList projectId={p.id} projectName={p.name} />
+        <TabsContent value="costs">
+          <ProjectCosts projectId={p.id} projectName={p.name} />
         </TabsContent>
         <TabsContent value="team">
           <ProjectTeam project={p} />
         </TabsContent>
-        {(['boq', 'bills', 'variations', 'bonds'] as const).map((k) => (
-          <TabsContent key={k} value={k}>
-            <ComingSoonPanel />
-          </TabsContent>
-        ))}
+        <TabsContent value="boq">
+          <ProjectBoq projectId={p.id} />
+        </TabsContent>
+        <TabsContent value="bills">
+          <ProjectBills project={p} />
+        </TabsContent>
+        <TabsContent value="variations">
+          <ProjectVariations project={p} />
+        </TabsContent>
+        <TabsContent value="bonds">
+          <ProjectBonds projectId={p.id} />
+        </TabsContent>
         <TabsContent value="documents">
           <DocumentPanel ownerType="PROJECT" ownerId={p.id} />
         </TabsContent>

@@ -17,7 +17,7 @@
 | 1 — Foundation | ✅ Done | 2026-10-14 | bbd7eaa |
 | 2 — Master data & documents | ✅ Done | 2026-10-15 | 411fde4 |
 | 3 — Daily operations | ✅ Done | 2026-10-15 | feba827 |
-| 4 — Money | ⬜ Not started | | |
+| 4 — Money | ✅ Done | 2026-10-15 | (see below) |
 | 5 — Dashboard, reminders & reports | ⬜ Not started | | |
 | 6 — Backup, packaging & polish | ⬜ Not started | | |
 
@@ -287,3 +287,83 @@
 ### Needs human (cannot be done by the agent)
 - Nothing for Step 3.
 
+
+## Step 4 — Money (2026-10-15)
+
+**Result:** ✅ Done
+
+### Versions pinned (added in this step)
+- API: `exceljs` **4.4.0** (BOQ import from .xlsx now; Step 5 reuses it for Excel reports). No web deps added.
+
+### Deviations from the plan
+- **BOQ import is two calls**: `POST /projects/:id/boq/import/preview` (multipart, field `file`, `.csv` or `.xlsx`, ≤ 5 MB, read into memory by `common/upload/read-small-file.ts`) → `{rows, validCount, errorCount, total}` with per-field validation codes; then `POST /projects/:id/boq/import` `{rows, replace?}` with the confirmed rows (JSON). A header row is optional (columns matched by name: Item No / Description / Unit / Qty|Quantity / Rate, else by position); heading rows (no unit, qty and rate) and blank rows are skipped; "Rs." and thousands separators are stripped. `replace: true` is refused with 409 `BOQ_HAS_PROGRESS` once any measurement exists. The JSON body limit was raised to 2 MB (`app.setup.ts`, `useBodyParser('json', { limit: '2mb' })`).
+- **"Record progress" for several items** = `POST /projects/:id/progress {date, items:[{boqItemId, cumulativeQty}], notes?}` (all-or-nothing) in addition to the per-item `POST /boq/:itemId/measurements`. A measurement on the same date is replaced (unique `(boqItemId, date)`).
+- **Payroll line editing is a dialog** (pencil next to the worker's name) instead of inline cells — the 10-column salary sheet only fits 1280 px (also in Sinhala) that way. Half days are no longer shown under the day count (days already show .5).
+- **Audit actions**: finalize/reopen are logged as `UPDATE` on `PayrollRun` (the `AuditAction` enum only has CREATE/UPDATE/DELETE; the path tells which).
+- Sample data (Step 2/3 values changed for the Step 4 story): school budget EQUIPMENT 1.6 M → **4.8 M**, house manual progress 45 % → **50 %**; `test/sample-data.e2e-spec.ts` now expects **39** purchases (14 earlier cash purchases added) and **7** open advances (one fully recovered by last month's payroll).
+
+### Decisions made (not specified by the plan)
+- **Payroll calculator** (`modules/payroll/calc/payroll.calculator.ts`):
+  - OT is only paid on PRESENT / HALF_DAY days. A day without a rate pays 0 and sets `missingRate`.
+  - PERMANENT: the salary is the rate in force on the month's last day (or the leaving day). **Joining / leaving mid-month**: the Mon–Sat days of the month before `joinedDate` / after `leftDate` are added to the no-pay days (same per-day rate as absences). Basic never goes below 0.
+  - Rounding: daily basic and OT are summed exactly and rounded once; EPF 8 / EPF 12 / ETF 3 are each rounded half-up to 2 dp on the rounded basic.
+  - **Advances**: due = each open advance's `recoveryPerMonth` (or its whole balance), capped at its balance; the deduction is capped so net ≥ 0 (room = gross − EPF 8 % − other deductions). Allocation to advances: instalments first (oldest advance first), then — if more is deducted — the remaining balances oldest first (`allocateAdvanceDeduction`). An edited deduction may exceed the instalments but not the total open balance (400 `DEDUCTION_MORE_THAN_BALANCE`); net < 0 → 400 `NET_BELOW_ZERO`.
+  - **Breakdown** (`PayrollLine.breakdown` = `[{projectId|null, days, otHours, cost}]`): DAILY → cost = pay of those days (Σ = gross); PERMANENT → gross + EPF 12 % + ETF 3 % split by attendance days (PRESENT 1 / HALF 0.5); days without a project → `projectId: null` (overhead); no attendance at all → one overhead entry. Rounding differences go to the biggest entry so Σ cost is exact.
+- **Payroll API** (`modules/payroll`): `GET /payroll/runs?year=&month=` (summaries + totals), `POST /payroll/runs {year, month}` (create or regenerate the DRAFT; manually entered *other deductions + note* are kept, advance deductions recalculated), `GET /payroll/runs/:id` (lines + totals incl. `employerCost`, `stale`, `canReopen`), `PATCH /payroll/runs/:id/lines/:lineId`, `POST …/finalize`, `POST …/reopen`, `GET /workers/:id/payslips`. Lines: every worker with attendance in the month + every active, non-deleted PERMANENT worker employed that month; DAILY workers with gross 0 get no line.
+  - **Stale drafts**: `PayrollRun.sourceHash` = sha256 of the month's attendance + all pay rates + open advances (≤ month end) at generation. `GET` reports `stale: true` when it changed; `finalize` → 409 **`PAYROLL_STALE`** ("Calculate again" first).
+  - Finalize (one transaction): attendance of the month gets `payrollRunId`, `AdvanceRecovery` rows are created, advances whose balance reaches 0 become RECOVERED, status FINALIZED. Attendance edits are then 409 `PAYROLL_LOCKED` (the Step 3 check). Reopen only the latest FINALIZED month (409 `PAYROLL_REOPEN_NOT_LATEST`), reverses recoveries (advances → OPEN), clears `payrollRunId`. Regenerating/editing a finalized month → 409 `PAYROLL_NOT_DRAFT`.
+  - Known limit: a DRAFT for month M does not see deductions of an earlier month that is still a DRAFT (balances come from finalized recoveries only).
+- **Costing** (`modules/costing/calc/costing.ts`, `health.ts`):
+  - Expense → budget category: FUEL, EQUIPMENT_HIRE, REPAIRS → EQUIPMENT; SUBCONTRACT → SUBCONTRACT; UTILITIES, OFFICE, PERMITS_FEES → OVERHEAD; TRANSPORT, MEALS, SMALL_TOOLS, OTHER → OTHER (`EXPENSE_TO_BUDGET`). Maintenance records are not project costs.
+  - LABOUR is one entry per worker. Days in a FINALIZED month use that line's breakdown cost for the project spread evenly over its project days (exact for whole months); other days are estimated (DAILY: rate + OT; PERMANENT: salary / workingDaysPerMonth × 1.15 (EPF 12 + ETF 3) + OT) and flagged `estimated`.
+  - EQUIPMENT per usage log: hours × `internalRatePerHour`, else one day × `internalRatePerDay` (no hourly rate), plus `fuelCost` as its own entry, plus the mapped expenses.
+  - `GET /projects/:id/costs?from&to&category&page&pageSize` → `byCategory` (all 6, with budget/actual/variance/pct/estimated/count), `total`, `estimated`, `entries` (paginated, for `category`, default LABOUR). Category totals are Σ of the rounded entries (e2e checks this).
+  - Health: time % = (today − start) / (current end − start), clamped, COMPLETED = 100; budget % = all-time actual / total budget (null without a budget); physical % = BOQ (as of today) else manual `progressPct` else 0 (`physicalSource` BOQ/MANUAL/NONE). Flags use `> 15` points (`HEALTH_FLAG_THRESHOLD`); COMPLETED projects are never BEHIND_SCHEDULE. `GET /projects/:id/health`, `GET /projects/health` (= not COMPLETED/CANCELLED; routes live in `ProjectsController`, `health` declared before `:id`).
+- **BOQ progress**: items of a variation that is not APPROVED are listed but `excluded` from totals and from IPC work done. Out-of-order measurements (below an earlier / above a later one) → 409 `MEASUREMENT_OUT_OF_ORDER` `details.items`; above the BOQ quantity is allowed with `warnings: ['OVER_QUANTITY']`. Items with measurements cannot be deleted (409 `BOQ_HAS_PROGRESS`); a variation with BOQ items cannot be deleted (409 `CONFLICT`).
+- **Variations / EOT**: variation numbers are per project (max + 1). Effective contract value = contract value + Σ APPROVED `amountChange`. EOT: `previousEndDate` = the project's current end at creation; after every EOT create/update/delete the project's `revisedEndDate` = the latest EOT's `newEndDate` (by approvedDate, then createdAt) or null. All recorded EOTs count as approved.
+- **IPC** (`modules/billing/calc/ipc.calculator.ts`):
+  - `previousCertified` = Σ gross of all earlier bills (= the previous cumulative). **Retention cap = effective contract value (incl. approved variations) × retentionCapPct** (the glossary defines contract value that way). Retention / advance recovery are never negative (a negative gross deducts nothing).
+  - One DRAFT at a time (409 `DRAFT_BILL_EXISTS`); `periodTo` must be after the previous bill's (400 `BEFORE_PREVIOUS_BILL`); `periodFrom` defaults to the previous `periodTo` + 1 (or project start). `PATCH` only for DRAFT (409 `CERTIFICATE_NOT_DRAFT`): `cumulativeWorkDone` value = manual override, `''`/null = back to measured, omitted = keep. `POST …/certificates/preview` = the wizard's calculation without saving.
+  - Status: DRAFT → SUBMITTED → CERTIFIED → PAID, plus SUBMITTED → DRAFT for the latest bill without payments (`CERTIFICATE_TRANSITIONS` in shared). PAID needs Σ IPC payments linked to the bill ≥ net (409 `CERTIFICATE_NOT_PAID_IN_FULL`); deleting a payment that leaves a PAID bill short moves it back to CERTIFIED. Payments cannot point at a DRAFT bill (400 `BILL_NOT_SUBMITTED`).
+  - Finance summary: receivable = Σ net of SUBMITTED/CERTIFIED/**PAID** bills − Σ IPC payments (PAID included so its payments cancel out); retention held = Σ retention of those bills − Σ RETENTION_RELEASE; advance recovered = Σ advanceRecovered of those bills; `advanceReceived` = Σ ADVANCE payments. Bill code `IPC-<project code>-NN` is computed (`certificateCode`), not stored.
+- **Bonds**: `/projects/:id/bonds` CRUD, `GET /bonds?expiringWithin=N&status=` (ACTIVE expiring ≤ today + N, expired included). Bond copies are PROJECT documents with category BOND_COPY; `DocumentPanel` got a `category` prop (filters the list and pre-selects the upload category) used on the Bonds tab.
+- New error codes: `PAYROLL_NOT_DRAFT, PAYROLL_STALE, PAYROLL_REOPEN_NOT_LATEST, BOQ_HAS_PROGRESS, MEASUREMENT_OUT_OF_ORDER, DRAFT_BILL_EXISTS, CERTIFICATE_NOT_DRAFT, CERTIFICATE_STATUS_INVALID, CERTIFICATE_NOT_PAID_IN_FULL, CERTIFICATE_HAS_PAYMENTS, IMPORT_FILE_INVALID`. New validation codes: `DEDUCTION_MORE_THAN_BALANCE, NET_BELOW_ZERO, BEFORE_PREVIOUS_BILL, BILL_NOT_SUBMITTED` (+ `NOT_FOUND`, `DUPLICATE` labels under `errors.validation`).
+- Audit entities: `PayrollRun`, `PayrollLine`, `BoqItem`, `BoqMeasurement`, `Variation`, `ExtensionOfTime`, `PaymentCertificate`, `ClientPayment`, `Bond`. Previews (BOQ import, bill) are `@SkipAudit()`.
+- Shared: `packages/shared/src/schemas/payroll.ts`, `finance.ts` (schemas + DTO types + `HEALTH_FLAGS`, `CERTIFICATE_TRANSITIONS`, `BOQ_IMPORT_COLUMNS`). `common/projects/require-project.ts` (`requireProject`, `fieldError`) for the new services.
+- **Web**:
+  - `/payroll` (`components/payroll/payroll-view.tsx`): month arrows, Calculate / Calculate again / Finalize / Open again (ConfirmDialogs), stale warning, salary sheet with totals footer, employer-cost card (gross, EPF 12 %, ETF 3 %, total), disabled PDF/Excel buttons (Step 5), open advances below. Worker → Payslips tab (`payslips-panel.tsx`).
+  - Project tabs: Overview → `ProjectHealthPanel` (`ProgressTriple` + `HealthFlags` in `components/progress-triple.tsx`, budget-vs-actual table, manual progress slider for PRIVATE projects without a BOQ); BOQ & progress (`project-boq.tsx`: grid with per-item bars, add/edit item, import preview dialog, record-progress dialog, measurement history); Bills & payments (`project-bills.tsx`: summary cards, bills table with next-status buttons, "New bill" wizard with `CalculationSteps`, payment dialog); Variations & time (`project-variations.tsx`); Bonds (`project-bonds.tsx`); Costs (`project-costs.tsx`: date range, category cards, paginated entries, the Step 3 expenses list below).
+  - `components/forms/dialog-form.tsx`: `useDialogForm` (plain state + server field errors) and `DialogButtons`. **`FormField` translates error codes itself — pass the raw code as `error.message`, never a translated string** (otherwise it shows "Please check this value").
+  - All project finance queries are cached under the `projects` resource (`useApi('projects', …)`), so `invalidate('projects')` refreshes every tab; payroll uses the new `payroll` resource.
+- **Sample data** (`seed/sample-finance.ts`, runs after `seedOperations`, uses the real `BoqService` / `BillingService` / `PayrollService` so numbers match the app): BOQs — road 25 items + 2 items of approved variation V1 (extra pipe culvert), school 35, culvert 12 (fully measured), drain 9; BOQ totals equal the contract values (provisional-sum item absorbs rounding). Drain: pending variation + **one EOT** (on hold, end moved to +150 days). Bills: road IPC-01 PAID, IPC-02 CERTIFIED (unpaid → receivable), school IPC-01 SUBMITTED, culvert 3 bills PAID with half the retention released. Mobilization advances paid for road and school (road partly recovered). Bonds: road performance bond expiring in **20 days** (+ its copy as a BOND_COPY document) and an advance payment guarantee, school released bid bond + performance bond, drain performance bond. 14 cash purchases + 18 expenses dated **before** the 60-day history (road, drain, culvert) so the story is: road healthy (~52 % done / ~50 % spent), **school BEHIND_SCHEDULE**, **drain OVER_BUDGET** (+ cost ahead of progress), house healthy. **Last month FINALIZED** (25 lines, recovers part of the advances); the current month is left for the owner to calculate.
+
+### Schema changes (migrations added in this step)
+- `20261015151831_payroll_note_and_source_hash`: `PayrollLine.otherDeductionsNote TEXT NULL`, `PayrollRun.generatedAt TIMESTAMPTZ NULL`, `PayrollRun.sourceHash TEXT NULL`.
+
+### Gotchas / things the next step must know
+- Dashboard (Step 5): use `GET /projects/health` (active projects with bars + flags) and `GET /projects/:id/finance-summary` (receivable) — "Money to receive" = Σ `receivable`. "Spent this month" can reuse `CostingService.compute(project, from, to)`.
+- Reminders (Step 5): `GET /bonds?expiringWithin=N` already exists; bond copies are PROJECT documents with category BOND_COPY and their own expiry.
+- Reports (Step 5): payroll totals/lines from `GET /payroll/runs/:id`; payslips from `GET /workers/:id/payslips`; IPC printout from `GET /projects/:id/certificates/:certId` (`calculation` has every step). The disabled "Payslips (PDF)" / "Salary sheet (Excel)" buttons on `/payroll` are placeholders to wire up.
+- The salary sheet is exactly as wide as the 1280 px content area in Sinhala — adding a column needs another layout (e.g. move a column into a sub-line).
+- `TableCell` in a `TableFooter` is `whitespace-nowrap` by default: a long footer label widens the whole first column.
+- Nest DI does not work under `tsx` (no decorator metadata) — to run a quick script that needs services, `pnpm --filter @sc/api build` and run it from `dist/`.
+- The web Docker build needs internet: `next/font/google` downloads Noto Sans / Noto Sans Sinhala at build time (a network outage fails `pnpm --filter @sc/web build` inside Docker with "Error while requesting resource"; just retry).
+- Running the seed's finance part needs `today`; tests pin `TODAY = '2026-10-15'` and assert the story flags at that date (time % grows by about 0.4 points a day for the school, so the flags are only guaranteed on the seed day ± a few days).
+
+### Useful commands
+- One API e2e file: `pnpm --filter @sc/api exec vitest run --config ./vitest.config.e2e.ts test/money.e2e-spec.ts`
+- One Playwright spec: `pnpm --filter @sc/web exec playwright test e2e/money.spec.ts`
+- Calculator tests only: `pnpm --filter @sc/api exec vitest run src/modules/payroll src/modules/costing src/modules/boq src/modules/billing`
+
+### Test summary
+- Unit: 380 passed (shared 87 · api 263 · web 30) — new: payroll calculator 34, IPC + finance summary 12, BOQ progress + measurements 20, BOQ import (CSV/XLSX) 6, costing + health 27
+- API e2e: 115 passed (Steps 1–3: 100 · money 14 · sample seed +1 step-4 story test)
+- Playwright: 28 passed against a fresh `docker compose down -v && up -d --build --wait` stack (Steps 1–3: 24 · money 4: payroll deduction edit, BOQ CSV import → record progress → new bill with the calculation checked → submit/certify → part payment lowers "money to receive", Sinhala payroll smoke). The visual spec now also opens the sample **road** project (typed into the list search — the list does not read `?search=` from the URL) so every Step 4 tab is checked in EN/SI at 1280/1440 px.
+
+### Unfinished / known issues (carry over)
+- [ ] Payroll exports (payslips PDF, salary sheet Excel, EPF/ETF summary) — buttons are disabled placeholders until Step 5.
+- [ ] A draft for a month does not account for advance deductions of an earlier month that is still a draft (only finalized recoveries reduce balances).
+- [ ] Carried from Steps 2–3: company logo / worker photo UI, NIC re-use after soft delete, schedule rows capped at 100, Daily Entry date change with unsaved edits, API image size.
+
+### Needs human (cannot be done by the agent)
+- Nothing for Step 4.

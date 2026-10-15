@@ -1006,6 +1006,10 @@ model PayrollRun {
   month       Int
   status      PayrollStatus @default(DRAFT)
   finalizedAt DateTime?     @db.Timestamptz
+  /// When the draft lines were last (re)generated.
+  generatedAt DateTime?     @db.Timestamptz
+  /// Fingerprint of the month's attendance + pay rates at generation (detects a stale draft).
+  sourceHash  String?
   createdAt   DateTime      @default(now()) @db.Timestamptz
   updatedAt   DateTime      @updatedAt @db.Timestamptz
 
@@ -1016,26 +1020,27 @@ model PayrollRun {
 }
 
 model PayrollLine {
-  id               String     @id @default(uuid()) @db.Uuid
-  payrollRunId     String     @db.Uuid
-  workerId         String     @db.Uuid
-  workerType       WorkerType
-  daysWorked       Decimal    @default(0) @db.Decimal(14, 3)
-  halfDays         Int        @default(0)
-  otHours          Decimal    @default(0) @db.Decimal(14, 3)
-  basicPay         Decimal    @default(0) @db.Decimal(14, 2)
-  otPay            Decimal    @default(0) @db.Decimal(14, 2)
-  grossPay         Decimal    @default(0) @db.Decimal(14, 2)
-  epfEmployee      Decimal    @default(0) @db.Decimal(14, 2)
-  epfEmployer      Decimal    @default(0) @db.Decimal(14, 2)
-  etfEmployer      Decimal    @default(0) @db.Decimal(14, 2)
-  advanceDeduction Decimal    @default(0) @db.Decimal(14, 2)
-  otherDeductions  Decimal    @default(0) @db.Decimal(14, 2)
-  netPay           Decimal    @default(0) @db.Decimal(14, 2)
+  id                  String     @id @default(uuid()) @db.Uuid
+  payrollRunId        String     @db.Uuid
+  workerId            String     @db.Uuid
+  workerType          WorkerType
+  daysWorked          Decimal    @default(0) @db.Decimal(14, 3)
+  halfDays            Int        @default(0)
+  otHours             Decimal    @default(0) @db.Decimal(14, 3)
+  basicPay            Decimal    @default(0) @db.Decimal(14, 2)
+  otPay               Decimal    @default(0) @db.Decimal(14, 2)
+  grossPay            Decimal    @default(0) @db.Decimal(14, 2)
+  epfEmployee         Decimal    @default(0) @db.Decimal(14, 2)
+  epfEmployer         Decimal    @default(0) @db.Decimal(14, 2)
+  etfEmployer         Decimal    @default(0) @db.Decimal(14, 2)
+  advanceDeduction    Decimal    @default(0) @db.Decimal(14, 2)
+  otherDeductions     Decimal    @default(0) @db.Decimal(14, 2)
+  otherDeductionsNote String?
+  netPay              Decimal    @default(0) @db.Decimal(14, 2)
   /// Per-project days & cost: [{ projectId, days, cost }]
-  breakdown        Json       @default("[]")
-  createdAt        DateTime   @default(now()) @db.Timestamptz
-  updatedAt        DateTime   @updatedAt @db.Timestamptz
+  breakdown           Json       @default("[]")
+  createdAt           DateTime   @default(now()) @db.Timestamptz
+  updatedAt           DateTime   @updatedAt @db.Timestamptz
 
   payrollRun PayrollRun        @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
   worker     Worker            @relation(fields: [workerId], references: [id])

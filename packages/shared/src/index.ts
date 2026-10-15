@@ -12,4 +12,6 @@ export * from './schemas/projects';
 export * from './schemas/settings';
 export * from './schemas/workers';
 export * from './schemas/operations';
+export * from './schemas/payroll';
+export * from './schemas/finance';
 export * from './time';
