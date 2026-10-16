@@ -70,3 +70,11 @@ export function samplePdf(text: string): Buffer {
     `%PDF-1.4\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n2 0 obj << /Type /Pages /Kids [] /Count 0 >> endobj\n% ${text}\ntrailer << /Root 1 0 R >>\n%%EOF\n`,
   );
 }
+
+/**
+ * The search box of the EntityPicker that is open now. A picker that was just closed stays in the
+ * page for its fade-out animation, so `getByTestId('picker-search')` alone can match two boxes.
+ */
+export function openPickerSearch(page: Page) {
+  return page.locator('[data-slot="popover-content"][data-state="open"]').getByTestId('picker-search');
+}

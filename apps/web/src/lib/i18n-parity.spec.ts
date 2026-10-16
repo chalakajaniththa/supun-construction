@@ -67,7 +67,9 @@ const enumNamespace = (name: string) => name.charAt(0).toLowerCase() + name.slic
 describe('icuArgs', () => {
   it('reads plain and plural / select arguments, not branch text', () => {
     expect(icuArgs('Hello {name}')).toEqual(['name']);
-    expect(icuArgs('{owner} expires {days, plural, =0 {today} =1 {tomorrow} other {in # days}}')).toEqual(['days', 'owner']);
+    expect(
+      icuArgs('{owner} expires {days, plural, =0 {today} =1 {tomorrow} other {in # days}}'),
+    ).toEqual(['days', 'owner']);
     expect(icuArgs('{n, plural, one {# item of {total}} other {# items}}')).toEqual(['n', 'total']);
     expect(icuArgs('No arguments')).toEqual([]);
   });

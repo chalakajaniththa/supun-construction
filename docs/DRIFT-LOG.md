@@ -18,7 +18,7 @@
 | 2 — Master data & documents | ✅ Done | 2026-10-15 | 411fde4 |
 | 3 — Daily operations | ✅ Done | 2026-10-15 | feba827 |
 | 4 — Money | ✅ Done | 2026-10-15 | dd7279d |
-| 5 — Dashboard, reminders & reports | 🟨 Partial (Playwright, full-stack check, seed, drift details left) | 2026-10-15 | see git log |
+| 5 — Dashboard, reminders & reports | ✅ Done | 2026-10-16 | (pending) |
 | 6 — Backup, packaging & polish | ⬜ Not started | | |
 
 (Status values: ⬜ Not started · 🟨 In progress / partial · ✅ Done)
@@ -370,7 +370,7 @@
 
 ## Step 5 — Dashboard, reminders & reports (2026-10-15)
 
-**Result:** 🟨 Partial — backend, web UI, unit + API e2e tests done; Playwright specs, full-stack Docker check, visual pass and final drift details NOT done (the session ran out of usage).
+**Result:** ✅ Done (finished 2026-10-16 after a usage-limit pause; the first part was committed as `c7987d5` "wip(step-5)").
 
 ### Versions pinned (added)
 - API: `@nestjs/schedule` 12.0.2, `handlebars` 4.7.9, `nodemailer` 10.0.12 (ships its own types), `intl-messageformat` 11.2.15. Web: `recharts` 3.10.1.
@@ -395,16 +395,29 @@
 - Never `pkill -f dist/main.js` (killed the shell again) — stop by port.
 - Handlebars `../` inside `{{#each sections}}{{#if}}` reaches the root — verify the payslip mini-header renders after page breaks (not checked visually yet).
 
-### Test summary (so far)
-- Unit: 476 passed (shared 87 · api 350 · web 39). API e2e: `test/insights.e2e-spec.ts` 33 passed (other e2e files not re-run this step). Playwright: not run.
+### Test fixes (tests that were wrong, not weakened)
+- `e2e/helpers.ts` `openPickerSearch()`: a just-closed EntityPicker stays mounted during its fade-out, so `getByTestId('picker-search')` could match two boxes (race in `daily-operations.spec.ts` "purchase to the store"). Pickers in specs now target `[data-slot=popover-content][data-state=open]`.
+- `daily-operations.spec.ts` Sinhala smoke: label changed with the Sinhala pass (`ව්‍යාපෘතිය (අඩවිය)` → `ව්‍යාපෘතිය (වැඩබිම)`).
+- `.prettierignore` now ignores `**/*.hbs` (Prettier's glimmer parser fails on the report layout).
 
-### Unfinished (next session must do)
-- [ ] Playwright spec for step 5 (dashboard 4 KPIs/attention/projects, bell count = list, open notification → entity, R1 PDF + R2 Excel download events, Sinhala dashboard) + add new pages to `e2e/visual.spec.ts`; run all specs.
-- [ ] Re-run all API e2e files (regression) and `pnpm -r lint` / `typecheck` after the last message edits.
-- [ ] `docker compose down -v && docker compose up -d --build --wait` (Dockerfile now copies messages) and check `docker compose logs api` (reminder scan on start).
-- [ ] Visual check EN/SI at 1280/1440 (dashboard was checked in SI at 1280; reports panel, notifications page, payroll buttons not yet).
-- [ ] Seed: notifications come from the start-up scan; consider making a sample notification read/resolved.
-- [ ] Final commit message `feat(step-5): dashboard, reminders and reports` once complete; update the Status row.
+### Useful commands
+- Step 5 API e2e: `pnpm --filter @sc/api exec vitest run --config ./vitest.config.e2e.ts test/insights.e2e-spec.ts`
+- Step 5 Playwright: `pnpm --filter @sc/web exec playwright test e2e/insights.spec.ts`
+- A report through the stack: log in with curl at `localhost:3000/api/auth/login`, then `GET /api/reports/<id>?format=pdf&locale=si&…`; look at it with `pdftoppm -png`.
+
+### Test summary
+- Unit: 476 passed (shared 87 · api 350 · web 39) — new: reminder rules 43, dashboard calc, report builders (totals = source DTOs), formatting, xlsx writer, translator/ICU, `sliceCostingInput`/`machineCost`, notification links, `icuArgs`.
+- API e2e: 148 passed (Steps 1–4: 115 · step 5: 33 — reminders from sample data, dedupe, read/read-all, renewal clears, deadline appears/clears, dashboard < 1.5 s and Σ receivable, every report × format with content type / `%PDF` / xlsx header, Sinhala PDF embeds NotoSansSinhala, cookie locale, error codes).
+- Playwright: 35 passed against a fresh `docker compose down -v && up -d --build --wait` stack (Steps 1–4: 28 · step 5: 7). Visual spec now includes `/reports` and `/notifications` (EN/SI, 1280/1440, no overflow, no raw keys).
+- Looked at myself: dashboard EN 1440 / SI 1280, reminders SI, reports panel SI, payroll buttons SI, PDFs (project cost, attendance grid, payslips incl. page-2 header, IPC) in Sinhala — no broken glyphs.
+
+### Unfinished / known issues (carry over)
+- [ ] Backup status on the dashboard (`backup: null`) and the "last backup failed / older than 36 h" attention item — Step 6.
+- [ ] Reminder e-mail digest is English only and untested against a real SMTP server.
+- [ ] Dashboard projects list can get long (no paging); fine for this business size.
+- [ ] Documents of soft-deleted owners still produce reminders (owner name still resolves).
+- [ ] Carried from earlier steps: company logo upload UI (reports already print `company.logoDocId` if set), worker photo, NIC re-use after soft delete, schedule rows capped at 100, API image size.
 
 ### Needs human
-- SMTP credentials for the optional e-mail digest (optional).
+- Optional: SMTP settings in `.env` for the daily reminder e-mail.
+- A native Sinhala speaker should review `apps/web/messages/si.json` (README note added).

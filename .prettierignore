@@ -10,3 +10,4 @@ apps/web/playwright-report
 apps/web/test-results
 apps/web/next-env.d.ts
 pnpm-workspace.yaml
+**/*.hbs

@@ -1,5 +1,5 @@
 import { type Page, expect, test } from '@playwright/test';
-import { login, samplePdf, setLocale, trackErrors } from './helpers';
+import { login, openPickerSearch, samplePdf, setLocale, trackErrors } from './helpers';
 
 /** Step 3 flows: schedule (with an overlap), Daily Entry, purchase → store → issue. */
 const stamp = String(Date.now()).slice(-6);
@@ -18,7 +18,7 @@ async function apiPost<T>(page: Page, path: string, data: object): Promise<T> {
 /** Opens an EntityPicker by its trigger and picks the option with this text. */
 async function pick(page: Page, trigger: ReturnType<Page['locator']>, text: string) {
   await trigger.click();
-  await page.getByTestId('picker-search').fill(text);
+  await openPickerSearch(page).fill(text);
   await page
     .getByRole('option', { name: new RegExp(text) })
     .first()
@@ -229,7 +229,7 @@ test.describe.serial('daily operations', () => {
     await setLocale(page, 'si');
     await page.goto('/daily');
     await expect(page.getByTestId('page-title')).toHaveText('දෛනික සටහන්');
-    await pick(page, page.getByLabel('ව්‍යාපෘතිය (අඩවිය)'), PROJECT);
+    await pick(page, page.getByLabel('ව්‍යාපෘතිය (වැඩබිම)'), PROJECT);
     await expect(page.getByTestId('section-attendance')).toContainText('පැමිණීම');
     await expect(page.getByTestId('section-usage')).toContainText('යන්ත්‍ර');
     await expect(page.getByTestId('daily-save')).toHaveText(/සුරකින්න/);
