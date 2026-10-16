@@ -1,49 +1,23 @@
 #!/bin/bash
 # Supun Construction — START. Double-click this file on the Mac.
-# First time: creates .env with fresh random secrets, builds and starts everything.
-set -euo pipefail
-cd "$(dirname "$0")/.."
+# First time: creates .env with fresh random secrets (and your backup password), builds and
+# starts everything (takes several minutes), then opens the app in your browser.
+set -uo pipefail
+# shellcheck source=scripts/lib.sh
+. "$(dirname "$0")/lib.sh"
 
-say() { printf '\n\033[1m%s\033[0m\n' "$1"; }
+ensure_docker
+ensure_env
+show_backup_password_once
 
-if ! command -v docker >/dev/null 2>&1; then
-  say "Docker Desktop is not installed. Please install it from https://www.docker.com/products/docker-desktop/ and try again."
-  read -r -p "Press Enter to close…" _
-  exit 1
+bold "Starting Supun Construction… (the first time takes several minutes)"
+docker compose up -d --build || fail "Could not start. Is another program using port $(env_value WEB_PORT)? See README → Troubleshooting."
+
+if wait_ready 900; then
+  bold "Opening $(web_url) — log in with your username and password."
+  open_url "$(web_url)"
+  info "You can close this window. The system keeps running in the background."
+  exit 0
 fi
-
-if ! docker info >/dev/null 2>&1; then
-  say "Starting Docker Desktop… (this can take a minute)"
-  open -a Docker >/dev/null 2>&1 || true
-  for _ in $(seq 1 120); do
-    docker info >/dev/null 2>&1 && break
-    sleep 3
-  done
-fi
-
-if [ ! -f .env ]; then
-  say "First start: creating settings file (.env) with new random passwords…"
-  cp .env.example .env
-  for key in POSTGRES_PASSWORD JWT_SECRET S3_ACCESS_KEY S3_SECRET_KEY; do
-    value="$(openssl rand -hex 24)"
-    sed -i.bak "s|^${key}=.*|${key}=${value}|" .env
-  done
-  rm -f .env.bak
-fi
-
-say "Starting Supun Construction… (the first time takes several minutes)"
-docker compose up -d --build
-
-WEB_PORT="$(grep -E '^WEB_PORT=' .env | cut -d= -f2 || true)"
-WEB_PORT="${WEB_PORT:-3000}"
-say "Waiting for the system to be ready…"
-for _ in $(seq 1 200); do
-  if curl -fsS "http://localhost:${WEB_PORT}/login" >/dev/null 2>&1; then
-    say "Ready! Opening http://localhost:${WEB_PORT}"
-    open "http://localhost:${WEB_PORT}"
-    exit 0
-  fi
-  sleep 3
-done
-say "The system did not start in time. Run: docker compose logs api web"
+pause_if_double_clicked
 exit 1

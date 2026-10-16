@@ -24,7 +24,8 @@ export type Resource =
   | 'payroll'
   | 'bonds'
   | 'notifications'
-  | 'dashboard';
+  | 'dashboard'
+  | 'backup';
 
 export type ListParams = Record<string, string | number | boolean | undefined | null>;
 

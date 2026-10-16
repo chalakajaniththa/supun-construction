@@ -1,0 +1,4 @@
+#!/bin/bash
+# Runs backup.sh unless another backup or a restore is running (they share one lock).
+# Usage: run-backup SCHEDULED|MANUAL
+exec flock -n "${LOCK_FILE:-/tmp/backup.lock}" /usr/local/bin/backup.sh "$@"

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { EXPENSE_CATEGORIES, type NotificationSeverity } from '../enums';
 import { dateOnlySchema, isOnOrAfter } from './common';
 import { paginationQuerySchema } from './pagination';
+import type { BackupStatusDto } from './backup';
 import type { ProjectHealthDto } from './finance';
 
 /**
@@ -34,6 +35,12 @@ export const NOTIFICATION_TITLE_KEYS = [
   'overBudget',
   'costAheadOfProgress',
   'behindSchedule',
+  'backupFailed',
+  'backupNever',
+  'backupTooOld',
+  'backupOld',
+  'backupLocalOnly',
+  'backupAgentOffline',
 ] as const;
 export type NotificationTitleKey = (typeof NOTIFICATION_TITLE_KEYS)[number];
 
@@ -48,11 +55,11 @@ export const notificationListQuerySchema = paginationQuerySchema.extend({
 export type NotificationListQuery = z.output<typeof notificationListQuerySchema>;
 
 /** What a notification points at; the web builds the link from it. */
-export type NotificationEntityType = 'DOCUMENT' | 'BOND' | 'ASSET' | 'PROJECT';
+export type NotificationEntityType = 'DOCUMENT' | 'BOND' | 'ASSET' | 'PROJECT' | 'BACKUP';
 
 export interface NotificationDto {
   id: string;
-  type: NotificationType | 'HEALTH';
+  type: NotificationType | 'HEALTH' | 'BACKUP';
   severity: NotificationSeverity;
   titleKey: NotificationTitleKey;
   /** Sentence parts (names, codes, enum values) — see the reminder rules. */
@@ -97,8 +104,7 @@ export interface DashboardDto {
   attentionTotal: number;
   projects: ProjectHealthDto[];
   series: DashboardSeriesPoint[];
-  /** Filled by Step 6 (backup status). */
-  backup: null;
+  backup: BackupStatusDto;
 }
 
 // ── Reports ─────────────────────────────────────────────────────────────

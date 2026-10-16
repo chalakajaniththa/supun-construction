@@ -80,13 +80,15 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Company details, rates and your password.",
+    "subtitle": "Company details, rates, backups and your password.",
     "saved": "Settings saved.",
     "tabs": {
       "company": "Company",
       "payroll": "Salary rates",
       "reminders": "Reminders",
       "billing": "Billing",
+      "backup": "Backup",
+      "sampleData": "Sample data",
       "password": "Password",
       "clients": "Clients"
     },
@@ -131,6 +133,92 @@
       "submit": "Change password",
       "changed": "Your password has been changed."
     }
+  },
+  "backup": {
+    "dotLabel": "Backup",
+    "loading": "checking…",
+    "title": "Backups",
+    "description": "Every night the system saves a locked copy of all records and documents. Keep it running and nothing is lost.",
+    "lastSuccess": "Last good backup",
+    "hoursAgo": "{hours, plural, =0 {less than an hour ago} =1 {1 hour ago} other {# hours ago}}",
+    "never": "Never",
+    "size": "Size",
+    "savedTo": "Saved to",
+    "automatic": "Automatic backup",
+    "everyDayAt": "Every day at {time}",
+    "agentOnline": "Backup service is running",
+    "agentOffline": "Backup service is not running",
+    "backupNow": "Back up now",
+    "backupNowHint": "Takes about a minute. You can keep working.",
+    "running": "Backing up…",
+    "waiting": "Starting…",
+    "startedToast": "Backup started.",
+    "offlineToast": "The backup service is not running. The backup will start when it runs again.",
+    "doneToast": "Backup finished successfully.",
+    "failedToast": "The backup did not work. See the history below.",
+    "reasons": {
+      "OK": "Backups are up to date",
+      "OLD": "The last backup is more than a day old",
+      "LOCAL_ONLY": "The last backup was saved only on this computer",
+      "AGENT_OFFLINE": "The backup service is not running",
+      "TOO_OLD": "No backup for more than 3 days",
+      "FAILED": "The last backup did not work",
+      "NEVER": "No backup has been made yet"
+    },
+    "advice": {
+      "OK": "Nothing to do. The next backup runs automatically.",
+      "OLD": "The computer was probably off or asleep at backup time. Press \"Back up now\".",
+      "LOCAL_ONLY": "Google Drive did not accept it. Check your internet connection, then press \"Back up now\".",
+      "AGENT_OFFLINE": "Start the system again with start.command. If this stays, ask your helper.",
+      "TOO_OLD": "Press \"Back up now\". If it does not work, ask your helper.",
+      "FAILED": "Press \"Back up now\" to try again. If it fails again, ask your helper.",
+      "NEVER": "Press \"Back up now\" to make the first backup."
+    },
+    "drive": {
+      "title": "Google Drive",
+      "connected": "Connected. Every backup is also saved to your Google Drive.",
+      "notConnected": "Not connected. Backups are kept only on this computer — if the computer is lost or broken, they are lost too.",
+      "howTo": "How to connect Google Drive",
+      "step1": "In the Supun Construction folder, open the \"scripts\" folder.",
+      "step2": "Double-click \"setup-gdrive.command\". A black Terminal window opens.",
+      "step3": "Your browser shows a Google page. Choose the Google account for the backups.",
+      "step4": "If Google says the app is not verified, click \"Advanced\", then \"Go to rclone\". Then click \"Continue\" or \"Allow\".",
+      "step5": "When the page says \"Success\", close it. Come back here and press \"Back up now\" to test.",
+      "privacy": "The backup tool can only see the files it creates. Backups are locked with your backup password, so nobody can open them without it."
+    },
+    "password": {
+      "title": "Keep your backup password safe",
+      "text": "Backups are locked with the backup password shown when the system was first started (also in the .env file). Write it on paper and keep it safe. Without it, no backup can be restored."
+    },
+    "history": {
+      "title": "Backup history",
+      "empty": "No backups yet.",
+      "when": "When",
+      "result": "Result",
+      "type": "Type",
+      "savedTo": "Saved to",
+      "size": "Size",
+      "took": "Took",
+      "underMinute": "under 1 min",
+      "minutes": "{count, plural, =1 {1 min} other {# min}}",
+      "newer": "Newer",
+      "older": "Older",
+      "page": "Page {page} of {pages}"
+    }
+  },
+  "sampleData": {
+    "title": "Reset sample data",
+    "description": "Start again with the sample data, for example after trying things out.",
+    "removes": "Removes ALL projects, workers, machines, daily records, salaries, bills and documents.",
+    "keeps": "Keeps your login, the settings, the change history and the backup history.",
+    "backupFirst": "Make a backup first if you want to keep anything (Settings → Backup).",
+    "button": "Reset sample data…",
+    "confirmTitle": "Delete everything and load the sample data?",
+    "confirmText": "This cannot be undone (except by restoring a backup).",
+    "typeLabel": "Type {word} to confirm",
+    "working": "Resetting… this takes up to a minute.",
+    "confirmButton": "Delete and reset",
+    "done": "Sample data loaded again."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -230,7 +318,8 @@
       "BILL_NOT_SUBMITTED": "This bill is still a draft.",
       "NOT_FOUND": "Not found.",
       "DUPLICATE": "Already in the list.",
-      "INVALID_MONTH": "Pick a month"
+      "INVALID_MONTH": "Pick a month",
+      "TYPE_RESET": "Type RESET (in capital letters) to confirm."
     },
     "UNSUPPORTED_FILE_TYPE": "This type of file cannot be uploaded. Use PDF, photos (JPG, PNG, WEBP, HEIC), Word / Excel files, drawings (DWG, DXF) or ZIP.",
     "FILE_TOO_LARGE": "The file is too big. Please choose a smaller file.",
@@ -1590,14 +1679,21 @@
       "deadlinePassed": "{project} was due to finish {days, plural, =1 {yesterday} other {# days ago}}",
       "overBudget": "{project} has spent more than its budget",
       "costAheadOfProgress": "{project}: spending is running ahead of the work done",
-      "behindSchedule": "{project} is behind schedule"
+      "behindSchedule": "{project} is behind schedule",
+      "backupFailed": "The last backup did not work",
+      "backupNever": "No backup has been made yet",
+      "backupTooOld": "The last backup was {days, plural, =0 {today} =1 {yesterday} other {# days ago}} — make a backup now",
+      "backupOld": "The last backup was {days, plural, =0 {today} =1 {yesterday} other {# days ago}}",
+      "backupLocalOnly": "The last backup was saved only on this computer, not on Google Drive",
+      "backupAgentOffline": "The backup service is not running"
     },
     "types": {
       "DOCUMENT_EXPIRY": "Papers",
       "BOND_EXPIRY": "Bonds",
       "SERVICE_DUE": "Service",
       "PROJECT_DEADLINE": "Deadlines",
-      "HEALTH": "Projects"
+      "HEALTH": "Projects",
+      "BACKUP": "Backup"
     },
     "digest": {
       "subject": "{company}: {count, plural, one {# reminder} other {# reminders}} today",

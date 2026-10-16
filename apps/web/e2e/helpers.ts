@@ -76,5 +76,7 @@ export function samplePdf(text: string): Buffer {
  * page for its fade-out animation, so `getByTestId('picker-search')` alone can match two boxes.
  */
 export function openPickerSearch(page: Page) {
-  return page.locator('[data-slot="popover-content"][data-state="open"]').getByTestId('picker-search');
+  return page
+    .locator('[data-slot="popover-content"][data-state="open"]')
+    .getByTestId('picker-search');
 }

@@ -1,6 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { BackupPanel } from '@/components/backup/backup-panel';
+import { ResetSampleData } from '@/components/backup/reset-sample-data';
 import { ClientsManager } from '@/components/clients/clients-manager';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -51,6 +53,10 @@ export function SettingsView({ initialTab }: { initialTab: SettingsTab }) {
           <ChangePasswordForm />
         ) : tab === 'clients' ? (
           <ClientsManager />
+        ) : tab === 'backup' ? (
+          <BackupPanel />
+        ) : tab === 'sampleData' ? (
+          <ResetSampleData />
         ) : (
           <Card>
             <CardContent className="flex flex-col gap-4 py-6">
@@ -76,6 +82,12 @@ export function SettingsView({ initialTab }: { initialTab: SettingsTab }) {
           </TabsContent>
           <TabsContent value="clients">
             <ClientsManager />
+          </TabsContent>
+          <TabsContent value="backup">
+            <BackupPanel />
+          </TabsContent>
+          <TabsContent value="sampleData">
+            <ResetSampleData />
           </TabsContent>
           <TabsContent value="password">
             <ChangePasswordForm />

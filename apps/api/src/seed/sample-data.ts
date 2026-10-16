@@ -983,7 +983,50 @@ export async function seedSampleData(
   if (opts.storage) {
     await seedDocuments(prisma, opts.storage, today, ids);
   }
+  await seedBackupHistory(prisma, today);
   return true;
+}
+
+/**
+ * A few past backup runs so Settings → Backup has a history (only when no real runs exist).
+ * All are older than 36 h, so the backup container's catch-up run makes a real one on start.
+ */
+export async function seedBackupHistory(prisma: PrismaClient, today: string): Promise<number> {
+  if ((await prisma.backupRun.count()) > 0) return 0;
+  const at = (offset: number, hhmm: string, plusMinutes = 0) =>
+    new Date(
+      new Date(`${addDays(today, offset)}T${hhmm}:00+05:30`).getTime() + plusMinutes * 60_000,
+    );
+  const runs: Prisma.BackupRunCreateManyInput[] = [
+    {
+      startedAt: at(-24, '23:00'),
+      finishedAt: at(-24, '23:00', 1),
+      status: 'FAILED',
+      trigger: 'SCHEDULED',
+      destination: 'LOCAL',
+      message: 'Sample record: the database could not be reached (the computer was shutting down).',
+    },
+    {
+      startedAt: at(-23, '09:12'),
+      finishedAt: at(-23, '09:14'),
+      status: 'SUCCESS',
+      trigger: 'MANUAL',
+      sizeBytes: 18_734_112n,
+      destination: 'LOCAL',
+      message: 'Sample record: saved on this computer.',
+    },
+    {
+      startedAt: at(-9, '23:00'),
+      finishedAt: at(-9, '23:03'),
+      status: 'SUCCESS',
+      trigger: 'SCHEDULED',
+      sizeBytes: 21_904_377n,
+      destination: 'LOCAL',
+      message: 'Sample record: saved on this computer.',
+    },
+  ];
+  const { count } = await prisma.backupRun.createMany({ data: runs });
+  return count;
 }
 
 /** Vehicle documents with expiries spread around today, project / company / worker documents. */

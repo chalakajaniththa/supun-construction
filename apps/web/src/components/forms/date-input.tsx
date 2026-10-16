@@ -23,6 +23,9 @@ function toDay(date: Date): string {
 }
 
 /** Calendar-day picker. Value is a "YYYY-MM-DD" string (or empty). Shows "14 Oct 2026". */
+const START_MONTH = new Date(1940, 0);
+const END_MONTH = new Date(new Date().getFullYear() + 20, 11);
+
 export function DateInput({
   value,
   onChange,
@@ -68,6 +71,9 @@ export function DateInput({
           selected={selected}
           defaultMonth={selected}
           captionLayout="dropdown"
+          // Birth dates far back; expiry dates (insurance, bonds, licences) years ahead.
+          startMonth={START_MONTH}
+          endMonth={END_MONTH}
           onSelect={(d) => {
             if (d) onChange(toDay(d));
             setOpen(false);

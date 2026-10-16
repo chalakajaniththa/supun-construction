@@ -22,3 +22,6 @@ apps/web/e2e/screenshots/
 apps/web/e2e/.auth/
 # Prisma generated client
 apps/api/src/generated/
+# Google Drive connection for backups (contains an access token)
+config/rclone/*
+!config/rclone/.gitkeep

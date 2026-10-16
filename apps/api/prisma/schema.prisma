@@ -366,6 +366,19 @@ model BackupRequest {
   @@map("backup_requests")
 }
 
+/// One row (id = 1), written by the backup container: heartbeat and whether Google Drive is set up.
+model BackupAgent {
+  id               Int       @id @default(1)
+  lastSeenAt       DateTime  @default(now()) @map("last_seen_at") @db.Timestamptz
+  gdriveConfigured Boolean   @default(false) @map("gdrive_configured")
+  schedule         String?
+  version          String?
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("backup_agent")
+}
+
 // ───────────────────────────────── Parties ─────────────────────────────────
 
 model Client {

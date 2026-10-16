@@ -1,6 +1,7 @@
 # Supun Construction — the full system (what the owner runs).
 #   docker compose up -d --build        (or double-click scripts/start.command on the Mac)
-# Only the web app is published, on http://localhost:3000 (bound to 127.0.0.1).
+# Only the web app is published, on http://localhost:3000 (bound to 127.0.0.1; set WEB_BIND=0.0.0.0
+# in .env to open it to phones on the same Wi-Fi).
 # All settings come from .env (copy .env.example; start.command does this for you).
 name: supun
 
@@ -92,13 +93,46 @@ services:
     environment:
       TZ: Asia/Colombo
     ports:
-      - '127.0.0.1:${WEB_PORT:-3000}:3000'
+      - '${WEB_BIND:-127.0.0.1}:${WEB_PORT:-3000}:3000'
     depends_on:
       api:
         condition: service_healthy
 
-  # backup: (Step 6) alpine + pg_dump + rclone + restic + supercronic → local repo + Google Drive.
+  # Nightly + "Backup now": pg_dump + document files → restic (local volume, and Google Drive when
+  # config/rclone/rclone.conf has a [gdrive] remote — see scripts/setup-gdrive.command).
+  backup:
+    <<: *restart
+    build:
+      context: .
+      dockerfile: docker/backup/Dockerfile
+    image: supun-backup:latest
+    init: true
+    environment:
+      TZ: Asia/Colombo
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-supun}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-supun}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-supun-docs}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD:?Set RESTIC_PASSWORD in .env (scripts/start.command creates it)}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 23 * * *}
+      GDRIVE_FOLDER: ${GDRIVE_FOLDER:-SupunConstructionBackup}
+      GDRIVE_CLIENT_ID: ${GDRIVE_CLIENT_ID:-}
+      GDRIVE_CLIENT_SECRET: ${GDRIVE_CLIENT_SECRET:-}
+    volumes:
+      - backup_local:/backup-local
+      - ./config/rclone:/config/rclone
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
 
 volumes:
   pgdata:
   seaweed_data:
+  backup_local:

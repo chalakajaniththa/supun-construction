@@ -9,11 +9,13 @@ import { I18nModule } from './common/i18n/i18n.module.js';
 import { PrismaModule } from './common/prisma/prisma.module.js';
 import { StorageModule } from './common/storage/storage.module.js';
 import { validateEnv } from './config/env.js';
+import { AdminModule } from './modules/admin/admin.module.js';
 import { AdvancesModule } from './modules/advances/advances.module.js';
 import { AllocationsModule } from './modules/allocations/allocations.module.js';
 import { AssetsModule } from './modules/assets/assets.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { BackupModule } from './modules/backup/backup.module.js';
 import { BillingModule } from './modules/billing/billing.module.js';
 import { BondsModule } from './modules/bonds/bonds.module.js';
 import { BoqModule } from './modules/boq/boq.module.js';
@@ -63,6 +65,8 @@ import { WorkersModule } from './modules/workers/workers.module.js';
     RemindersModule,
     DashboardModule,
     ReportsModule,
+    BackupModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

@@ -11,6 +11,8 @@ const PAGES = [
   '/settings',
   '/settings?tab=payroll',
   '/settings?tab=clients',
+  '/settings?tab=backup',
+  '/settings?tab=sampleData',
   '/projects',
   '/projects/new',
   '/projects/clients',
@@ -44,7 +46,7 @@ const DETAILS = [
 ] as const;
 const WIDTHS = [1280, 1440] as const;
 const RAW_KEY =
-  /\b(common|nav|auth|settings|dashboard|errors|enums|projects|clients|workers|assets|suppliers|materials|purchases|documents|schedule|daily|expenses|attendance|advances|store|payroll|health|costs|boq|variations|eot|bills|payments|bonds|reports|notifications)\.[a-zA-Z]+(\.[a-zA-Z_]+)*\b/;
+  /\b(common|nav|auth|settings|dashboard|errors|enums|projects|clients|workers|assets|suppliers|materials|purchases|documents|schedule|daily|expenses|attendance|advances|store|payroll|health|costs|boq|variations|eot|bills|payments|bonds|reports|notifications|backup|sampleData)\.[a-zA-Z]+(\.[a-zA-Z_]+)*\b/;
 
 /** Tables whose content is wider than their box (the user would have to scroll sideways). */
 const clippedTables = (page: import('@playwright/test').Page) =>

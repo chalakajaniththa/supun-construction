@@ -12,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { BackupDot } from './backup-dot';
 import { BrandMark, useCompanyName } from './brand';
 import { DefaultPasswordBanner } from './default-password-banner';
 import { LanguageToggle } from './language-toggle';
@@ -78,6 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2">
             <LanguageToggle />
+            <BackupDot />
             <NotificationBell />
             <UserMenu />
           </div>

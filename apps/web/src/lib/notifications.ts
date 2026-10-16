@@ -29,6 +29,8 @@ export function notificationHref(
       return `/assets/${n.entityId}?tab=maintenance`;
     case 'PROJECT':
       return `/projects/${n.entityId}`;
+    case 'BACKUP':
+      return '/settings?tab=backup';
     default:
       return '/notifications';
   }

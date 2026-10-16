@@ -14,7 +14,10 @@ async function unreadCount(page: Page): Promise<{ unread: number; open: number }
 async function pick(page: Page, triggerId: string, text: string) {
   await page.locator(`#${triggerId}`).click();
   await openPickerSearch(page).fill(text);
-  await page.getByRole('option', { name: new RegExp(text) }).first().click();
+  await page
+    .getByRole('option', { name: new RegExp(text) })
+    .first()
+    .click();
 }
 
 test.describe.serial('dashboard, reminders and reports', () => {
@@ -30,7 +33,9 @@ test.describe.serial('dashboard, reminders and reports', () => {
       await expect(page.getByTestId(`kpi-${id}-value`)).toBeVisible();
     }
     await expect(page.getByTestId('kpi-toReceive-value')).toHaveText(/^Rs\. [\d,]+$/);
-    expect(Number(await page.getByTestId('kpi-activeProjects-value').innerText())).toBeGreaterThan(0);
+    expect(Number(await page.getByTestId('kpi-activeProjects-value').innerText())).toBeGreaterThan(
+      0,
+    );
     const items = page.getByTestId('attention-item');
     await expect(items.first()).toBeVisible();
     expect(await items.count()).toBeLessThanOrEqual(8);
@@ -65,7 +70,9 @@ test.describe.serial('dashboard, reminders and reports', () => {
     await page.goto('/dashboard');
     await page.getByTestId('bell').click();
     await page.getByTestId('bell-item').first().click();
-    await expect(page).toHaveURL(/\/(assets|projects|workers|suppliers)\/[0-9a-f-]{36}|\/documents/);
+    await expect(page).toHaveURL(
+      /\/(assets|projects|workers|suppliers)\/[0-9a-f-]{36}|\/documents/,
+    );
     await expect(page.getByTestId('page-title')).toBeVisible();
     if (first.entityType === 'DOCUMENT' && first.params.ownerType === 'ASSET') {
       await expect(page).toHaveURL(/tab=documents/);
@@ -89,7 +96,9 @@ test.describe.serial('dashboard, reminders and reports', () => {
     expect(statSync((await download.path())!).size).toBeGreaterThan(1000);
   });
 
-  test('R2 salary sheet Excel downloads (last month, from Payroll and Reports)', async ({ page }) => {
+  test('R2 salary sheet Excel downloads (last month, from Payroll and Reports)', async ({
+    page,
+  }) => {
     await page.goto('/reports');
     await page.getByTestId('report-payroll-sheet').click();
     const [download] = await Promise.all([
@@ -129,7 +138,10 @@ test.describe.serial('dashboard, reminders and reports', () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/dashboard');
       await page.waitForLoadState('networkidle');
-      await page.screenshot({ path: `e2e/screenshots/step5-si-${width}-dashboard.png`, fullPage: true });
+      await page.screenshot({
+        path: `e2e/screenshots/step5-si-${width}-dashboard.png`,
+        fullPage: true,
+      });
       await page.goto('/reports');
       await page.getByTestId('report-project-cost').click();
       await page.screenshot({ path: `e2e/screenshots/step5-si-${width}-report-panel.png` });

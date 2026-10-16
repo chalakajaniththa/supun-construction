@@ -10,3 +10,8 @@ onlyBuiltDependencies:
   - prisma
   - sharp
   - unrs-resolver
+
+# Security fixes for transitive dependencies (pnpm audit --prod, Step 6).
+overrides:
+  mysql2: 3.24.5
+  'uuid@<11.1.1': 11.1.1

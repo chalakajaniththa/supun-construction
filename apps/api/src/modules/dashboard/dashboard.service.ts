@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   type DashboardDto,
   type ProjectHealthDto,
+  colomboDay,
   colomboDayRange,
   dayToDate,
   toDay,
@@ -9,6 +10,8 @@ import {
 import { todayInColombo } from '../../common/dates/dates.js';
 import { asDto } from '../../common/money/as-dto.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { backupAttention } from '../backup/calc/backup-health.js';
+import { BackupService } from '../backup/backup.service.js';
 import { BillingService } from '../billing/billing.service.js';
 import { CostingService } from '../costing/costing.service.js';
 import { NotificationsService } from '../reminders/notifications.service.js';
@@ -33,6 +36,7 @@ export class DashboardService {
     private readonly costing: CostingService,
     private readonly billing: BillingService,
     private readonly notifications: NotificationsService,
+    private readonly backup: BackupService,
   ) {}
 
   async get(): Promise<DashboardDto> {
@@ -42,7 +46,7 @@ export class DashboardService {
     const seriesFrom = months[0]!.from;
     const day = colomboDayRange(today);
 
-    const [projects, attendance, planned, payments, looseExpenses, healthRaw, top] =
+    const [projects, attendance, planned, payments, looseExpenses, healthRaw, top, backup] =
       await Promise.all([
         this.prisma.project.findMany({ where: { deletedAt: null } }),
         this.prisma.attendance.findMany({
@@ -63,6 +67,7 @@ export class DashboardService {
         }),
         this.costing.allHealth(),
         this.notifications.topOpen(ATTENTION_LIMIT),
+        this.backup.status(),
       ]);
 
     const order = { ONGOING: 0, ON_HOLD: 1, PLANNING: 2 } as Record<string, number>;
@@ -92,7 +97,15 @@ export class DashboardService {
       attendance.map((a) => a.workerId),
       planned.map((a) => a.workerId),
     );
-    const flagged = healthAttention(health, new Date().toISOString());
+    const now = new Date().toISOString();
+    const backupItem = backupAttention(
+      backup,
+      backup.lastSuccess
+        ? colomboDay(backup.lastSuccess.finishedAt ?? backup.lastSuccess.startedAt)
+        : null,
+      now,
+    );
+    const flagged = [...healthAttention(health, now), ...(backupItem ? [backupItem] : [])];
     const attention = mergeAttention(top.items, flagged, ATTENTION_LIMIT);
 
     return {
@@ -109,7 +122,7 @@ export class DashboardService {
       attentionTotal: top.total + flagged.length,
       projects: health,
       series,
-      backup: null,
+      backup,
     };
   }
 }

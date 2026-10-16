@@ -19,7 +19,7 @@
 | 3 — Daily operations | ✅ Done | 2026-10-15 | feba827 |
 | 4 — Money | ✅ Done | 2026-10-15 | dd7279d |
 | 5 — Dashboard, reminders & reports | ✅ Done | 2026-10-16 | 2585b99 |
-| 6 — Backup, packaging & polish | ⬜ Not started | | |
+| 6 — Backup, packaging & polish | ✅ Done | 2026-10-16 | (see below) |
 
 (Status values: ⬜ Not started · 🟨 In progress / partial · ✅ Done)
 
@@ -421,3 +421,87 @@
 ### Needs human
 - Optional: SMTP settings in `.env` for the daily reminder e-mail.
 - A native Sinhala speaker should review `apps/web/messages/si.json` (README note added).
+
+## Step 6 — Backup, packaging & polish (2026-10-16)
+
+**Result:** ✅ Done (real Google Drive sign-in and an arm64 build on the Mac are left for a human — see "Needs human").
+
+### Versions pinned (added / changed)
+- Backup image: `alpine:3.24.2` + `postgresql18-client` 18.6, `restic` 0.18.1, `rclone` 1.74.1, `supercronic` 0.2.49, `flock` (util-linux), `socat`, `jq`, `curl`, `bash`, `tzdata`.
+- API: `helmet` 8.3.0; `handlebars` 4.7.9 → **4.7.10** (critical advisory). pnpm `overrides` in `pnpm-workspace.yaml`: `mysql2: 3.24.5` (via the Prisma CLI), `uuid@<11.1.1: 11.1.1` (via exceljs).
+
+### Deviations from the plan
+- **Backup "Backup now" poll is every 15 s** (`BACKUP_POLL_SECONDS`), not 60 s — the button would otherwise feel broken. The crontab is generated from `BACKUP_SCHEDULE` (default `0 23 * * *`) at start; there is no static `docker/backup/crontab` file.
+- **Restore drops and recreates schema `public`** before `pg_restore --single-transaction` instead of `pg_restore --clean --if-exists`: `--clean` leaves tables that a *newer* version added, and the next `migrate deploy` would then fail. The API re-applies newer migrations when it starts.
+- **Backup traffic light** (`modules/backup/calc/backup-health.ts`): red = latest finished run failed / never / ≥ 72 h; orange = ≥ 36 h, **or Google Drive is set up but the last backup only reached this computer**, or the backup container has no heartbeat for 5 min; green otherwise. *A local-only backup is green while Drive is not set up* (the step's owner journey says "status green (local)"); Settings shows "Google Drive not connected" separately.
+- **Google Drive auth = browser sign-in through the backup container** (no rclone on the Mac): `scripts/setup-gdrive.command` runs `docker compose run -p 127.0.0.1:53682:53683 … gdrive-setup.sh`; inside, `socat` forwards :53683 → rclone's OAuth listener on 127.0.0.1:53682, so Google's redirect to `http://127.0.0.1:53682/` on the Mac reaches rclone. The host script opens the printed URL. Scope `drive.file`. Fallback: `--token '<json>'` from `rclone authorize "drive" "eyJzY29wZSI6ImRyaXZlLmZpbGUifQ"` elsewhere. Optional own client: `GDRIVE_CLIENT_ID/SECRET` in `.env`.
+- New table **`backup_agent`** (one row, heartbeat + `gdrive_configured` + schedule) written by the container; the API learns Drive status from it (the step allowed "a status row written by the container").
+- Settings has **two new tabs**: `backup` and `sampleData` (reset). Overview §8 listed both under Settings.
+
+### Decisions made (not specified by the plan)
+- **Timezone bug fixed (pre-existing since Step 1):** `@prisma/adapter-pg` sends/reads `timestamptz` as UTC wall-clock text without an offset, while our Postgres sessions defaulted to `Asia/Colombo` → every Prisma-written instant was stored 5 h 30 min early (round trips hid it) and SQL `now()` values (backup container) showed 5 h 30 min late. Fix: `pgAdapter()` in `common/prisma/prisma.service.ts` passes `options: '-c timezone=UTC'`. Regression test in `test/backup.e2e-spec.ts`. **Instants stored before this fix are 5 h 30 min early** (only sample/dev data existed; DATE columns are unaffected). No data migration.
+- Backup container (`docker/backup/`): `lib.sh` (env, `q` = psql via stdin so `:'var'` works, `ensure_repo` (restic exit 10 → init), `heartbeat`), `backup.sh` (one run; picks waiting requests and inserts the RUNNING row in one statement; EXIT trap → FAILED + log tail), `run-backup` (`flock -n /tmp/backup.lock`), `worker.sh` (marks leftover RUNNING rows FAILED, starts supercronic, heartbeat loop every 30 s, **waits up to 10 min for `http://api:4000/health`** before the catch-up so the first backup is not of a half-seeded DB, catch-up if no SUCCESS in 24 h, request loop), `restore.sh` (`--from local|gdrive --list | --snapshot ID|latest --yes`, same lock, marks the dump's own RUNNING row SUCCESS), `gdrive-setup.sh` (removes a broken `[gdrive]` remote if the test fails). Local repo `/backup-local/restic` (volume `backup_local`); Drive repo `rclone:gdrive:${GDRIVE_FOLDER}`. A Drive failure keeps the run SUCCESS with destination LOCAL and the error in `message`. Retention `forget --keep-daily 7 --keep-weekly 4 --keep-monthly 12`, `--prune` on Sundays only. Restic host `supun`; size = `du` of `/work` (dump + files).
+- rclone's SeaweedFS remote is `store:` (env `RCLONE_CONFIG_STORE_*`, provider SeaweedFS, path style); `RCLONE_CONFIG` points at `config/rclone/rclone.conf` only when it exists.
+- API: `GET /backup/status` (`BackupStatusDto`), `GET /backup/runs` (paginated), `POST /backup/run` → 202 `{requestId, queued}` (no second request while one waits or a run is RUNNING). `POST /admin/reset-sample-data {confirm:"RESET"}` (validation code `TYPE_RESET`): truncates every table except `_prisma_migrations, User, Setting, AuditLog, backup_*`, clears `company.logoDocId`, reseeds with storage, deletes the old document files, runs the reminder scan; audited as `SampleData` DELETE.
+- Dashboard `backup` = `BackupStatusDto`; a non-green status adds one attention item (`type/entityType 'BACKUP'`, title keys `backupFailed|backupNever|backupTooOld|backupOld|backupLocalOnly|backupAgentOffline`) → links to `/settings?tab=backup`.
+- Web: `BackupDot` in the top bar (`data-testid="backup-dot"`, `data-state`), `useBackupStatus` (60 s, 3 s while busy), `components/backup/backup-panel.tsx` (status, Back up now with polling in the click handler, Drive how-to, password card, history), `reset-sample-data.tsx` (typed RESET dialog). `DateInput` calendars now span 1940 → 20 years ahead (the dropdown stopped at the current year, so a next-year expiry could only be reached with the arrows).
+- Sample data: `seedBackupHistory()` adds 3 old runs (1 failed, 2 local successes, all > 36 h old) only when `backup_runs` is empty; the container's catch-up then makes a real one.
+- Security: `helmet` in the API (no CSP — JSON + file downloads/PDF previews; `CORP same-origin`); Next sends `nosniff`, `X-Frame-Options SAMEORIGIN`, `Referrer-Policy same-origin`, `Permissions-Policy`. `start.command` `chmod 600 .env`. `pnpm audit --prod`: 8 → 2 (remaining **high**: `deepmerge-ts` <8 inside the Prisma CLI (`@prisma/config`, major bump, only reads our own config) and `braces` via the shadcn CLI (no patched version)).
+- Mac scripts share `scripts/lib.sh` (bash 3.2-safe; `ensure_docker` opens Docker Desktop and waits, `ensure_env` creates `.env` with 5 random secrets incl. `RESTIC_PASSWORD` and **adds `RESTIC_PASSWORD` to an existing `.env`** on update, `show_backup_password_once`, `wait_ready` (15 min, shows `compose ps` on timeout)). `SC_NO_PAUSE=1` / `SC_NO_OPEN=1` for automation. New: `scripts/restore.sh`, `scripts/setup-gdrive.command`, `scripts/test-backup-restore.sh`. All shell scripts pass `shellcheck -x` (koalaman/shellcheck:stable).
+- `WEB_BIND` (default `127.0.0.1`) in compose/.env; README explains `0.0.0.0` for phones on the same Wi-Fi.
+
+### Schema changes (migrations added in this step)
+- `20261016021831_backup_agent`: table `backup_agent` (id int PK default 1, last_seen_at, gdrive_configured, schedule, version, created_at, updated_at).
+
+### Gotchas / things the next session must know
+- **This dev machine runs Docker with userns-remap + SELinux:** the backup container's root cannot write the bind mount `./config/rclone` (the worker logs a note). On the Mac (Docker Desktop) it is writable. For local Drive-setup tests: `chmod 777 config/rclone`.
+- `docker compose run … gdrive-setup.sh` uses the fixed name `supun-gdrive-setup`; an interrupted run is removed at the next start (it would hold port 53682).
+- To run rclone by hand inside the container, source the env first: `docker compose exec backup bash -c '. /usr/local/lib/backup/lib.sh && rclone lsd store:'`.
+- No arm64 emulation on this host (and installing qemu binfmt would change host kernel settings), so arm64 was verified by manifests: every base image (`node:24.21.0-slim`, `alpine:3.24.2`, `postgres:18.6-alpine`, `chrislusf/seaweedfs:4.48`, `gotenberg:8.37.0-chromium`) has `linux/arm64`, and every apk package exists in the aarch64 index.
+- Image sizes: api 656 MB (Prisma CLI + engines at runtime), web 274 MB, backup 196 MB.
+- The network here dropped twice during the step (Docker Hub / npm timeouts) — a failed `docker compose build` with `ConnectTimeoutError` is not a code problem; retry.
+
+### Useful commands
+- Backup now (CLI): `docker compose exec backup run-backup MANUAL` · logs `docker compose logs -f backup`
+- List snapshots: `docker compose exec backup restore.sh --list` · restore: `scripts/restore.sh [--from gdrive] [--snapshot ID|--latest] [--yes]`
+- Restore round-trip test (full stack): `scripts/test-backup-restore.sh`
+- Step 6 API e2e: `pnpm --filter @sc/api exec vitest run --config ./vitest.config.e2e.ts test/backup.e2e-spec.ts`
+- Owner journey: `pnpm --filter @sc/web exec playwright test e2e/owner-journey.spec.ts`
+- Clean-clone check: `git ls-files -co --exclude-standard | rsync -a --files-from=- . <dir>` then `SC_NO_PAUSE=1 SC_NO_OPEN=1 <dir>/scripts/start.command`
+
+### Test summary
+- Unit: 509 passed (shared 87 · api 371 · web 51) — new: backup health/attention, reset truncate list, bytes/schedule/duration formatting.
+- API e2e: 159 passed (Steps 1–5: 148 · backup + reset 11, incl. the session-timezone regression test).
+- Playwright: 39 passed against a fresh `docker compose down -v && up -d --build --wait` stack (Steps 1–5: 35 · owner journey 4: setup, the English day, reset dialog, Sinhala backup). Visual spec now also covers Settings → Backup / Sample data (EN/SI, 1280/1440).
+- Restore: `scripts/test-backup-restore.sh` PASSED (backup via the app → rename a client + delete a stored file → restore latest local → name and file sha256 back, no stuck RUNNING row).
+- `start.command` from a clean copy with no `.env`: created `.env` (mode 600) with secrets + `RESTIC_PASSWORD`, built, all 6 services healthy, seed loaded, catch-up backup after the seed.
+- Performance: every list endpoint 9–30 ms, `/projects/health` 190 ms, `/dashboard` 230 ms with the sample data — no indexes added.
+- Looked at it myself: Settings → Backup EN + SI at 1280 px, top-bar dot, no console errors.
+
+### Unfinished / known issues (carry over)
+- [ ] Carried from earlier steps: company logo / worker photo UI, NIC re-use after soft delete, schedule rows capped at 100, Daily Entry date change with unsaved edits, English-only reminder e-mail, reminders for documents of soft-deleted owners.
+- [ ] API image ~656 MB (Prisma CLI needed at runtime for `migrate deploy`).
+- [ ] `pnpm audit --prod`: 2 high left (deepmerge-ts in the Prisma CLI, braces in the shadcn CLI) — re-check when Prisma / shadcn update.
+
+### Needs human (cannot be done by the agent)
+- **Connect Google Drive for real**: run `scripts/setup-gdrive.command` on the Mac, sign in, then Settings → Backup → Back up now; check "Saved to: This computer and Google Drive" and the `SupunConstructionBackup` folder. Then try `scripts/restore.sh --from gdrive --list`.
+- **Build on the MacBook (arm64)**: `scripts/start.command` from a clean clone (first build ~10 min).
+- **Write down the backup password** shown on the first start (also `RESTIC_PASSWORD` in `.env`).
+- Optional: own Google OAuth client (README §6), SMTP for the reminder e-mail, a native Sinhala review of `si.json`.
+
+## Handover notes
+
+**What to test by hand (30 minutes on the Mac):**
+1. `scripts/start.command` from a fresh clone → note the backup password → log in → change the password.
+2. Dashboard → Daily Entry for today on a sample site → Save.
+3. A machine with expiring insurance → Documents → New version with next year's expiry → its reminder disappears from the bell.
+4. Payroll → this month → Calculate → Payslips (PDF); a project → Bills → New bill → Submitted → Certified → Record payment.
+5. Settings → Backup → Back up now → green. `scripts/setup-gdrive.command` → Back up now → "This computer and Google Drive".
+6. `scripts/restore.sh` → pick the latest → RESTORE → data is still there.
+7. EN ↔ සිං on a few pages; open it from a phone after setting `WEB_BIND=0.0.0.0`.
+8. Settings → Sample data → reset (only while it is still sample data), or `SEED_SAMPLE_DATA=false` before the first real start.
+
+**Known limitations:** one login (no roles); the app is only as safe as the Mac (no HTTPS; keep `WEB_BIND=127.0.0.1` unless on a trusted network); backups are kept on the same disk until Drive is connected; restic's local repo lives in a Docker volume (removed by `docker compose down -v` — never run that on the owner's Mac); reminder e-mails are English; the DRAFT payroll of a month ignores deductions of an earlier still-draft month.
+
+**Ideas for v2:** user accounts with roles (site supervisor entering Daily Entry on a phone), a phone-first Daily Entry, HTTPS + remote access (e.g. Tailscale), SMS/WhatsApp reminders, photo capture with GPS on site, material requests and quotations, a tender/estimate module from BOQ rates, automatic restore drills (monthly test-restore to a scratch DB), worker photo and company logo upload, bank file export for salaries.
+
