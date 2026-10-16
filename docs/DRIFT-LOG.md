@@ -19,7 +19,7 @@
 | 3 — Daily operations | ✅ Done | 2026-10-15 | feba827 |
 | 4 — Money | ✅ Done | 2026-10-15 | dd7279d |
 | 5 — Dashboard, reminders & reports | ✅ Done | 2026-10-16 | 2585b99 |
-| 6 — Backup, packaging & polish | ✅ Done | 2026-10-16 | (see below) |
+| 6 — Backup, packaging & polish | ✅ Done | 2026-10-16 | 58eef64 |
 
 (Status values: ⬜ Not started · 🟨 In progress / partial · ✅ Done)
 
