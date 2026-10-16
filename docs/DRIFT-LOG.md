@@ -18,7 +18,7 @@
 | 2 — Master data & documents | ✅ Done | 2026-10-15 | 411fde4 |
 | 3 — Daily operations | ✅ Done | 2026-10-15 | feba827 |
 | 4 — Money | ✅ Done | 2026-10-15 | dd7279d |
-| 5 — Dashboard, reminders & reports | ✅ Done | 2026-10-16 | (pending) |
+| 5 — Dashboard, reminders & reports | ✅ Done | 2026-10-16 | 2585b99 |
 | 6 — Backup, packaging & polish | ⬜ Not started | | |
 
 (Status values: ⬜ Not started · 🟨 In progress / partial · ✅ Done)
