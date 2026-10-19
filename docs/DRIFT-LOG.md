@@ -505,3 +505,31 @@
 
 **Ideas for v2:** user accounts with roles (site supervisor entering Daily Entry on a phone), a phone-first Daily Entry, HTTPS + remote access (e.g. Tailscale), SMS/WhatsApp reminders, photo capture with GPS on site, material requests and quotations, a tender/estimate module from BOQ rates, automatic restore drills (monthly test-restore to a scratch DB), worker photo and company logo upload, bank file export for salaries.
 
+
+## After Step 6 — In-app user guide (2026-10-19)
+
+**What:** a bilingual (EN / SI) user guide inside the app at `/guide`, for the owner.
+- Menu item **User guide** (last in the sidebar) and a **?** Help button in the top bar that opens
+  the guide at the section of the current page (`/guide?section=…`). Topics open at `/guide?topic=…`.
+- 11 sections, ~50 topics (getting started, daily entry, projects & bills, schedule, workers &
+  payroll, machines, purchases/suppliers, documents, reports, settings & backups, problems).
+  Each topic: summary, numbered steps with an annotated screenshot (red boxes with numbers that
+  match "(1)" in the text), tips, warnings, related topics, and an "Open this page" button.
+- Search (`src/lib/guide-search.ts`, unit-tested): every query word must match; title > keywords >
+  summary > steps; English and Sinhala keywords are both searched whatever the screen language;
+  Sinhala joiners are ignored; a rough English stem ("salary" finds "salaries").
+- Screenshots: `apps/web/public/guide/{en,si}/*.webp` (~50 KB each), made by
+  `e2e/guide-screenshots.spec.ts` (skipped unless `GUIDE_SHOTS=1`; needs ImageMagick) against
+  the dev app with the sample data. Static files under `/guide/...` are public (the proxy matcher
+  skips paths with a file extension), like any other static asset.
+
+**Deviation:** the guide's long text lives in `guide-content.ts` (both languages side by side),
+not in `messages/*.json` — it is documentation, not UI strings, and keeping EN and SI next to each
+other makes it easier to keep in step. Screen labels inside it are not copied: `[[ns.key]]` shows
+the real label from the messages files. The guide's own UI strings (search box, buttons) are in
+`messages/*.json` under `guide.*` as usual. `guide-content.spec.ts` checks both languages, the
+label keys, the picture marks, related links and that every screenshot exists.
+
+**Known:** the screenshots were made with `next dev` and the dev database, so Settings → Backup
+shows "no backup yet / backup service not running" (there is no backup container in dev). The
+Sinhala guide text should get a native-speaker review, like `si.json`.

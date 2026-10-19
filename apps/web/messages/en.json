@@ -63,7 +63,8 @@
     "reports": "Reports",
     "documents": "Documents",
     "settings": "Settings",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "guide": "User guide"
   },
   "auth": {
     "title": "Welcome",
@@ -1971,5 +1972,30 @@
       "spentMonth": "Spent",
       "receivedMonth": "Received"
     }
+  },
+  "guide": {
+    "title": "User guide",
+    "subtitle": "Step-by-step help for everything in the system, with pictures.",
+    "help": "Help",
+    "searchLabel": "What do you want to do?",
+    "searchPlaceholder": "Type a word, for example: salary, insurance, attendance",
+    "searchHint": "Type one or two words. You can search in English or Sinhala.",
+    "clearSearch": "Clear the search",
+    "results": "{count, plural, =0 {No help found} one {# help topic found} other {# help topics found}}",
+    "noResults": "Nothing found for these words.",
+    "noResultsHint": "Try another word, or fewer words. You can also look through the topics below the search box after clearing it.",
+    "popular": "Most used",
+    "allTopics": "All help topics",
+    "showAll": "Show all {count}",
+    "backToAll": "All help topics",
+    "openPage": "Open this page",
+    "step": "Step {n}",
+    "screenshotAlt": "Picture for step {n}: {title}",
+    "enlarge": "Make bigger",
+    "zoomHelp": "Press Escape or click outside the picture to close it.",
+    "tip": "Tip",
+    "warning": "Important",
+    "related": "See also",
+    "nextTopic": "Next"
   }
 }

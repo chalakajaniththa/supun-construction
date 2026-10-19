@@ -94,6 +94,10 @@ The most important screen is **Daily Entry** (left menu).
    of the receipt.
 5. Press **Save** at the bottom. That's it.
 
+**Help inside the system:** click **User guide** in the left menu (or the **?** button at the top
+of any page) for step-by-step help with pictures, in English and Sinhala. Type a word such as
+"salary" or "insurance" in its search box to find how to do something.
+
 Other everyday tasks:
 
 - **Upload a document** (insurance, licence, contract…): open the project / machine / worker →
@@ -255,6 +259,20 @@ command line: `docker compose exec backup run-backup MANUAL`.
 `apps/api/src/seed` (base + sample data), `apps/web/src/app/(app)/<page>`, `apps/web/src/components`,
 `apps/web/messages/{en,si}.json` (all screen text; same keys in both), `apps/web/e2e` (Playwright),
 `docker/` (Dockerfiles, backup scripts), `scripts/` (Mac scripts).
+
+### User guide (in the app)
+
+The guide at `/guide` lives in `apps/web/src/components/guide/guide-content.ts` (English and
+Sinhala side by side; `[[ns.key]]` shows a screen label from `messages/*.json`, `(1)` matches the
+numbered red marks on a picture). Its screenshots are in `apps/web/public/guide/{en,si}/*.webp`.
+After a screen changes, make them again against the running app with the sample data (needs
+ImageMagick):
+
+```bash
+GUIDE_SHOTS=1 pnpm --filter @sc/web exec playwright test guide-screenshots
+```
+
+A unit test checks that every label, link and picture the guide uses exists in both languages.
 
 ### Translations
 

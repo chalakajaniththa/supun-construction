@@ -15,6 +15,7 @@ import {
 import { BackupDot } from './backup-dot';
 import { BrandMark, useCompanyName } from './brand';
 import { DefaultPasswordBanner } from './default-password-banner';
+import { HelpButton } from './help-button';
 import { LanguageToggle } from './language-toggle';
 import { NotificationBell } from './notification-bell';
 import { SidebarNav } from './sidebar-nav';
@@ -79,6 +80,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2">
             <LanguageToggle />
+            <HelpButton />
             <BackupDot />
             <NotificationBell />
             <UserMenu />

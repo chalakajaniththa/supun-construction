@@ -5,6 +5,7 @@ import {
   FileText,
   HardHat,
   LayoutDashboard,
+  LifeBuoy,
   Receipt,
   ReceiptText,
   Settings,
@@ -28,7 +29,8 @@ export type NavKey =
   | 'payroll'
   | 'reports'
   | 'documents'
-  | 'settings';
+  | 'settings'
+  | 'guide';
 
 export interface NavItem {
   key: NavKey;
@@ -55,6 +57,7 @@ export const NAV_ITEMS: NavItem[] = [
   { key: 'reports', href: '/reports', icon: ReceiptText },
   { key: 'documents', href: '/documents', icon: FileText },
   { key: 'settings', href: '/settings', icon: Settings },
+  { key: 'guide', href: '/guide', icon: LifeBuoy },
 ];
 
 export function isActive(pathname: string, href: string, exact = false): boolean {
