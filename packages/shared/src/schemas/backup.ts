@@ -67,9 +67,55 @@ export interface BackupStatusDto {
 export const backupRunsQuerySchema = paginationQuerySchema.pick({ page: true, pageSize: true });
 export type BackupRunsQuery = z.infer<typeof backupRunsQuerySchema>;
 
-/** POST /admin/reset-sample-data — the owner must type RESET. */
+/**
+ * POST /admin/reset-data — wipes every project, worker, machine, record and document.
+ * SAMPLE loads the sample data again; EMPTY starts empty for real use (and the sample data is not
+ * loaded again on the next start). The owner must type RESET and their login password.
+ */
 export const RESET_CONFIRM_WORD = 'RESET';
-export const resetSampleDataSchema = z.object({
+export const RESET_MODES = ['SAMPLE', 'EMPTY'] as const;
+export type ResetMode = (typeof RESET_MODES)[number];
+export const resetDataSchema = z.object({
+  mode: z.enum(RESET_MODES),
   confirm: z.literal(RESET_CONFIRM_WORD, { error: 'TYPE_RESET' }),
+  password: z.string({ error: 'REQUIRED' }).min(1, { error: 'REQUIRED' }).max(200),
 });
-export type ResetSampleDataInput = z.infer<typeof resetSampleDataSchema>;
+export type ResetDataInput = z.infer<typeof resetDataSchema>;
+
+/** The Setting row that remembers "started empty" (internal, not one of SETTING_KEYS). */
+export const DATA_MODE_SETTING_KEY = 'dataMode';
+
+// ── Google Drive (Settings → Backup → Connect Google Drive) ──────────────────────────────────
+
+/**
+ * The sign-in runs inside the backup container (rclone). IDLE = nothing going on; STARTING = the
+ * container is preparing the sign-in; WAITING = the owner must open `authUrl` and allow access;
+ * TESTING = signed in, checking that Drive works; DONE = connected; FAILED = see `message`.
+ */
+export const GDRIVE_LINK_STATES = [
+  'IDLE',
+  'STARTING',
+  'WAITING',
+  'TESTING',
+  'DONE',
+  'FAILED',
+] as const;
+export type GdriveLinkState = (typeof GDRIVE_LINK_STATES)[number];
+export const GDRIVE_LINK_ACTIONS = ['CONNECT', 'CANCEL', 'DISCONNECT'] as const;
+export type GdriveLinkAction = (typeof GDRIVE_LINK_ACTIONS)[number];
+/** A sign-in that is not finished after this many minutes is given up. */
+export const GDRIVE_LINK_TIMEOUT_MINUTES = 10;
+
+export interface GdriveLinkDto {
+  state: GdriveLinkState;
+  /** The action the backup container has not picked up yet. */
+  pendingAction: GdriveLinkAction | null;
+  /** Open this in the browser (only on the computer that runs the system) while WAITING. */
+  authUrl: string | null;
+  /** Why it failed (English, from rclone), when FAILED. */
+  message: string | null;
+  /** Drive is connected (from the backup container's heartbeat); null = unknown. */
+  configured: boolean | null;
+  agentOnline: boolean;
+  updatedAt: string;
+}

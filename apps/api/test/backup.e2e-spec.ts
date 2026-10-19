@@ -169,7 +169,7 @@ describe('backup (Step 6)', () => {
   });
 });
 
-describe('reset sample data (Step 6)', () => {
+describe('reset data (Step 6, password-checked)', () => {
   let ctx: TestContext;
   let cookie: string;
 
@@ -187,18 +187,27 @@ describe('reset sample data (Step 6)', () => {
     await ctx.app.close();
   });
 
-  it('refuses without the typed word', async () => {
-    const res = await ctx
-      .http()
-      .post('/admin/reset-sample-data')
-      .set('Cookie', cookie)
-      .send({ confirm: 'reset' })
-      .expect(400);
+  const reset = (body: object) =>
+    ctx.http().post('/admin/reset-data').set('Cookie', cookie).send(body).timeout(180_000);
+
+  it('refuses without the typed word or the password', async () => {
+    const res = await reset({ mode: 'SAMPLE', confirm: 'reset', password: 'admin123' }).expect(400);
     expect(res.body.code).toBe('VALIDATION_FAILED');
     expect(res.body.details[0]).toMatchObject({ path: 'confirm', message: 'TYPE_RESET' });
+    const noPw = await reset({ mode: 'EMPTY', confirm: 'RESET' }).expect(400);
+    expect(noPw.body.details[0]).toMatchObject({ path: 'password' });
   });
 
-  it('wipes changes, reloads the sample data and keeps login, settings, audit and backups', async () => {
+  it('refuses a wrong password and changes nothing', async () => {
+    const before = await ctx.prisma.project.count();
+    const res = await reset({ mode: 'EMPTY', confirm: 'RESET', password: 'not-it' }).expect(400);
+    expect(res.body.code).toBe('WRONG_PASSWORD');
+    expect(await ctx.prisma.project.count()).toBe(before);
+    // still logged in (a wrong password here is not a login failure)
+    await ctx.http().get('/dashboard').set('Cookie', cookie).expect(200);
+  });
+
+  it('SAMPLE: wipes changes, reloads the sample data and keeps login, settings, audit and backups', async () => {
     const storage = ctx.app.get(StorageService);
     await ctx.prisma.client.create({ data: { name: 'Owner test client', type: 'PRIVATE' } });
     await ctx.prisma.setting.update({
@@ -208,18 +217,17 @@ describe('reset sample data (Step 6)', () => {
     await ctx.prisma.backupRun.create({
       data: { status: 'SUCCESS', trigger: 'MANUAL', destination: 'LOCAL' },
     });
+    await ctx.prisma.backupAgent.upsert({
+      where: { id: 1 },
+      create: { id: 1, gdriveConfigured: true },
+      update: { gdriveConfigured: true },
+    });
     const runsBefore = await ctx.prisma.backupRun.count();
     const oldKey = (await ctx.prisma.documentVersion.findFirstOrThrow()).storageKey;
     const auditBefore = await ctx.prisma.auditLog.count();
 
-    const res = await ctx
-      .http()
-      .post('/admin/reset-sample-data')
-      .set('Cookie', cookie)
-      .send({ confirm: 'RESET' })
-      .timeout(180_000)
-      .expect(200);
-    expect(res.body.ok).toBe(true);
+    const res = await reset({ mode: 'SAMPLE', confirm: 'RESET', password: 'admin123' }).expect(200);
+    expect(res.body).toMatchObject({ ok: true, mode: 'SAMPLE' });
     expect(res.body.deletedFiles).toBeGreaterThan(10);
 
     expect(await ctx.prisma.client.count({ where: { name: 'Owner test client' } })).toBe(0);
@@ -231,9 +239,28 @@ describe('reset sample data (Step 6)', () => {
     expect(reminders.value).toEqual({ daysBefore: [45, 10] });
     expect(await ctx.prisma.user.count()).toBe(1);
     expect(await ctx.prisma.backupRun.count()).toBe(runsBefore);
+    expect(
+      (await ctx.prisma.backupAgent.findUniqueOrThrow({ where: { id: 1 } })).gdriveConfigured,
+    ).toBe(true);
     expect(await ctx.prisma.auditLog.count()).toBeGreaterThan(auditBefore);
+    const audit = await ctx.prisma.auditLog.findFirstOrThrow({ orderBy: { createdAt: 'desc' } });
+    expect(JSON.stringify(audit.summary)).not.toContain('admin123');
     expect(await ctx.prisma.notification.count({ where: { resolvedAt: null } })).toBeGreaterThan(0);
     // Still logged in, and the app works on the new data.
+    await ctx.http().get('/dashboard').set('Cookie', cookie).expect(200);
+  }, 180_000);
+
+  it('EMPTY: leaves no business data, remembers it, and keeps backups', async () => {
+    const runsBefore = await ctx.prisma.backupRun.count();
+    const res = await reset({ mode: 'EMPTY', confirm: 'RESET', password: 'admin123' }).expect(200);
+    expect(res.body).toMatchObject({ ok: true, mode: 'EMPTY' });
+    expect(await ctx.prisma.project.count()).toBe(0);
+    expect(await ctx.prisma.worker.count()).toBe(0);
+    expect(await ctx.prisma.document.count()).toBe(0);
+    expect(await ctx.prisma.backupRun.count()).toBe(runsBefore);
+    expect(await ctx.prisma.user.count()).toBe(1);
+    const mode = await ctx.prisma.setting.findUniqueOrThrow({ where: { key: 'dataMode' } });
+    expect(mode.value).toMatchObject({ mode: 'EMPTY' });
     await ctx.http().get('/dashboard').set('Cookie', cookie).expect(200);
   }, 180_000);
 });

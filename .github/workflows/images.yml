@@ -1,0 +1,77 @@
+# Builds the Docker images and publishes them to GitHub Container Registry (ghcr.io):
+#   ghcr.io/<owner>/supun-construction-{api,web,backup,seaweedfs}
+# Tags: "latest" for every push to main, "1.2.3" + "1.2" for a git tag v1.2.3, and the short commit.
+# Both amd64 (Windows / Linux / Intel Mac) and arm64 (Apple Silicon Mac) are built.
+name: Images
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  image:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            file: docker/api.Dockerfile
+            build-args: ''
+          - name: web
+            file: docker/web.Dockerfile
+            build-args: API_INTERNAL_URL=http://api:4000
+          - name: backup
+            file: docker/backup/Dockerfile
+            build-args: ''
+          - name: seaweedfs
+            file: docker/seaweedfs/Dockerfile
+            build-args: ''
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/supun-construction-${{ matrix.name }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+          labels: |
+            org.opencontainers.image.title=supun-construction-${{ matrix.name }}
+            org.opencontainers.image.description=Supun Construction business management system (${{ matrix.name }})
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: ${{ matrix.build-args }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}

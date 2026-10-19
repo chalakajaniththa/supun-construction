@@ -1,6 +1,6 @@
 # Infrastructure only, for local development and tests (apps run on the host with `pnpm dev`).
 #   docker compose -f docker-compose.dev.yml up -d --wait
-# Ports: postgres 5433 · SeaweedFS S3 8334 · Gotenberg 3002
+# Ports: postgres 5433 · SeaweedFS S3 8334 · Gotenberg 3002 · plus the backup service (no port)
 name: supun-dev
 
 services:
@@ -50,6 +50,40 @@ services:
       timeout: 5s
       retries: 20
 
+  # The backup service for the dev database (so Settings → Backup shows it running). Google Drive
+  # sign-in is not available in dev (port 53682 is left to the full stack).
+  backup:
+    build:
+      context: .
+      dockerfile: docker/backup/Dockerfile
+    image: supun-backup-dev:latest
+    init: true
+    environment:
+      TZ: Asia/Colombo
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: supun
+      PGPASSWORD: supun
+      PGDATABASE: supun_dev
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_ACCESS_KEY: dev-access-key
+      S3_SECRET_KEY: dev-secret-key
+      S3_BUCKET: supun-docs
+      RESTIC_PASSWORD: dev-backup-password
+      API_HEALTH_URL: http://host.docker.internal:4000/health
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - backup_dev:/backup-local
+      - rclone_dev:/config/rclone
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+
 volumes:
   pgdata_dev:
   seaweed_dev:
+  backup_dev:
+  rclone_dev:

@@ -1,8 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import type { BackupRunDto, BackupRunsQuery, BackupStatusDto, Paginated } from '@sc/shared';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BACKUP_AGENT_OFFLINE_MINUTES,
+  type BackupRunDto,
+  type BackupRunsQuery,
+  type BackupStatusDto,
+  GDRIVE_LINK_ACTIONS,
+  GDRIVE_LINK_STATES,
+  GDRIVE_LINK_TIMEOUT_MINUTES,
+  type GdriveLinkAction,
+  type GdriveLinkDto,
+  type GdriveLinkState,
+  type Paginated,
+} from '@sc/shared';
+import { AppException } from '../../common/errors/app-exception.js';
 import { paginated, toSkipTake } from '../../common/pagination/pagination.js';
 import { PrismaService } from '../../common/prisma/prisma.service.js';
-import type { BackupRun } from '../../generated/prisma/client.js';
+import type { BackupAgent, BackupRun, GdriveLink } from '../../generated/prisma/client.js';
 import { backupHealth, isRunning } from './calc/backup-health.js';
 
 const RECENT = 5;
@@ -17,6 +30,41 @@ export function toBackupRunDto(r: BackupRun): BackupRunDto {
     sizeBytes: r.sizeBytes === null ? null : r.sizeBytes.toString(),
     destination: r.destination,
     message: r.message,
+  };
+}
+
+const agentOnline = (agent: BackupAgent | null, now: Date) =>
+  agent !== null &&
+  now.getTime() - agent.lastSeenAt.getTime() < BACKUP_AGENT_OFFLINE_MINUTES * 60_000;
+
+/** The Google Drive sign-in as the app shows it (pure, unit-tested). */
+export function toGdriveLinkDto(
+  link: Pick<GdriveLink, 'action' | 'state' | 'authUrl' | 'message' | 'updatedAt'> | null,
+  agent: BackupAgent | null,
+  now: Date,
+): GdriveLinkDto {
+  const online = agentOnline(agent, now);
+  let state = (GDRIVE_LINK_STATES as readonly string[]).includes(link?.state ?? '')
+    ? (link!.state as GdriveLinkState)
+    : 'IDLE';
+  const busy = state === 'STARTING' || state === 'WAITING' || state === 'TESTING';
+  // A sign-in the container can no longer finish (it stopped, or nobody came back to it).
+  const stale =
+    busy &&
+    (!online ||
+      now.getTime() - link!.updatedAt.getTime() > (GDRIVE_LINK_TIMEOUT_MINUTES + 1) * 60_000);
+  if (stale) state = 'IDLE';
+  const action = (GDRIVE_LINK_ACTIONS as readonly string[]).includes(link?.action ?? '')
+    ? (link!.action as GdriveLinkAction)
+    : null;
+  return {
+    state,
+    pendingAction: action,
+    authUrl: state === 'WAITING' ? (link?.authUrl ?? null) : null,
+    message: state === 'FAILED' ? (link?.message ?? null) : null,
+    configured: agent ? agent.gdriveConfigured : null,
+    agentOnline: online,
+    updatedAt: (link?.updatedAt ?? now).toISOString(),
   };
 }
 
@@ -62,6 +110,40 @@ export class BackupService {
       gdriveConfigured: agent ? agent.gdriveConfigured : null,
       schedule: agent?.schedule ?? null,
     };
+  }
+
+  async gdrive(now = new Date()): Promise<GdriveLinkDto> {
+    const [link, agent] = await Promise.all([
+      this.prisma.gdriveLink.findUnique({ where: { id: 1 } }),
+      this.prisma.backupAgent.findUnique({ where: { id: 1 } }),
+    ]);
+    return toGdriveLinkDto(link, agent, now);
+  }
+
+  /**
+   * Connect / cancel / disconnect Google Drive: queued for the backup container, which picks it
+   * up within a few seconds (it must be running).
+   */
+  async gdriveAction(action: GdriveLinkAction, now = new Date()): Promise<GdriveLinkDto> {
+    const agent = await this.prisma.backupAgent.findUnique({ where: { id: 1 } });
+    if (action !== 'CANCEL' && !agentOnline(agent, now)) {
+      throw new AppException(
+        HttpStatus.CONFLICT,
+        'BACKUP_SERVICE_OFFLINE',
+        'The backup service is not running.',
+      );
+    }
+    const data = {
+      action,
+      requestedAt: now,
+      ...(action === 'CONNECT' ? { state: 'STARTING', authUrl: null, message: null } : {}),
+    };
+    await this.prisma.gdriveLink.upsert({
+      where: { id: 1 },
+      create: { id: 1, ...data },
+      update: data,
+    });
+    return this.gdrive(now);
   }
 
   async runs(q: BackupRunsQuery): Promise<Paginated<BackupRunDto>> {

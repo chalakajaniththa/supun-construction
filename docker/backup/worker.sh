@@ -2,6 +2,7 @@
 # Supun Construction — the backup container's main process.
 #   • supercronic runs the nightly backup (BACKUP_SCHEDULE, default 23:00 Asia/Colombo)
 #   • a heartbeat tells the app the backup service is alive (and whether Google Drive is set up)
+#   • gdrive-link.sh runs the Google Drive sign-in when the app asks for it
 #   • every BACKUP_POLL_SECONDS it looks for "Backup now" requests from the app
 #   • on start it makes a catch-up backup when the last success is older than 24 h
 #     (the MacBook may have been asleep at 23:00)
@@ -42,6 +43,10 @@ CHILDREN+=($!)
   heartbeat || log "heartbeat failed (database not reachable?)"
   sleep 30
 done) &
+CHILDREN+=($!)
+
+# "Connect Google Drive" from the app (Settings → Backup).
+/usr/local/bin/gdrive-link.sh &
 CHILDREN+=($!)
 
 # Let the app finish its start (migrations, first-time seed) before the catch-up backup, so the

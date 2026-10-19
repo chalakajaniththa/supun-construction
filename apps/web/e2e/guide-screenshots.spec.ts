@@ -719,9 +719,40 @@ for (const locale of ['en', 'si'] as const) {
           { target: tid('backup-now'), label: '2' },
         ],
       });
-      await shot('backup-drive', { marks: [{ target: tid('backup-drive-card') }] });
+      await shot('backup-drive', {
+        scrollTo: tid('backup-drive-card'),
+        marks: [{ target: tid('gdrive-connect') }],
+      });
+      // the Google sign-in step (needs the backup service; cancelled again, nothing is connected)
+      if (await tid('gdrive-connect').isEnabled()) {
+        await tid('gdrive-connect').click();
+        await expect(tid('gdrive-open-signin')).toBeVisible({ timeout: 30_000 });
+        await settle(page);
+        await shot('gdrive-signin', {
+          scrollTo: tid('gdrive-waiting'),
+          marks: [{ target: tid('gdrive-open-signin') }],
+        });
+        await tid('gdrive-waiting').getByRole('button').click();
+        await expect(tid('gdrive-connect')).toBeVisible({ timeout: 30_000 });
+      }
       await open('/settings?tab=sampleData');
-      await shot('sample-data', { marks: [{ target: tid('reset-open') }] });
+      await shot('sample-data', {
+        marks: [
+          { target: tid('reset-empty-open'), label: '1' },
+          { target: tid('reset-open'), label: '2' },
+        ],
+      });
+      // the confirmation (cancelled — nothing is deleted)
+      await tid('reset-empty-open').click();
+      await settle(page);
+      await shot('reset-dialog', {
+        marks: [
+          { target: tid('reset-confirm'), label: '1' },
+          { target: tid('reset-password'), label: '2' },
+          { target: tid('reset-submit'), label: '3' },
+        ],
+      });
+      await page.keyboard.press('Escape');
     });
 
     expect(failures).toEqual([]);

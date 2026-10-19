@@ -234,16 +234,25 @@ test.describe.serial('owner journey', () => {
     expect(errors).toEqual([]);
   });
 
-  test('reset sample data asks for the typed word RESET', async ({ page }) => {
+  test('reset data asks for the word RESET and the login password', async ({ page }) => {
     await page.goto('/settings?tab=sampleData');
-    await page.getByTestId('reset-open').click();
-    await expect(page.getByTestId('reset-submit')).toBeDisabled();
-    await page.getByTestId('reset-confirm').fill('reset');
-    await expect(page.getByTestId('reset-submit')).toBeDisabled();
-    await page.getByTestId('reset-confirm').fill('RESET');
-    await expect(page.getByTestId('reset-submit')).toBeEnabled();
-    await page.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page.getByTestId('reset-confirm')).toBeHidden();
+    for (const open of ['reset-open', 'reset-empty-open']) {
+      await page.getByTestId(open).click();
+      await expect(page.getByTestId('reset-submit')).toBeDisabled();
+      await page.getByTestId('reset-confirm').fill('reset');
+      await page.getByTestId('reset-password').fill('something');
+      await expect(page.getByTestId('reset-submit')).toBeDisabled();
+      await page.getByTestId('reset-confirm').fill('RESET');
+      await page.getByTestId('reset-password').fill('');
+      await expect(page.getByTestId('reset-submit')).toBeDisabled();
+      await page.getByTestId('reset-password').fill('not-the-password');
+      await expect(page.getByTestId('reset-submit')).toBeEnabled();
+      // a wrong password changes nothing
+      await page.getByTestId('reset-submit').click();
+      await expect(page.getByText('The password is not correct.')).toBeVisible();
+      await page.getByRole('button', { name: 'Cancel' }).click();
+      await expect(page.getByTestId('reset-confirm')).toBeHidden();
+    }
   });
 
   test('Sinhala: dashboard, Settings → Backup, back up now', async ({ page }) => {
@@ -257,7 +266,7 @@ test.describe.serial('owner journey', () => {
     await expect(page.getByText('බැකප් එක සාර්ථකව අවසන් විය.')).toBeVisible({ timeout: 180_000 });
     await expect(page.getByTestId('backup-state')).toContainText('බැකප් යාවත්කාලීනයි');
     await page.getByTestId('tab-sampleData').click();
-    await expect(page.getByTestId('reset-open')).toHaveText(/නියැදි දත්ත යළි සකසන්න/);
+    await expect(page.getByTestId('reset-open')).toHaveText(/නියැදි දත්ත පූරණය කරන්න/);
     await setLocale(page, 'en');
     expect(errors).toEqual([]);
   });

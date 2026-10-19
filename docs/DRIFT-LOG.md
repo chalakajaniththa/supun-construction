@@ -533,3 +533,39 @@ label keys, the picture marks, related links and that every screenshot exists.
 **Known:** the screenshots were made with `next dev` and the dev database, so Settings → Backup
 shows "no backup yet / backup service not running" (there is no backup container in dev). The
 Sinhala guide text should get a native-speaker review, like `si.json`.
+
+## After Step 6 — Google Drive from the app, password-checked reset, GHCR install (2026-10-19)
+
+**Google Drive in the app.** Settings → Backup → **Connect Google Drive** replaces running
+`setup-gdrive.command` (still there for helpers). New table `gdrive_link` (one row: `action`,
+`state`, `auth_url`, `message`). The API queues CONNECT / CANCEL / DISCONNECT
+(`/backup/gdrive*`, 409 `BACKUP_SERVICE_OFFLINE` when the container is not running); the backup
+container's `gdrive-link.sh` (started by `worker.sh`, polls every 2 s) runs rclone's own browser
+sign-in (STARTING → WAITING with the link → TESTING → DONE / FAILED, 10-minute limit) into a temp
+config, tests `mkdir` + `lsd`, then swaps the `[gdrive]` remote into rclone.conf. Google answers on
+`127.0.0.1:53682`; the `backup` service now publishes `127.0.0.1:53682 → :53683` (socat), so the
+sign-in only works in a browser on the same computer — the card says so when opened from another
+host. The final "Allow" in Google was not automated (needs a real Google account); the flow was
+checked up to Google's consent page (307 to accounts.google.com) plus cancel.
+
+**"Backup service is not running"** came from running the app with `pnpm dev`, which had no
+backup container (the full Docker stack was fine: heartbeat + catch-up backup). The dev compose
+now has a `backup` service on `supun_dev` (no Google port). Guide screenshots were re-made on the
+full stack, so they show a green backup.
+
+**Reset data** (`POST /admin/reset-data`, replaces `/admin/reset-sample-data`): `mode` SAMPLE |
+EMPTY, the word RESET **and the login password** (400 `WRONG_PASSWORD`; the password is redacted
+in the audit log). EMPTY writes Setting `dataMode` = EMPTY, and the start-up seed then skips the
+sample data even with `SEED_SAMPLE_DATA=true`. Kept tables now include `gdrive_link`; backups,
+the Google Drive connection and the backup volumes are never touched. Settings tab renamed
+"Reset data".
+
+**Published images.** `.github/workflows/images.yml` → `ghcr.io/chalakajaniththa/supun-construction-
+{api,web,backup,seaweedfs}` (amd64 + arm64 via QEMU; `latest` on main, semver on `v*` tags, short
+sha). New `docker/seaweedfs/Dockerfile` bakes the entrypoint in (the source compose bind-mounts
+it). `deploy/docker-compose.yml` uses the images (`SC_VERSION`, named volume `rclone_config`
+instead of `./config/rclone`); `deploy/install.sh` / `install.ps1` download it, create `.env` with
+random secrets, ask about sample data, show the backup password, pull and start. Tested locally
+with the images tagged as GHCR names (pull stubbed): fresh install healthy, wrong-password reset
+refused, EMPTY survives an API restart, backup runs kept. The GHCR build itself runs only after a
+push. Owner/installer guide: `docs/INSTALL.md`.

@@ -400,40 +400,40 @@ export const GUIDE_TOPICS: GuideTopic[] = [
     id: 'start-stop',
     section: 'start',
     title: {
-      en: 'Start and stop the system on the Mac',
-      si: 'Mac පරිගණකයේ පද්ධතිය ආරම්භ කිරීම සහ නැවැත්වීම',
+      en: 'Start, stop and update the system',
+      si: 'පද්ධතිය ආරම්භ කිරීම, නැවැත්වීම සහ යාවත්කාලීන කිරීම',
     },
     summary: {
-      en: 'The system runs on your MacBook with Docker Desktop. It starts by itself when Docker starts.',
-      si: 'පද්ධතිය Docker Desktop සමඟ ඔබගේ MacBook එකේ ක්‍රියා කරයි. Docker ආරම්භ වන විට එය ඉබේම ආරම්භ වේ.',
+      en: 'The system runs on this computer inside Docker Desktop. It starts by itself when Docker starts.',
+      si: 'පද්ධතිය මෙම පරිගණකයේ Docker Desktop තුළ ක්‍රියා කරයි. Docker ආරම්භ වන විට එය ඉබේම ආරම්භ වේ.',
     },
     keywords: {
-      en: 'start, stop, docker, mac, turn on, turn off, start.command, stop.command, update',
+      en: 'start, stop, docker, mac, windows, linux, turn on, turn off, start.command, stop.command, update, install',
       si: 'ආරම්භ කිරීම, නැවැත්වීම, docker, mac, පණගැන්වීම, අක්‍රිය කිරීම, යාවත්කාලීන කිරීම',
     },
     steps: [
       {
         text: {
-          en: 'Make sure **Docker Desktop** is open (the whale icon in the top menu bar of the Mac is still, not moving).',
-          si: '**Docker Desktop** විවෘතව ඇති බව තහවුරු කරගන්න (Mac හි ඉහළ මෙනු තීරුවේ ඇති තල්මසා අයිකනය චලනය නොවී නිශ්චලව තිබිය යුතුය).',
+          en: 'The system runs inside **Docker Desktop**. Keep Docker Desktop open (on a Mac: the whale icon in the top menu bar; on Windows: the whale icon near the clock). When Docker starts, the system starts by itself.',
+          si: 'පද්ධතිය **Docker Desktop** තුළ ක්‍රියා කරයි. Docker Desktop විවෘතව තබා ගන්න (Mac හි: ඉහළ මෙනු තීරුවේ තල්මසා අයිකනය; Windows හි: ඔරලෝසුව අසල ඇති තල්මසා අයිකනය). Docker ආරම්භ වූ විට, පද්ධතිය ඉබේම ආරම්භ වේ.',
         },
       },
       {
         text: {
-          en: 'To start: open the **supun-construction** folder, then **scripts**, and double-click **start.command**. When it is ready, the browser opens the system.',
-          si: 'ආරම්භ කිරීමට: **supun-construction** ෆෝල්ඩරය, ඉන්පසු **scripts** විවෘත කර **start.command** දෙවරක් ක්ලික් කරන්න. සූදානම් වූ විට, බ්‍රව්සරය පද්ධතිය විවෘත කරයි.',
+          en: 'Tip: in Docker Desktop → **Settings → General**, tick **Start Docker Desktop when you sign in**. Then the system is ready every morning without doing anything.',
+          si: 'ඉඟිය: Docker Desktop → **Settings → General** හි **Start Docker Desktop when you sign in** සලකුණු කරන්න. එවිට කිසිවක් නොකර සෑම උදෑසනකම පද්ධතිය සූදානම්ව පවතී.',
         },
       },
       {
         text: {
-          en: 'To stop: double-click **stop.command** in the same folder. Your data is kept.',
-          si: 'නැවැත්වීමට: එම ෆෝල්ඩරයේම ඇති **stop.command** දෙවරක් ක්ලික් කරන්න. ඔබගේ දත්ත ආරක්ෂිතව පවතී.',
+          en: 'To stop or start it by hand, open the **supun-construction** folder in a terminal and type **docker compose stop** or **docker compose up -d**. (On a Mac set up from the source folder you can also double-click **stop.command** / **start.command** in the **scripts** folder.) Your data is always kept.',
+          si: 'අතින් නැවැත්වීමට හෝ ආරම්භ කිරීමට, **supun-construction** ෆෝල්ඩරය terminal එකක විවෘත කර **docker compose stop** හෝ **docker compose up -d** ටයිප් කරන්න. (මූලාශ්‍ර ෆෝල්ඩරයෙන් සකසා ඇති Mac එකක **scripts** ෆෝල්ඩරයේ ඇති **stop.command** / **start.command** දෙවරක් ක්ලික් කිරීමටද හැක.) ඔබගේ දත්ත සැමවිටම ආරක්ෂිතව පවතී.',
         },
       },
       {
         text: {
-          en: 'When your helper says there is a new version, double-click **update.command**. It takes a few minutes; your data is kept.',
-          si: 'නව සංස්කරණයක් ඇති බව ඔබගේ උදව්කරු පැවසූ විට, **update.command** දෙවරක් ක්ලික් කරන්න. මිනිත්තු කිහිපයක් ගත වේ; ඔබගේ දත්ත ආරක්ෂිතව පවතී.',
+          en: 'When your helper says there is a new version, run the install command again (it is in the file docs/INSTALL.md). It takes a few minutes; your data is kept.',
+          si: 'නව සංස්කරණයක් ඇති බව ඔබගේ උදව්කරු පැවසූ විට, ස්ථාපන විධානය නැවත ධාවනය කරන්න (එය docs/INSTALL.md ගොනුවේ ඇත). මිනිත්තු කිහිපයක් ගත වේ; ඔබගේ දත්ත ආරක්ෂිතව පවතී.',
         },
       },
     ],
@@ -2004,27 +2004,28 @@ export const GUIDE_TOPICS: GuideTopic[] = [
     steps: [
       {
         text: {
-          en: 'On [[nav.settings]] → [[settings.tabs.backup]], the [[backup.drive.title]] box says if Drive is connected and shows the steps.',
-          si: '[[nav.settings]] → [[settings.tabs.backup]] හි [[backup.drive.title]] කොටුවෙන් Drive සම්බන්ධ වී ඇත්දැයි පවසා පියවර පෙන්වයි.',
+          en: 'On the computer where the system is installed, open [[nav.settings]] → [[settings.tabs.backup]]. In the [[backup.drive.title]] box press [[backup.drive.connect]].',
+          si: 'පද්ධතිය ස්ථාපනය කර ඇති පරිගණකයේ, [[nav.settings]] → [[settings.tabs.backup]] විවෘත කරන්න. [[backup.drive.title]] කොටුවේ [[backup.drive.connect]] ඔබන්න.',
         },
         shot: 'backup-drive',
       },
       {
         text: {
-          en: 'In the **scripts** folder, double-click **setup-gdrive.command**. Your browser shows a Google page: choose the account for the backups.',
-          si: '**scripts** ෆෝල්ඩරයේ **setup-gdrive.command** දෙවරක් ක්ලික් කරන්න. ඔබගේ බ්‍රව්සරය Google පිටුවක් පෙන්වයි: බැකප් සඳහා ගිණුම තෝරන්න.',
+          en: 'After a few seconds, press [[backup.drive.openSignIn]]. A Google page opens in a new tab: choose the Google account for the backups.',
+          si: 'තත්පර කිහිපයකින්, [[backup.drive.openSignIn]] ඔබන්න. නව ටැබයක Google පිටුවක් විවෘත වේ: බැකප් සඳහා Google ගිණුම තෝරන්න.',
+        },
+        shot: 'gdrive-signin',
+      },
+      {
+        text: {
+          en: 'If Google says the app is not verified, click **Advanced**, then **Go to rclone (unsafe)**, then **Continue** / **Allow**. When the page says **Success**, close it.',
+          si: 'යෙදුම තහවුරු කර නැති බව Google පැවසුවහොත්, **Advanced**, ඉන්පසු **Go to rclone (unsafe)**, ඉන්පසු **Continue** / **Allow** ක්ලික් කරන්න. පිටුවේ **Success** පෙනුණු විට, එය වසන්න.',
         },
       },
       {
         text: {
-          en: 'If Google says the app is not verified, click **Advanced**, then **Go to rclone**, then **Continue** / **Allow**. When the page says **Success**, close it.',
-          si: 'යෙදුම තහවුරු කර නැති බව Google පැවසුවහොත්, **Advanced**, ඉන්පසු **Go to rclone**, ඉන්පසු **Continue** / **Allow** ක්ලික් කරන්න. පිටුවේ **Success** පෙනුණු විට, එය වසන්න.',
-        },
-      },
-      {
-        text: {
-          en: 'Come back and press [[backup.backupNow]] to test it.',
-          si: 'ආපසු පැමිණ එය පරීක්ෂා කිරීමට [[backup.backupNow]] ඔබන්න.',
+          en: 'Back in the system, the box now says it is connected (the page updates by itself). Press [[backup.backupNow]] to test it.',
+          si: 'ආපසු පද්ධතියට පැමිණි විට, කොටුවේ එය සම්බන්ධ වී ඇති බව පෙන්වයි (පිටුව ඉබේම යාවත්කාලීන වේ). එය පරීක්ෂා කිරීමට [[backup.backupNow]] ඔබන්න.',
         },
       },
     ],
@@ -2048,29 +2049,36 @@ export const GUIDE_TOPICS: GuideTopic[] = [
       si: 'පුහුණුව සඳහා පද්ධතිය සමඟ ව්‍යාජ නියැදි දත්ත පැමිණියේය. නැවත ආරම්භ කිරීමට අවශ්‍ය විට එය යළි සකසන්න.',
     },
     keywords: {
-      en: 'sample data, demo data, reset, start fresh, delete all, practice data',
+      en: 'sample data, demo data, reset, start fresh, start empty, real use, delete all, practice data, clear database',
       si: 'නියැදි දත්ත, ආදර්ශ දත්ත, යළි සැකසීම, අලුතින් ආරම්භ කිරීම, සියල්ල මකා දැමීම',
     },
     page: '/settings?tab=sampleData',
     steps: [
       {
         text: {
-          en: 'First press [[backup.backupNow]] if you want to keep anything.',
-          si: 'යමක් තබා ගැනීමට අවශ්‍ය නම් පළමුව [[backup.backupNow]] ඔබන්න.',
+          en: 'If you might want the old records back one day, first press [[backup.backupNow]].',
+          si: 'කවදා හෝ පැරණි වාර්තා නැවත අවශ්‍ය විය හැකි නම්, පළමුව [[backup.backupNow]] ඔබන්න.',
         },
       },
       {
         text: {
-          en: 'Open [[nav.settings]] → [[settings.tabs.sampleData]] and press [[sampleData.button]]. Type **RESET** and confirm.',
-          si: '[[nav.settings]] → [[settings.tabs.sampleData]] විවෘත කර [[sampleData.button]] ඔබන්න. **RESET** ටයිප් කර තහවුරු කරන්න.',
+          en: 'Open [[nav.settings]] → [[settings.tabs.sampleData]]. To start real use press [[sampleData.emptyButton]] (1). To practise again with the made-up company press [[sampleData.button]] (2).',
+          si: '[[nav.settings]] → [[settings.tabs.sampleData]] විවෘත කරන්න. සැබෑ භාවිතය ආරම්භ කිරීමට [[sampleData.emptyButton]] (1) ඔබන්න. ව්‍යාජ සමාගම සමඟ නැවත පුහුණු වීමට [[sampleData.button]] (2) ඔබන්න.',
         },
         shot: 'sample-data',
+      },
+      {
+        text: {
+          en: 'Type **RESET** (1), then the password you use to log in (2), and press the red button (3). It takes up to a minute.',
+          si: '**RESET** (1) ටයිප් කර, ඉන්පසු ඔබ පිවිසීමට භාවිත කරන මුරපදය (2) ටයිප් කර, රතු බොත්තම (3) ඔබන්න. එයට මිනිත්තුවක් පමණ ගත විය හැක.',
+        },
+        shot: 'reset-dialog',
       },
     ],
     warnings: [
       {
-        en: 'This deletes ALL projects, workers, machines, daily records, salaries, bills and documents. It cannot be undone, except by restoring a backup.',
-        si: 'මෙමඟින් සියලු ව්‍යාපෘති, සේවකයින්, යන්ත්‍ර, දෛනික සටහන්, වැටුප්, බිල්පත් සහ ලේඛන මකා දමයි. බැකප් එකක් ප්‍රතිසාධනය කිරීමෙන් හැර එය අහෝසි කළ නොහැක.',
+        en: 'Both buttons delete ALL projects, workers, machines, daily records, salaries, bills and documents. It cannot be undone, except by restoring a backup. Your login, the settings and all backups (also Google Drive) are kept.',
+        si: 'බොත්තම් දෙකම සියලු ව්‍යාපෘති, සේවකයින්, යන්ත්‍ර, දෛනික සටහන්, වැටුප්, බිල්පත් සහ ලේඛන මකා දමයි. බැකප් එකක් ප්‍රතිසාධනය කිරීමෙන් හැර එය අහෝසි කළ නොහැක. ඔබගේ පිවිසුම, සැකසුම් සහ සියලු බැකප් (Google Drive ද) ආරක්ෂිතව පවතී.',
       },
     ],
     related: ['backup'],
@@ -2165,8 +2173,8 @@ export const GUIDE_TOPICS: GuideTopic[] = [
       },
       {
         text: {
-          en: 'If it says the backup service is not running, double-click **start.command** in the scripts folder. If it stays red, ask your helper.',
-          si: 'බැකප් සේවාව ක්‍රියාත්මක නොවන බව පවසයි නම්, scripts ෆෝල්ඩරයේ ඇති **start.command** දෙවරක් ක්ලික් කරන්න. එය දිගටම රතු නම්, ඔබගේ උදව්කරුගෙන් විමසන්න.',
+          en: 'If it says the backup service is not running, start the system again (Docker Desktop open, then **docker compose up -d** in the supun-construction folder, or **start.command** on a Mac). If it stays red, ask your helper.',
+          si: 'බැකප් සේවාව ක්‍රියාත්මක නොවන බව පවසයි නම්, පද්ධතිය නැවත ආරම්භ කරන්න (Docker Desktop විවෘත කර, supun-construction ෆෝල්ඩරයේ **docker compose up -d**, නැතහොත් Mac හි **start.command**). එය දිගටම රතු නම්, ඔබගේ උදව්කරුගෙන් විමසන්න.',
         },
       },
     ],
@@ -2190,8 +2198,8 @@ export const GUIDE_TOPICS: GuideTopic[] = [
     steps: [
       {
         text: {
-          en: 'Wait one minute and reload the page. If it still does not open, check that Docker Desktop is open, then double-click **start.command**.',
-          si: 'මිනිත්තුවක් රැඳී පිටුව නැවත පූරණය කරන්න. තවමත් විවෘත නොවේ නම්, Docker Desktop විවෘතව ඇත්දැයි පරීක්ෂා කර, **start.command** දෙවරක් ක්ලික් කරන්න.',
+          en: 'Wait one minute and reload the page. If it still does not open, check that Docker Desktop is open, then start the system (**docker compose up -d** in the supun-construction folder, or **start.command** on a Mac).',
+          si: 'මිනිත්තුවක් රැඳී පිටුව නැවත පූරණය කරන්න. තවමත් විවෘත නොවේ නම්, Docker Desktop විවෘතව ඇත්දැයි පරීක්ෂා කර, පද්ධතිය ආරම්භ කරන්න (supun-construction ෆෝල්ඩරයේ **docker compose up -d**, නැතහොත් Mac හි **start.command**).',
         },
       },
     ],

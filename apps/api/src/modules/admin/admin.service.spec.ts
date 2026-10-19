@@ -12,6 +12,7 @@ describe('truncateStatement', () => {
       'backup_runs',
       'backup_requests',
       'backup_agent',
+      'gdrive_link',
       '_prisma_migrations',
     ]);
     expect(sql).toBe(

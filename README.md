@@ -33,11 +33,15 @@ your Google Drive).
 
 The system comes with **sample data** (a fictional company around Polonnaruwa) so you can try
 everything at once. When you are ready to use it for real, you can delete the sample data
-(see [Reset sample data](#reset-sample-data)).
+(see [Reset data](#reset-data-start-for-real-or-load-the-sample-again)).
 
 ---
 
 ## 2. Install on a MacBook
+
+> **Installing on any computer (Mac, Windows or Linux) from the published images?** Follow
+> [docs/INSTALL.md](docs/INSTALL.md) — one command installs Docker's part and starts the system.
+> The steps below build the system from this source folder on a Mac.
 
 You need: a MacBook with Apple Silicon (M1 or newer) or Intel, about 10 GB of free space, and an
 internet connection for the first start.
@@ -156,30 +160,32 @@ details. Problems also appear in the dashboard's "Needs attention" list.
 ### Connect Google Drive (strongly recommended)
 
 Backups on this computer do not help if the computer is lost, stolen or broken. Connect Google
-Drive so every backup is also stored there:
+Drive so every backup is also stored there — from inside the app:
 
-1. Make sure the system is running.
-2. In the **scripts** folder, double-click **setup-gdrive.command** (first time: right-click →
-   Open → Open).
-3. Your browser opens a Google page. **Choose the Google account** for the backups.
-4. Google may say **"Google hasn't verified this app"**. Click **Advanced**, then
-   **Go to rclone (unsafe)**. (rclone is the free, widely used backup tool inside this system. It
-   only gets access to the files it creates itself — not to your other Drive files.)
-5. Click **Continue** / **Allow**.
-6. The page says **"Success!"**. Close it and go back to the Terminal window — it says
-   **"Google Drive is connected"**.
-7. In the app: **Settings → Backup → Back up now**. When it finishes, "Saved to" shows
-   **This computer and Google Drive**. In Google Drive you will see a folder
-   **SupunConstructionBackup** (the files inside are encrypted; that is normal).
+1. On **the computer where the system runs**, open **Settings → Backup**.
+2. Press **Connect Google Drive**, then **Open the Google sign-in**.
+3. **Choose the Google account** for the backups. If Google says **"Google hasn't verified this
+   app"**, click **Advanced**, then **Go to rclone (unsafe)**, then **Continue / Allow**. (rclone
+   is the free, widely used backup tool inside this system. It only gets access to the files it
+   creates itself — not to your other Drive files.)
+4. The page says **"Success!"** — close it. Settings → Backup now says **Connected**.
+5. Press **Back up now**. When it finishes, "Saved to" shows **This computer and Google Drive**.
+   In Google Drive you will see a folder **SupunConstructionBackup** (the files inside are
+   encrypted; that is normal).
 
-_For your helper:_ the connection is saved in `config/rclone/rclone.conf` (never committed to
-git). It uses the `drive.file` scope. If the browser sign-in cannot be used, run
-`rclone authorize "drive" "eyJzY29wZSI6ImRyaXZlLmZpbGUifQ"` on any computer with rclone and a
-browser, then `scripts/setup-gdrive.command --token '<the token JSON it prints>'`.
+**Disconnect Google Drive** on the same card stops new backups going to Drive (the ones already
+there stay).
+
+_For your helper:_ the sign-in runs in the backup container (`docker/backup/gdrive-link.sh`); Google
+answers on `127.0.0.1:53682`, which the `backup` service publishes, so the browser must be on the
+same computer. The connection is saved in `config/rclone/rclone.conf` (never committed to git)
+with the `drive.file` scope. The old way still works: `scripts/setup-gdrive.command`, or on a
+computer without a browser `rclone authorize "drive" "eyJzY29wZSI6ImRyaXZlLmZpbGUifQ"` elsewhere,
+then `scripts/setup-gdrive.command --token '<the token JSON it prints>'`.
 Optional — **your own Google client ID** (better rate limits than rclone's shared one): create an
 OAuth client of type _Desktop app_ in Google Cloud Console (enable the Google Drive API), put
 `GDRIVE_CLIENT_ID=` and `GDRIVE_CLIENT_SECRET=` in `.env`, run `docker compose up -d backup`,
-then run `setup-gdrive.command` again.
+then connect again.
 
 ### Restore a backup
 
@@ -199,7 +205,7 @@ Restoring **replaces all current data** with the backup. Ask your helper if you 
 3. Open `.env` in TextEdit and replace the value after `RESTIC_PASSWORD=` with **your old backup
    password**. Save.
 4. Double-click **start.command** again (it applies the password).
-5. Run **setup-gdrive.command** and sign in with the **same Google account** as before.
+5. Connect Google Drive (Settings → Backup) with the **same Google account** as before.
 6. Run `scripts/restore.sh --from gdrive` (see above) and choose the latest backup.
 
 ---
@@ -217,16 +223,21 @@ Restoring **replaces all current data** with the backup. Ask your helper if you 
 | Forgot the login password                                    | Ask your helper: in Terminal, in the folder, run `docker compose exec postgres psql -U supun -d supun -c "DELETE FROM \"User\";"` then `docker compose restart api` — the login becomes `admin` / `admin123` (or `ADMIN_PASSWORD` from `.env`) again. |
 | It is slow or the Mac is full                                | Docker → Settings → Resources: give it at least 4 GB memory. Free some disk space.                                                                                                                                                                    |
 
-### Reset sample data
+### Reset data (start for real, or load the sample again)
 
-When you are ready to use the system for real, or want to start the sample again:
-**Settings → Sample data → Reset sample data…**, type **RESET** and confirm. All projects,
-workers, machines, records and documents are deleted and the sample data is loaded again. Your
-login, settings, change history and backup history are kept. Make a backup first if you want to
-keep anything.
+**Settings → Reset data** has two buttons; both ask you to type **RESET** and your **login
+password**:
 
-To start **empty** (no sample data at all) on a new install: set `SEED_SAMPLE_DATA=false` in
-`.env` before the very first start.
+- **Start empty…** — deletes the sample data and every record, so you can start real use. The
+  sample data does not come back on the next start.
+- **Load sample data…** — deletes every record and loads the sample company again (practice).
+
+Both keep your login, settings, change history and **all backups** (history, backups on this
+computer and on Google Drive, and the Google Drive connection). Make a backup first if you want
+to keep anything.
+
+To start **empty** on a new install without the sample data at all: set `SEED_SAMPLE_DATA=false`
+in `.env` before the very first start (the install scripts ask you).
 
 ---
 
@@ -242,7 +253,7 @@ helpers). SeaweedFS (S3) stores documents, Gotenberg renders PDFs, the `backup` 
 
 ```bash
 pnpm install                 # also builds packages/shared
-pnpm dev:infra               # postgres :5433, SeaweedFS :8334, Gotenberg :3002
+pnpm dev:infra               # postgres :5433, SeaweedFS :8334, Gotenberg :3002, backup service
 pnpm --filter @sc/api db:deploy && pnpm --filter @sc/api db:seed
 pnpm dev                     # API :4000 + web :3000
 ```
@@ -250,6 +261,11 @@ pnpm dev                     # API :4000 + web :3000
 **Checks:** `pnpm -r typecheck` · `pnpm -r lint` · `pnpm -r test` (unit) · `pnpm test:e2e:api`
 (dev infra) · `pnpm test:e2e:web` (Playwright against the full Docker stack on :3000) ·
 `scripts/test-backup-restore.sh` (real backup → change → restore → verify, against the full stack).
+
+**Published images (GHCR):** `.github/workflows/images.yml` builds `api`, `web`, `backup` and
+`seaweedfs` for amd64 + arm64 on every push to `main` (`latest`) and on `v*` tags; end users install
+them with `deploy/docker-compose.yml` and `deploy/install.sh` / `install.ps1` —
+see [docs/INSTALL.md](docs/INSTALL.md).
 
 **Full stack:** `docker compose up -d --build --wait` (project `supun`; everything comes from
 `.env`, see `.env.example`). Logs: `docker compose logs -f api backup`. A manual backup from the

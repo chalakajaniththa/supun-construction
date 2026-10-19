@@ -379,6 +379,23 @@ model BackupAgent {
   @@map("backup_agent")
 }
 
+/// "Connect Google Drive" from Settings → Backup. The app writes `action`; the backup container
+/// picks it up, runs the Google sign-in (rclone) and reports `state`, `auth_url` and `message`.
+model GdriveLink {
+  id          Int       @id @default(1)
+  /// CONNECT | CANCEL | DISCONNECT — waiting for the backup container (null = nothing to do)
+  action      String?
+  /// IDLE | STARTING | WAITING (for the owner in the browser) | TESTING | DONE | FAILED
+  state       String    @default("IDLE")
+  authUrl     String?   @map("auth_url")
+  message     String?
+  requestedAt DateTime? @map("requested_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("gdrive_link")
+}
+
 // ───────────────────────────────── Parties ─────────────────────────────────
 
 model Client {

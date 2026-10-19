@@ -19,6 +19,30 @@ export class BackupController {
     return this.backup.runs(q);
   }
 
+  /** Google Drive connection: status, and the sign-in started from Settings → Backup. */
+  @Get('gdrive')
+  gdrive() {
+    return this.backup.gdrive();
+  }
+
+  @Post('gdrive/connect')
+  @HttpCode(202)
+  connect() {
+    return this.backup.gdriveAction('CONNECT');
+  }
+
+  @Post('gdrive/cancel')
+  @HttpCode(202)
+  cancel() {
+    return this.backup.gdriveAction('CANCEL');
+  }
+
+  @Post('gdrive/disconnect')
+  @HttpCode(202)
+  disconnect() {
+    return this.backup.gdriveAction('DISCONNECT');
+  }
+
   /** "Backup now" — 202: the backup container starts it within a few seconds. */
   @Post('run')
   @HttpCode(202)

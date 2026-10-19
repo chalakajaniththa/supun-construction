@@ -99,7 +99,7 @@ services:
         condition: service_healthy
 
   # Nightly + "Backup now": pg_dump + document files → restic (local volume, and Google Drive when
-  # config/rclone/rclone.conf has a [gdrive] remote — see scripts/setup-gdrive.command).
+  # config/rclone/rclone.conf has a [gdrive] remote — connected from Settings → Backup).
   backup:
     <<: *restart
     build:
@@ -123,6 +123,9 @@ services:
       GDRIVE_FOLDER: ${GDRIVE_FOLDER:-SupunConstructionBackup}
       GDRIVE_CLIENT_ID: ${GDRIVE_CLIENT_ID:-}
       GDRIVE_CLIENT_SECRET: ${GDRIVE_CLIENT_SECRET:-}
+    # Google's answer after "Connect Google Drive" (Settings → Backup); only this computer.
+    ports:
+      - '127.0.0.1:53682:53683'
     volumes:
       - backup_local:/backup-local
       - ./config/rclone:/config/rclone

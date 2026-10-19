@@ -1,0 +1,130 @@
+# Supun Construction — install from the published images (no source code needed).
+# Used by deploy/install.sh (Mac / Linux) and deploy/install.ps1 (Windows); see docs/INSTALL.md.
+#
+#   docker compose pull && docker compose up -d      start / update
+#   docker compose stop                              stop (data is kept)
+#
+# Everything comes from .env next to this file (the install script creates it with random secrets).
+# Only the web app is published, on http://localhost:3000 (WEB_BIND=0.0.0.0 opens it to the network).
+name: supun
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  postgres:
+    <<: *restart
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-supun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-supun}
+      TZ: Asia/Colombo
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  seaweedfs:
+    <<: *restart
+    image: ${SC_REGISTRY:-ghcr.io/chalakajaniththa}/supun-construction-seaweedfs:${SC_VERSION:-latest}
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?Set S3_ACCESS_KEY in .env}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?Set S3_SECRET_KEY in .env}
+    volumes:
+      - seaweed_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:8333/healthz || exit 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  gotenberg:
+    <<: *restart
+    image: gotenberg/gotenberg:8.37.0-chromium
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1:3000/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  api:
+    <<: *restart
+    image: ${SC_REGISTRY:-ghcr.io/chalakajaniththa}/supun-construction-api:${SC_VERSION:-latest}
+    environment:
+      NODE_ENV: production
+      TZ: Asia/Colombo
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-supun}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supun}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_REGION: us-east-1
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-supun-docs}
+      GOTENBERG_URL: http://gotenberg:3000
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+      gotenberg:
+        condition: service_healthy
+
+  web:
+    <<: *restart
+    image: ${SC_REGISTRY:-ghcr.io/chalakajaniththa}/supun-construction-web:${SC_VERSION:-latest}
+    environment:
+      TZ: Asia/Colombo
+    ports:
+      - '${WEB_BIND:-127.0.0.1}:${WEB_PORT:-3000}:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Nightly + "Backup now" backups (this computer, and Google Drive once it is connected in
+  # Settings → Backup). Port 53682 receives Google's answer during "Connect Google Drive".
+  backup:
+    <<: *restart
+    image: ${SC_REGISTRY:-ghcr.io/chalakajaniththa}/supun-construction-backup:${SC_VERSION:-latest}
+    init: true
+    environment:
+      TZ: Asia/Colombo
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-supun}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-supun}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET:-supun-docs}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD:?Set RESTIC_PASSWORD in .env}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 23 * * *}
+      GDRIVE_FOLDER: ${GDRIVE_FOLDER:-SupunConstructionBackup}
+      GDRIVE_CLIENT_ID: ${GDRIVE_CLIENT_ID:-}
+      GDRIVE_CLIENT_SECRET: ${GDRIVE_CLIENT_SECRET:-}
+    ports:
+      - '127.0.0.1:53682:53683'
+    volumes:
+      - backup_local:/backup-local
+      - rclone_config:/config/rclone
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  seaweed_data:
+  backup_local:
+  rclone_config:

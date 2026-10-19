@@ -35,6 +35,7 @@ export const ERROR_CODES = [
   'REPORT_FORMAT_NOT_AVAILABLE',
   'NO_PAYROLL_FOR_MONTH',
   'PDF_FAILED',
+  'BACKUP_SERVICE_OFFLINE',
   'INTERNAL_ERROR',
 ] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];

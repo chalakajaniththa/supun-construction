@@ -6,8 +6,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  CloudOff,
-  Cloud,
   DatabaseBackup,
   KeyRound,
   Loader2,
@@ -37,6 +35,7 @@ import { api } from '@/lib/api-client';
 import { dailyTime, durationMinutes, formatBytes } from '@/lib/backup';
 import { formatDateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { DriveCard } from './drive-card';
 
 const PAGE_SIZE = 10;
 
@@ -213,41 +212,6 @@ function StatusCard() {
           </Button>
           <p className="text-sm text-muted-foreground">{t('backupNowHint')}</p>
         </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DriveCard() {
-  const t = useTranslations('backup.drive');
-  const { data } = useBackupStatus();
-  const connected = data?.gdriveConfigured === true;
-  const steps = ['step1', 'step2', 'step3', 'step4', 'step5'] as const;
-  return (
-    <Card data-testid="backup-drive-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl">
-          {connected ? (
-            <Cloud className="size-5 text-success" aria-hidden />
-          ) : (
-            <CloudOff className="size-5 text-muted-foreground" aria-hidden />
-          )}
-          {t('title')}
-        </CardTitle>
-        <CardDescription className="text-[0.95rem]">
-          {connected ? t('connected') : t('notConnected')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        <details className="group rounded-lg border px-4 py-3" open={!connected}>
-          <summary className="cursor-pointer font-semibold">{t('howTo')}</summary>
-          <ol className="mt-3 flex list-decimal flex-col gap-2 pl-5 text-[0.95rem]">
-            {steps.map((s) => (
-              <li key={s}>{t(s)}</li>
-            ))}
-          </ol>
-          <p className="mt-3 text-sm text-muted-foreground">{t('privacy')}</p>
-        </details>
       </CardContent>
     </Card>
   );

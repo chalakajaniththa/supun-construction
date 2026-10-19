@@ -65,7 +65,7 @@ test.describe('settings', () => {
       .getByTestId('form-password')
       .getByRole('button', { name: 'Change password' })
       .click();
-    await expect(page.getByText('The current password is not correct.')).toBeVisible();
+    await expect(page.getByText('The password is not correct.')).toBeVisible();
   });
 
   test('the user menu opens the password tab', async ({ page }) => {

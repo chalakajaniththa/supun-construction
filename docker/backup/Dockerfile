@@ -16,8 +16,11 @@ ENV TZ=Asia/Colombo \
 
 COPY docker/backup/lib.sh /usr/local/lib/backup/lib.sh
 COPY --chmod=0755 docker/backup/backup.sh docker/backup/worker.sh docker/backup/restore.sh \
-     docker/backup/gdrive-setup.sh docker/backup/run-backup /usr/local/bin/
+     docker/backup/gdrive-setup.sh docker/backup/gdrive-link.sh docker/backup/run-backup \
+     /usr/local/bin/
 
+# Google sign-in answer (rclone listens on 127.0.0.1:53682; socat forwards :53683 to it)
+EXPOSE 53683
 VOLUME ["/backup-local"]
 WORKDIR /work
 
